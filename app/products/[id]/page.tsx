@@ -1,0 +1,417 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import gsap from "gsap";
+import Image from "next/image";
+import { useCart } from "../../context/CartContext";
+import {
+  ArrowLeft,
+  ShoppingBag,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
+  RefreshCw,
+  Star,
+} from "lucide-react";
+
+interface Product {
+  id: number;
+  name: string;
+  color: string;
+  price: number;
+  stock: number;
+  description: string;
+  category: string;
+  image: string;
+}
+
+export default function ProductDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { addItem } = useCart();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState("M");
+  const [quantity, setQuantity] = useState(1);
+  const [isAdded, setIsAdded] = useState(false);
+  const productRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
+
+  // Fetch product
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch("/api/products");
+        const data = await response.json();
+        if (data.success) {
+          const foundProduct = data.products.find(
+            (p: Product) => p.id === parseInt(params.id as string),
+          );
+          setProduct(foundProduct);
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      }
+      setIsLoading(false);
+    };
+
+    fetchProduct();
+  }, [params.id]);
+
+  // Animation GSAP au chargement
+  useEffect(() => {
+    if (typeof window !== "undefined" && product && productRef.current) {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(
+        imageRef.current,
+        { opacity: 0, x: -50, scale: 0.9 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.8 },
+      );
+
+      tl.fromTo(
+        infoRef.current?.children || [],
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
+        "-=0.4",
+      );
+    }
+  }, [product]);
+
+  // Animation GSAP au hover de l'image
+  const handleImageHover = () => {
+    if (typeof window !== "undefined" && imageRef.current) {
+      gsap.to(imageRef.current, {
+        scale: 1.05,
+        rotation: 2,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    }
+  };
+
+  const handleImageLeave = () => {
+    if (typeof window !== "undefined" && imageRef.current) {
+      gsap.to(imageRef.current, {
+        scale: 1,
+        rotation: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    }
+  };
+
+  // Animation GSAP au clic sur "Ajouter au panier"
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    if (typeof window !== "undefined") {
+      const btn = document.querySelector(".add-to-cart-btn");
+      if (btn) {
+        gsap.to(btn, {
+          scale: 0.95,
+          duration: 0.1,
+          ease: "power2.out",
+          onComplete: () => {
+            gsap.to(btn, {
+              scale: 1,
+              duration: 0.3,
+              ease: "elastic.out(1, 0.3)",
+            });
+          },
+        });
+      }
+    }
+
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      color: product.color,
+    });
+
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  // Animation GSAP au hover du bouton
+  const handleButtonHover = () => {
+    if (typeof window !== "undefined") {
+      const btn = document.querySelector(".add-to-cart-btn");
+      if (btn) {
+        gsap.to(btn, {
+          scale: 1.02,
+          boxShadow: "0 0 40px rgba(255, 255, 255, 0.3)",
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+    }
+  };
+
+  const handleButtonLeave = () => {
+    if (typeof window !== "undefined") {
+      const btn = document.querySelector(".add-to-cart-btn");
+      if (btn) {
+        gsap.to(btn, {
+          scale: 1,
+          boxShadow: "0 0 20px rgba(255, 255, 255, 0.1)",
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Produit non trouvé</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
+          >
+            Retour à l'accueil
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Retour</span>
+            </button>
+            <div className="flex items-center space-x-2">
+              <svg
+                className="h-8 w-auto text-white"
+                viewBox="0 0 69 32"
+                fill="currentColor"
+              >
+                <path d="M68.56 4.58c-.2-.2-.5-.3-.8-.2-3.2 1.1-6.5 2.3-9.7 3.4-7.2 2.5-14.4 5-21.6 7.5-4.6 1.6-9.2 3.2-13.8 4.8-2.3.8-4.6 1.6-6.9 2.4-1.2.4-2.3.8-3.5 1.2-.6.2-1.1.4-1.7.6-.3.1-.5.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.6.1-.9.1-.3 0-.6 0-.9-.1-.3-.1-.6-.2-.8-.4-.3-.2-.5-.4-.7-.7-.2-.3-.3-.6-.3-.9 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1.3.1.6.2.8.3.1 0 .2.1.3.1.1 0 .2 0 .3.1.3.1.5.2.8.3.6.2 1.1.4 1.7.6 1.2.4 2.3.8 3.5 1.2 2.3.8 4.6 1.6 6.9 2.4 4.6 1.6 9.2 3.2 13.8 4.8 7.2 2.5 14.4 5 21.6 7.5 3.2 1.1 6.5 2.3 9.7 3.4.3.1.6.1.9 0 .3-.1.6-.3.8-.5.2-.2.3-.5.3-.8 0-.3 0-.6-.1-.9-.1-.3-.2-.6-.4-.8-.2-.3-.4-.5-.7-.7-.3-.2-.6-.3-.9-.3-.3 0-.6 0-.9.1-.3.1-.6.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.5.2-.8.3-.6.2-1.1.4-1.7.6-1.2.4-2.3.8-3.5 1.2-2.3.8-4.6 1.6-6.9 2.4-4.6 1.6-9.2 3.2-13.8 4.8-7.2 2.5-14.4 5-21.6 7.5-3.2 1.1-6.5 2.3-9.7 3.4-.3.1-.6.1-.9 0-.3-.1-.6-.3-.8-.5-.2-.2-.3-.5-.3-.8 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1z" />
+              </svg>
+              <span className="text-white font-bold text-xl">PREMIUM</span>
+            </div>
+            <div className="w-20" />
+          </div>
+        </div>
+      </header>
+
+      <div ref={productRef} className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Image du produit */}
+            <div
+              ref={imageRef}
+              onMouseEnter={handleImageHover}
+              onMouseLeave={handleImageLeave}
+              className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 cursor-pointer"
+            >
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-contain p-8"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+
+              {/* Badges */}
+              <div className="absolute top-4 left-4 flex flex-col space-y-2">
+                <span className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-medium">
+                  {product.category}
+                </span>
+                {product.stock < 10 && (
+                  <span className="px-3 py-1 bg-red-500/20 backdrop-blur-xl rounded-full text-xs font-medium text-red-400">
+                    Stock limité
+                  </span>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="absolute top-4 right-4 flex flex-col space-y-2">
+                <button className="p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors">
+                  <Heart className="h-5 w-5" />
+                </button>
+                <button className="p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors">
+                  <Share2 className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Informations du produit */}
+            <div ref={infoRef} className="space-y-6">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                  {product.name}
+                </h1>
+                <p className="text-white/60 text-lg">{product.color}</p>
+              </div>
+
+              {/* Prix */}
+              <div className="flex items-center space-x-4">
+                <span className="text-4xl font-bold">€{product.price}</span>
+                <span className="text-white/50 line-through text-xl">
+                  €{(product.price * 1.3).toFixed(2)}
+                </span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">
+                  -23%
+                </span>
+              </div>
+
+              {/* Description */}
+              <p className="text-white/70 text-lg leading-relaxed">
+                {product.description}
+              </p>
+
+              {/* Note */}
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-5 w-5 ${
+                        i < 4
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-white/20"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-white/60">(4.8) · 128 avis</span>
+              </div>
+
+              {/* Tailles */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Taille</h3>
+                <div className="flex flex-wrap gap-3">
+                  {sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                        selectedSize === size
+                          ? "bg-white text-black"
+                          : "bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantité */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Quantité</h3>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-xl font-bold"
+                  >
+                    -
+                  </button>
+                  <span className="text-2xl font-bold w-12 text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-xl font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Boutons d'action */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={handleAddToCart}
+                  onMouseEnter={handleButtonHover}
+                  onMouseLeave={handleButtonLeave}
+                  disabled={isAdded}
+                  className="add-to-cart-btn flex-1 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group flex items-center justify-center space-x-2"
+                >
+                  <span className="relative z-10">
+                    {isAdded ? "Ajouté !" : "Ajouter au panier"}
+                  </span>
+                  <ShoppingBag className="h-5 w-5 relative z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                </button>
+              </div>
+
+              {/* Avantages */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/10">
+                <div className="flex items-center space-x-3">
+                  <Truck className="h-6 w-6 text-green-400" />
+                  <div>
+                    <p className="font-medium">Livraison gratuite</p>
+                    <p className="text-white/60 text-sm">2-3 jours ouvrés</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Shield className="h-6 w-6 text-blue-400" />
+                  <div>
+                    <p className="font-medium">Garantie 2 ans</p>
+                    <p className="text-white/60 text-sm">
+                      Satisfait ou remboursé
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <RefreshCw className="h-6 w-6 text-purple-400" />
+                  <div>
+                    <p className="font-medium">Retour gratuit</p>
+                    <p className="text-white/60 text-sm">Sous 30 jours</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stock */}
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-white/60">Stock disponible</span>
+                  <span
+                    className={`font-bold ${
+                      product.stock > 20
+                        ? "text-green-400"
+                        : product.stock > 10
+                          ? "text-yellow-400"
+                          : "text-red-400"
+                    }`}
+                  >
+                    {product.stock} unités
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
