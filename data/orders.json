@@ -76,5 +76,31 @@
     "status": "pending",
     "createdAt": "2026-03-30T05:57:45.703Z",
     "updatedAt": "2026-03-30T05:57:45.703Z"
+  },
+  {
+    "id": 4,
+    "orderNumber": "ORD-1774853456373-W7ZYTLF8U",
+    "customerName": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "phone": "028585254",
+    "address": "alger",
+    "city": "hamiz",
+    "postalCode": "93939",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 1,
+        "name": "Veste Rouge",
+        "price": 69.99,
+        "quantity": 1,
+        "color": "Rouge",
+        "size": "XL",
+        "image": "/products/rouge.webp"
+      }
+    ],
+    "total": 69.99,
+    "status": "pending",
+    "createdAt": "2026-03-30T06:50:56.374Z",
+    "updatedAt": "2026-03-30T06:50:56.374Z"
   }
 ]
