@@ -21,6 +21,7 @@ const ensureDataDir = () => {
         stock: 25,
         description: "Élégance audacieuse pour un style unique",
         category: "Premium",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 2,
@@ -31,6 +32,7 @@ const ensureDataDir = () => {
         stock: 15,
         description: "Sophistication et confort absolu",
         category: "Luxury",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 3,
@@ -41,6 +43,7 @@ const ensureDataDir = () => {
         stock: 30,
         description: "Style moderne et dynamique",
         category: "Classic",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 4,
@@ -51,6 +54,7 @@ const ensureDataDir = () => {
         stock: 40,
         description: "Chaleur et élégance naturelle",
         category: "Classic",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 5,
@@ -61,6 +65,7 @@ const ensureDataDir = () => {
         stock: 20,
         description: "Minimalisme sophistiqué",
         category: "Premium",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 6,
@@ -71,6 +76,7 @@ const ensureDataDir = () => {
         stock: 35,
         description: "Intemporelle et raffinée",
         category: "Classic",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 7,
@@ -81,6 +87,7 @@ const ensureDataDir = () => {
         stock: 18,
         description: "Fraîcheur et originalité",
         category: "Premium",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
       {
         id: 8,
@@ -91,6 +98,7 @@ const ensureDataDir = () => {
         stock: 22,
         description: "Couleur vive et esprit jeune",
         category: "Premium",
+        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       },
     ];
     fs.writeFileSync(dataFilePath, JSON.stringify(initialProducts, null, 2));

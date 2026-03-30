@@ -25,7 +25,7 @@ export default function ContactPage() {
           duration: 0.6,
           stagger: 0.1,
           ease: "power3.out",
-        },
+        }
       );
     }
   }, []);
@@ -36,14 +36,14 @@ export default function ContactPage() {
       gsap.fromTo(
         successRef.current,
         { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" },
+        { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }
       );
     }
   }, [isSuccess]);
 
   // Animation GSAP au focus des inputs
   const handleInputFocus = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     gsap.to(e.target, {
       borderColor: "rgba(255, 255, 255, 0.5)",
@@ -54,7 +54,7 @@ export default function ContactPage() {
   };
 
   const handleInputBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     gsap.to(e.target, {
       borderColor: "rgba(255, 255, 255, 0.1)",
@@ -151,12 +151,14 @@ export default function ContactPage() {
             Merci pour votre message. Nous vous répondrons dans les plus brefs
             délais.
           </p>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => router.push("/")}
             className="w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
           >
             Retour à l'accueil
-          </button>
+          </motion.button>
         </motion.div>
       </div>
     );
@@ -168,13 +170,15 @@ export default function ContactPage() {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => router.back()}
               className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Retour</span>
-            </button>
+            </motion.button>
             <div className="flex items-center space-x-2">
               <svg
                 className="h-8 w-auto text-white"
@@ -245,8 +249,10 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <button
+              <motion.button
                 type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 disabled={isSubmitting}
                 onMouseEnter={handleButtonHover}
                 onMouseLeave={handleButtonLeave}
@@ -257,12 +263,17 @@ export default function ContactPage() {
                 </span>
                 <Send className="h-5 w-5 relative z-10" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </button>
+              </motion.button>
             </form>
 
             {/* Informations de contact */}
             <div className="space-y-6">
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10"
+              >
                 <h2 className="text-xl font-bold mb-4">Nos coordonnées</h2>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">
@@ -299,9 +310,14 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10"
+              >
                 <h2 className="text-xl font-bold mb-4">Horaires d'ouverture</h2>
                 <div className="space-y-2 text-white/80">
                   <div className="flex justify-between">
@@ -317,9 +333,14 @@ export default function ContactPage() {
                     <span className="text-red-400">Fermé</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10"
+              >
                 <h2 className="text-xl font-bold mb-4">FAQ</h2>
                 <div className="space-y-4">
                   <div>
@@ -347,7 +368,7 @@ export default function ContactPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

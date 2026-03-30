@@ -128,7 +128,9 @@ export default function Navigation() {
             <Cart />
 
             {/* Bouton menu mobile */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               className="md:hidden p-2 text-white/80 hover:text-white transition-colors duration-200"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -137,7 +139,7 @@ export default function Navigation() {
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -160,6 +162,7 @@ export default function Navigation() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  whileHover={{ x: 10, color: "#ffffff" }}
                   className="text-white/80 hover:text-white transition-colors duration-200 text-lg font-medium py-2 border-b border-white/10"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

@@ -15,6 +15,11 @@ import {
   Shield,
   RefreshCw,
   Star,
+  Check,
+  Copy,
+  Twitter,
+  Facebook,
+  Linkedin,
 } from "lucide-react";
 
 interface Product {
@@ -37,6 +42,10 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const productRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -49,9 +58,15 @@ export default function ProductDetailPage() {
         const data = await response.json();
         if (data.success) {
           const foundProduct = data.products.find(
-            (p: Product) => p.id === parseInt(params.id as string),
+            (p: Product) => p.id === parseInt(params.id as string)
           );
           setProduct(foundProduct);
+          
+          // Load likes from localStorage
+          const savedLikes = localStorage.getItem(`product_likes_${params.id}`);
+          const savedIsLiked = localStorage.getItem(`product_liked_${params.id}`);
+          if (savedLikes) setLikes(parseInt(savedLikes));
+          if (savedIsLiked) setIsLiked(savedIsLiked === "true");
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -70,14 +85,14 @@ export default function ProductDetailPage() {
       tl.fromTo(
         imageRef.current,
         { opacity: 0, x: -50, scale: 0.9 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.8 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.8 }
       );
 
       tl.fromTo(
         infoRef.current?.children || [],
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-        "-=0.4",
+        "-=0.4"
       );
     }
   }, [product]);
@@ -133,10 +148,71 @@ export default function ProductDetailPage() {
       price: product.price,
       image: product.image,
       color: product.color,
+      size: selectedSize,
     });
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  // Handle Like
+  const handleLike = () => {
+    if (typeof window !== "undefined") {
+      const btn = document.querySelector(".like-btn");
+      if (btn) {
+        gsap.to(btn, {
+          scale: 1.3,
+          duration: 0.1,
+          ease: "power2.out",
+          onComplete: () => {
+            gsap.to(btn, {
+              scale: 1,
+              duration: 0.3,
+              ease: "elastic.out(1, 0.3)",
+            });
+          },
+        });
+      }
+    }
+
+    const newIsLiked = !isLiked;
+    const newLikes = newIsLiked ? likes + 1 : likes - 1;
+    
+    setIsLiked(newIsLiked);
+    setLikes(newLikes);
+    
+    // Save to localStorage
+    localStorage.setItem(`product_likes_${params.id}`, newLikes.toString());
+    localStorage.setItem(`product_liked_${params.id}`, newIsLiked.toString());
+  };
+
+  // Handle Share
+  const handleShare = (platform: string) => {
+    const url = window.location.href;
+    const text = `Découvrez ${product?.name} - ${product?.description}`;
+    
+    let shareUrl = "";
+    switch (platform) {
+      case "copy":
+        navigator.clipboard.writeText(url);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        window.open(shareUrl, "_blank");
+        break;
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        window.open(shareUrl, "_blank");
+        break;
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        window.open(shareUrl, "_blank");
+        break;
+    }
+    
+    setShowShareMenu(false);
   };
 
   // Animation GSAP au hover du bouton
@@ -254,12 +330,76 @@ export default function ProductDetailPage() {
 
               {/* Actions */}
               <div className="absolute top-4 right-4 flex flex-col space-y-2">
-                <button className="p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors">
-                  <Heart className="h-5 w-5" />
-                </button>
-                <button className="p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors">
-                  <Share2 className="h-5 w-5" />
-                </button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleLike}
+                  className={`like-btn p-3 backdrop-blur-xl rounded-full transition-colors ${
+                    isLiked
+                      ? "bg-red-500/20 text-red-400"
+                      : "bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                >
+                  <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+                </motion.button>
+                <div className="relative">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowShareMenu(!showShareMenu)}
+                    className="p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors"
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </motion.button>
+                  
+                  {/* Share Menu */}
+                  {showShareMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="absolute right-0 top-14 bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 p-2 space-y-1 min-w-[160px]"
+                    >
+                      <button
+                        onClick={() => handleShare("copy")}
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                      >
+                        {copySuccess ? (
+                          <Check className="h-4 w-4 text-green-400" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                        <span>{copySuccess ? "Copié!" : "Copier le lien"}</span>
+                      </button>
+                      <button
+                        onClick={() => handleShare("twitter")}
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                      >
+                        <Twitter className="h-4 w-4" />
+                        <span>Twitter</span>
+                      </button>
+                      <button
+                        onClick={() => handleShare("facebook")}
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                      >
+                        <Facebook className="h-4 w-4" />
+                        <span>Facebook</span>
+                      </button>
+                      <button
+                        onClick={() => handleShare("linkedin")}
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                        <span>LinkedIn</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Likes Counter */}
+              <div className="absolute bottom-4 left-4 flex items-center space-x-2 px-3 py-2 bg-white/10 backdrop-blur-xl rounded-full">
+                <Heart className={`h-4 w-4 ${isLiked ? "text-red-400 fill-red-400" : "text-white/60"}`} />
+                <span className="text-sm font-medium">{likes}</span>
               </div>
             </div>
 
@@ -310,8 +450,10 @@ export default function ProductDetailPage() {
                 <h3 className="text-lg font-semibold mb-3">Taille</h3>
                 <div className="flex flex-wrap gap-3">
                   {sizes.map((size) => (
-                    <button
+                    <motion.button
                       key={size}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedSize(size)}
                       className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                         selectedSize === size
@@ -320,7 +462,7 @@ export default function ProductDetailPage() {
                       }`}
                     >
                       {size}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -329,27 +471,33 @@ export default function ProductDetailPage() {
               <div>
                 <h3 className="text-lg font-semibold mb-3">Quantité</h3>
                 <div className="flex items-center space-x-4">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-xl font-bold"
                   >
                     -
-                  </button>
+                  </motion.button>
                   <span className="text-2xl font-bold w-12 text-center">
                     {quantity}
                   </span>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setQuantity(quantity + 1)}
                     className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-xl font-bold"
                   >
                     +
-                  </button>
+                  </motion.button>
                 </div>
               </div>
 
               {/* Boutons d'action */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
                   onMouseEnter={handleButtonHover}
                   onMouseLeave={handleButtonLeave}
@@ -361,7 +509,7 @@ export default function ProductDetailPage() {
                   </span>
                   <ShoppingBag className="h-5 w-5 relative z-10" />
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                </button>
+                </motion.button>
               </div>
 
               {/* Avantages */}

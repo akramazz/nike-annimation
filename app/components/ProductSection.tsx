@@ -7,81 +7,16 @@ import gsap from "gsap";
 import { useCart } from "../context/CartContext";
 import { ShoppingBag, Eye } from "lucide-react";
 
-// Données des produits
-const products = [
-  {
-    id: 1,
-    name: "Veste Rouge",
-    color: "Rouge",
-    image: "/products/rouge.webp",
-    gradient: "from-[#FF4C4C] to-[#FF1F1F]",
-    price: 69.99,
-    description: "Élégance audacieuse pour un style unique",
-  },
-  {
-    id: 2,
-    name: "Veste Gris",
-    color: "Gris",
-    image: "/products/gris.webp",
-    gradient: "from-[#FFB6C1] to-[#FF69B4]",
-    price: 220.99,
-    description: "Sophistication et confort absolu",
-  },
-  {
-    id: 3,
-    name: "Veste Bleue",
-    color: "Bleu",
-    image: "/products/blue.webp",
-    gradient: "from-[#4C6FFF] to-[#1F3FFF]",
-    price: 59.99,
-    description: "Style moderne et dynamique",
-  },
-  {
-    id: 4,
-    name: "Veste Marron",
-    color: "Marron",
-    image: "/products/maron.webp",
-    gradient: "from-[#5b3a29] to-[#2e1c12]",
-    price: 33.99,
-    description: "Chaleur et élégance naturelle",
-  },
-  {
-    id: 5,
-    name: "Veste Beige",
-    color: "Beige",
-    image: "/products/beage.webp",
-    gradient: "from-[#2b2b2b] to-[#000000]",
-    price: 59.99,
-    description: "Minimalisme sophistiqué",
-  },
-  {
-    id: 6,
-    name: "Veste Noire",
-    color: "Noir",
-    image: "/products/noir.webp",
-    gradient: "from-[#2b2b2b] to-[#000000]",
-    price: 59.99,
-    description: "Intemporelle et raffinée",
-  },
-  {
-    id: 7,
-    name: "Veste Verte",
-    color: "Vert",
-    image: "/products/vert.webp",
-    gradient: "from-[#3d5a40] to-[#1b2d1d]",
-    price: 88.99,
-    description: "Fraîcheur et originalité",
-  },
-  {
-    id: 8,
-    name: "Veste Pistache",
-    color: "Pistache",
-    image: "/products/pistache.webp",
-    gradient: "from-[#FF4C4C] to-[#FF1F1F]",
-    price: 69.99,
-    description: "Couleur vive et esprit jeune",
-  },
-];
+interface Product {
+  id: number;
+  name: string;
+  color: string;
+  image: string;
+  price: number;
+  stock: number;
+  description: string;
+  category: string;
+}
 
 // Composant de carte produit avec Glassmorphism
 function ProductCard({
@@ -90,7 +25,7 @@ function ProductCard({
   onClick,
   index,
 }: {
-  product: (typeof products)[0];
+  product: Product;
   isSelected: boolean;
   onClick: () => void;
   index: number;
@@ -176,6 +111,7 @@ function ProductCard({
       price: product.price,
       image: product.image,
       color: product.color,
+      size: "M",
     });
 
     setIsAdded(true);
@@ -259,8 +195,10 @@ function ProductCard({
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
         {/* Bouton voir */}
-        <button
+        <motion.button
           ref={viewButtonRef}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onMouseEnter={handleViewButtonHover}
           onMouseLeave={handleViewButtonLeave}
           onClick={(e) => {
@@ -270,7 +208,7 @@ function ProductCard({
           className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
           <Eye className="h-5 w-5" />
-        </button>
+        </motion.button>
       </div>
 
       {/* Informations du produit */}
@@ -279,10 +217,12 @@ function ProductCard({
         <p className="text-white/60 text-sm">{product.description}</p>
         <div className="flex items-center justify-between pt-2">
           <span className="text-2xl font-bold text-white">
-            ${product.price}
+            €{product.price}
           </span>
-          <button
+          <motion.button
             ref={buttonRef}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onMouseEnter={handleButtonHover}
             onMouseLeave={handleButtonLeave}
             onClick={handleButtonClick}
@@ -291,7 +231,7 @@ function ProductCard({
           >
             <span>{isAdded ? "Ajouté !" : "Acheter"}</span>
             <ShoppingBag className="h-4 w-4" />
-          </button>
+          </motion.button>
         </div>
       </div>
     </motion.div>
@@ -300,12 +240,33 @@ function ProductCard({
 
 // Composant principal de la section produits
 export default function ProductSection() {
-  const [selectedProduct, setSelectedProduct] = useState(products[0]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products");
+        const data = await response.json();
+        if (data.success && data.products.length > 0) {
+          setProducts(data.products);
+          setSelectedProduct(data.products[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+      setIsLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
 
   // Animation GSAP au scroll
   useEffect(() => {
@@ -350,6 +311,8 @@ export default function ProductSection() {
 
   // Animation GSAP au clic sur "Ajouter au panier"
   const handleAddToCart = () => {
+    if (!selectedProduct) return;
+
     if (typeof window !== "undefined") {
       const btn = document.querySelector(".add-to-cart-btn");
       if (btn) {
@@ -374,11 +337,28 @@ export default function ProductSection() {
       price: selectedProduct.price,
       image: selectedProduct.image,
       color: selectedProduct.color,
+      size: "M",
     });
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
+
+  if (isLoading) {
+    return (
+      <section className="relative min-h-screen py-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="text-white text-xl">Chargement des produits...</div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <section className="relative min-h-screen py-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="text-white text-xl">Aucun produit disponible</div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -387,7 +367,7 @@ export default function ProductSection() {
     >
       {/* Background dynamique */}
       <div
-        className={`absolute inset-0 bg-gradient-to-br ${selectedProduct.gradient} opacity-30 transition-all duration-1000`}
+        className={`absolute inset-0 bg-gradient-to-br from-[#FF4C4C] to-[#FF1F1F] opacity-30 transition-all duration-1000`}
       />
 
       {/* Overlay */}
@@ -418,7 +398,7 @@ export default function ProductSection() {
             <ProductCard
               key={product.id}
               product={product}
-              isSelected={selectedProduct.id === product.id}
+              isSelected={selectedProduct?.id === product.id}
               onClick={() => setSelectedProduct(product)}
               index={index}
             />
@@ -426,87 +406,89 @@ export default function ProductSection() {
         </div>
 
         {/* Section informations produit */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-16 p-8 rounded-3xl backdrop-blur-2xl bg-white/10 border border-white/20"
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* Informations du produit sélectionné */}
-            <div className="space-y-6">
-              <h3 className="text-3xl md:text-4xl font-bold text-white">
-                {selectedProduct.name}
-              </h3>
-              <p className="text-white/70 text-lg">
-                {selectedProduct.description}
-              </p>
-              <div className="flex items-center space-x-4">
-                <span className="text-4xl font-bold text-white">
-                  ${selectedProduct.price}
-                </span>
-                <span className="text-white/50 line-through text-xl">
-                  ${(selectedProduct.price * 1.3).toFixed(2)}
-                </span>
+        {selectedProduct && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="mt-16 p-8 rounded-3xl backdrop-blur-2xl bg-white/10 border border-white/20"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              {/* Informations du produit sélectionné */}
+              <div className="space-y-6">
+                <h3 className="text-3xl md:text-4xl font-bold text-white">
+                  {selectedProduct.name}
+                </h3>
+                <p className="text-white/70 text-lg">
+                  {selectedProduct.description}
+                </p>
+                <div className="flex items-center space-x-4">
+                  <span className="text-4xl font-bold text-white">
+                    €{selectedProduct.price}
+                  </span>
+                  <span className="text-white/50 line-through text-xl">
+                    €{(selectedProduct.price * 1.3).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
+                    Livraison gratuite
+                  </span>
+                  <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
+                    Retour 30 jours
+                  </span>
+                  <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
+                    Garantie 2 ans
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleAddToCart}
+                    disabled={isAdded}
+                    className="add-to-cart-btn px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors duration-300 shadow-lg disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    <span>{isAdded ? "Ajouté !" : "Ajouter au panier"}</span>
+                    <ShoppingBag className="h-5 w-5" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() =>
+                      (window.location.href = `/products/${selectedProduct.id}`)
+                    }
+                    className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors duration-300 border border-white/20"
+                  >
+                    Voir le produit
+                  </motion.button>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
-                  Livraison gratuite
-                </span>
-                <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
-                  Retour 30 jours
-                </span>
-                <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
-                  Garantie 2 ans
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleAddToCart}
-                  disabled={isAdded}
-                  className="add-to-cart-btn px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors duration-300 shadow-lg disabled:opacity-50 flex items-center justify-center space-x-2"
-                >
-                  <span>{isAdded ? "Ajouté !" : "Ajouter au panier"}</span>
-                  <ShoppingBag className="h-5 w-5" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() =>
-                    (window.location.href = `/products/${selectedProduct.id}`)
-                  }
-                  className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors duration-300 border border-white/20"
-                >
-                  Voir le produit
-                </motion.button>
-              </div>
-            </div>
 
-            {/* Image du produit sélectionné */}
-            <div className="h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={selectedProduct.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative w-full h-full"
-                >
-                  <Image
-                    src={selectedProduct.image}
-                    alt={selectedProduct.name}
-                    fill
-                    className="object-contain p-8"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                </motion.div>
-              </AnimatePresence>
+              {/* Image du produit sélectionné */}
+              <div className="h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={selectedProduct.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.5 }}
+                    className="relative w-full h-full"
+                  >
+                    <Image
+                      src={selectedProduct.image}
+                      alt={selectedProduct.name}
+                      fill
+                      className="object-contain p-8"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </section>
   );

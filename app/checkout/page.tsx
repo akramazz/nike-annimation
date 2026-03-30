@@ -28,7 +28,7 @@ export default function CheckoutPage() {
           duration: 0.6,
           stagger: 0.1,
           ease: "power3.out",
-        }
+        },
       );
     }
   }, []);
@@ -39,7 +39,7 @@ export default function CheckoutPage() {
       gsap.fromTo(
         successRef.current,
         { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }
+        { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" },
       );
     }
   }, [isSuccess]);
@@ -110,6 +110,9 @@ export default function CheckoutPage() {
         name: item.name,
         price: item.price,
         quantity: item.quantity,
+        color: item.color,
+        size: item.size,
+        image: item.image,
       })),
       total,
     };
@@ -126,7 +129,7 @@ export default function CheckoutPage() {
       if (data.success) {
         setIsSuccess(true);
         clearCart();
-        
+
         // Animation de succès
         if (typeof window !== "undefined") {
           gsap.to(".checkout-form", {
@@ -158,14 +161,17 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-3xl font-bold mb-4">Commande confirmée !</h1>
           <p className="text-white/70 mb-6">
-            Merci pour votre commande. Vous recevrez un email de confirmation sous peu.
+            Merci pour votre commande. Vous recevrez un email de confirmation
+            sous peu.
           </p>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => router.push("/")}
             className="w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
           >
             Retour à l'accueil
-          </button>
+          </motion.button>
         </motion.div>
       </div>
     );
@@ -177,15 +183,21 @@ export default function CheckoutPage() {
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => router.back()}
               className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Retour</span>
-            </button>
+            </motion.button>
             <div className="flex items-center space-x-2">
-              <svg className="h-8 w-auto text-white" viewBox="0 0 69 32" fill="currentColor">
+              <svg
+                className="h-8 w-auto text-white"
+                viewBox="0 0 69 32"
+                fill="currentColor"
+              >
                 <path d="M68.56 4.58c-.2-.2-.5-.3-.8-.2-3.2 1.1-6.5 2.3-9.7 3.4-7.2 2.5-14.4 5-21.6 7.5-4.6 1.6-9.2 3.2-13.8 4.8-2.3.8-4.6 1.6-6.9 2.4-1.2.4-2.3.8-3.5 1.2-.6.2-1.1.4-1.7.6-.3.1-.5.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.6.1-.9.1-.3 0-.6 0-.9-.1-.3-.1-.6-.2-.8-.4-.3-.2-.5-.4-.7-.7-.2-.3-.3-.6-.3-.9 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1.3.1.6.2.8.3.1 0 .2.1.3.1.1 0 .2 0 .3.1.3.1.5.2.8.3.6.2 1.1.4 1.7.6 1.2.4 2.3.8 3.5 1.2 2.3.8 4.6 1.6 6.9 2.4 4.6 1.6 9.2 3.2 13.8 4.8 7.2 2.5 14.4 5 21.6 7.5 3.2 1.1 6.5 2.3 9.7 3.4.3.1.6.1.9 0 .3-.1.6-.3.8-.5.2-.2.3-.5.3-.8 0-.3 0-.6-.1-.9-.1-.3-.2-.6-.4-.8-.2-.3-.4-.5-.7-.7-.3-.2-.6-.3-.9-.3-.3 0-.6 0-.9.1-.3.1-.6.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.5.2-.8.3-.6.2-1.1.4-1.7.6-1.2.4-2.3.8-3.5 1.2-2.3.8-4.6 1.6-6.9 2.4-4.6 1.6-9.2 3.2-13.8 4.8-7.2 2.5-14.4 5-21.6 7.5-3.2 1.1-6.5 2.3-9.7 3.4-.3.1-.6.1-.9 0-.3-.1-.6-.3-.8-.5-.2-.2-.3-.5-.3-.8 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1z" />
               </svg>
               <span className="text-white font-bold text-xl">PREMIUM</span>
@@ -208,7 +220,9 @@ export default function CheckoutPage() {
             >
               {/* Informations personnelles */}
               <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
-                <h2 className="text-xl font-bold mb-4">Informations personnelles</h2>
+                <h2 className="text-xl font-bold mb-4">
+                  Informations personnelles
+                </h2>
                 <div className="space-y-4">
                   <input
                     type="text"
@@ -286,18 +300,22 @@ export default function CheckoutPage() {
               </div>
 
               {/* Bouton de paiement */}
-              <button
+              <motion.button
                 type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 disabled={isSubmitting || items.length === 0}
                 onMouseEnter={handleButtonHover}
                 onMouseLeave={handleButtonLeave}
                 className="submit-btn w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
               >
                 <span className="relative z-10">
-                  {isSubmitting ? "Traitement..." : `Payer €${total.toFixed(2)}`}
+                  {isSubmitting
+                    ? "Traitement..."
+                    : `Payer €${total.toFixed(2)}`}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </button>
+              </motion.button>
 
               {/* Sécurité */}
               <div className="flex items-center justify-center space-x-6 text-white/60 text-sm">
@@ -315,11 +333,16 @@ export default function CheckoutPage() {
             {/* Résumé de la commande */}
             <div className="space-y-6">
               <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10 sticky top-24">
-                <h2 className="text-xl font-bold mb-4">Résumé de la commande</h2>
-                
+                <h2 className="text-xl font-bold mb-4">
+                  Résumé de la commande
+                </h2>
+
                 <div className="space-y-4 mb-6">
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4">
+                    <div
+                      key={`${item.id}-${item.size}`}
+                      className="flex items-center space-x-4"
+                    >
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10">
                         <Image
                           src={item.image}
@@ -330,9 +353,16 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium">{item.name}</h3>
-                        <p className="text-white/60 text-sm">Qté: {item.quantity}</p>
+                        <p className="text-white/60 text-sm">
+                          {item.color} • Taille: {item.size}
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          Qté: {item.quantity}
+                        </p>
                       </div>
-                      <p className="font-bold">€{(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-bold">
+                        €{(item.price * item.quantity).toFixed(2)}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -356,7 +386,9 @@ export default function CheckoutPage() {
                 <div className="mt-6 space-y-3">
                   <div className="flex items-center space-x-3 text-white/80">
                     <Truck className="h-5 w-5 text-green-400" />
-                    <span className="text-sm">Livraison gratuite en 2-3 jours</span>
+                    <span className="text-sm">
+                      Livraison gratuite en 2-3 jours
+                    </span>
                   </div>
                   <div className="flex items-center space-x-3 text-white/80">
                     <Shield className="h-5 w-5 text-blue-400" />
@@ -364,7 +396,9 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex items-center space-x-3 text-white/80">
                     <CreditCard className="h-5 w-5 text-purple-400" />
-                    <span className="text-sm">Retour gratuit sous 30 jours</span>
+                    <span className="text-sm">
+                      Retour gratuit sous 30 jours
+                    </span>
                   </div>
                 </div>
               </div>

@@ -66,13 +66,17 @@ export default function Cart() {
   };
 
   // Animation GSAP au clic sur supprimer
-  const handleRemoveClick = (id: number, element: HTMLElement) => {
+  const handleRemoveClick = (
+    id: number,
+    size: string,
+    element: HTMLElement,
+  ) => {
     gsap.to(element, {
       x: 100,
       opacity: 0,
       duration: 0.3,
       ease: "power2.in",
-      onComplete: () => removeItem(id),
+      onComplete: () => removeItem(id, size),
     });
   };
 
@@ -100,7 +104,9 @@ export default function Cart() {
   return (
     <>
       {/* Bouton panier */}
-      <button
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
         className="relative p-2 text-white/80 hover:text-white transition-colors duration-200"
       >
@@ -114,7 +120,7 @@ export default function Cart() {
             {itemCount}
           </motion.span>
         )}
-      </button>
+      </motion.button>
 
       {/* Panier slide-in */}
       <AnimatePresence>
@@ -142,12 +148,14 @@ export default function Cart() {
               <div className="p-6 border-b border-white/10">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold">Panier</h2>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setIsOpen(false)}
                     className="p-2 hover:bg-white/10 rounded-full transition-colors"
                   >
                     <X className="h-6 w-6" />
-                  </button>
+                  </motion.button>
                 </div>
                 <p className="text-white/60 mt-1">{itemCount} article(s)</p>
               </div>
@@ -165,7 +173,7 @@ export default function Cart() {
                 ) : (
                   items.map((item) => (
                     <motion.div
-                      key={item.id}
+                      key={`${item.id}-${item.size}`}
                       layout
                       onMouseEnter={(e) => handleItemHover(e.currentTarget)}
                       onMouseLeave={(e) => handleItemLeave(e.currentTarget)}
@@ -184,45 +192,62 @@ export default function Cart() {
                       {/* Info */}
                       <div className="flex-1">
                         <h3 className="font-semibold">{item.name}</h3>
-                        <p className="text-white/60 text-sm">{item.color}</p>
+                        <p className="text-white/60 text-sm">
+                          {item.color} • Taille: {item.size}
+                        </p>
                         <p className="text-lg font-bold mt-1">€{item.price}</p>
                       </div>
 
                       {/* Quantité */}
                       <div className="flex items-center space-x-2">
-                        <button
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            updateQuantity(
+                              item.id,
+                              item.size,
+                              item.quantity - 1,
+                            )
                           }
                           className="p-1 hover:bg-white/10 rounded-lg transition-colors"
                         >
                           <Minus className="h-4 w-4" />
-                        </button>
+                        </motion.button>
                         <span className="w-8 text-center font-medium">
                           {item.quantity}
                         </span>
-                        <button
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            updateQuantity(
+                              item.id,
+                              item.size,
+                              item.quantity + 1,
+                            )
                           }
                           className="p-1 hover:bg-white/10 rounded-lg transition-colors"
                         >
                           <Plus className="h-4 w-4" />
-                        </button>
+                        </motion.button>
                       </div>
 
                       {/* Supprimer */}
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={(e) =>
                           handleRemoveClick(
                             item.id,
+                            item.size,
                             e.currentTarget.parentElement!,
                           )
                         }
                         className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
                       >
                         <Trash2 className="h-4 w-4 text-red-400" />
-                      </button>
+                      </motion.button>
                     </motion.div>
                   ))
                 )}
@@ -238,20 +263,24 @@ export default function Cart() {
                     </span>
                   </div>
 
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleCheckoutClick}
                     className="checkout-btn w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors relative overflow-hidden group"
                   >
                     <span className="relative z-10">Passer la commande</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  </button>
+                  </motion.button>
 
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={clearCart}
                     className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-full transition-colors"
                   >
                     Vider le panier
-                  </button>
+                  </motion.button>
                 </div>
               )}
             </motion.div>
