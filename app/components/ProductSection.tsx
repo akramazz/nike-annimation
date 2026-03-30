@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useCart } from "../context/CartContext";
-import { ShoppingBag, Eye } from "lucide-react";
+import { ShoppingBag, Eye, Heart, Share2, Check, Copy, Twitter, Facebook, Linkedin } from "lucide-react";
 
 interface Product {
   id: number;
@@ -16,6 +16,7 @@ interface Product {
   stock: number;
   description: string;
   category: string;
+  sizes: string[];
 }
 
 // Composant de carte produit avec Glassmorphism
@@ -35,6 +36,22 @@ function ProductCard({
   const viewButtonRef = useRef<HTMLButtonElement>(null);
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [showSizeSelector, setShowSizeSelector] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  // Load likes from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedLikes = localStorage.getItem(`product_likes_${product.id}`);
+      const savedIsLiked = localStorage.getItem(`product_liked_${product.id}`);
+      if (savedLikes) setLikes(parseInt(savedLikes));
+      if (savedIsLiked) setIsLiked(savedIsLiked === "true");
+    }
+  }, [product.id]);
 
   // Animation GSAP au hover de la carte
   const handleCardHover = () => {
@@ -90,6 +107,11 @@ function ProductCard({
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
+    if (!selectedSize) {
+      setShowSizeSelector(true);
+      return;
+    }
+
     if (typeof window !== "undefined" && buttonRef.current) {
       gsap.to(buttonRef.current, {
         scale: 0.95,
@@ -111,11 +133,56 @@ function ProductCard({
       price: product.price,
       image: product.image,
       color: product.color,
-      size: "M",
+      size: selectedSize,
     });
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  // Handle Like
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newIsLiked = !isLiked;
+    const newLikes = newIsLiked ? likes + 1 : likes - 1;
+    
+    setIsLiked(newIsLiked);
+    setLikes(newLikes);
+    
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`product_likes_${product.id}`, newLikes.toString());
+      localStorage.setItem(`product_liked_${product.id}`, newIsLiked.toString());
+    }
+  };
+
+  // Handle Share
+  const handleShare = (platform: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/products/${product.id}`;
+    const text = `Découvrez ${product.name} - ${product.description}`;
+    
+    let shareUrl = "";
+    switch (platform) {
+      case "copy":
+        navigator.clipboard.writeText(url);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        window.open(shareUrl, "_blank");
+        break;
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        window.open(shareUrl, "_blank");
+        break;
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        window.open(shareUrl, "_blank");
+        break;
+    }
+    
+    setShowShareMenu(false);
   };
 
   // Animation GSAP au hover du bouton voir
@@ -194,27 +261,118 @@ function ProductCard({
         {/* Effet de brillance */}
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Bouton voir */}
-        <motion.button
-          ref={viewButtonRef}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onMouseEnter={handleViewButtonHover}
-          onMouseLeave={handleViewButtonLeave}
-          onClick={(e) => {
-            e.stopPropagation();
-            window.location.href = `/products/${product.id}`;
-          }}
-          className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        >
-          <Eye className="h-5 w-5" />
-        </motion.button>
+        {/* Actions */}
+        <div className="absolute top-4 right-4 flex flex-col space-y-2">
+          <motion.button
+            ref={viewButtonRef}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onMouseEnter={handleViewButtonHover}
+            onMouseLeave={handleViewButtonLeave}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `/products/${product.id}`;
+            }}
+            className="p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            <Eye className="h-5 w-5" />
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleLike}
+            className={`p-2 backdrop-blur-xl rounded-full transition-colors ${
+              isLiked
+                ? "bg-red-500/20 text-red-400"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+          </motion.button>
+          
+          <div className="relative">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowShareMenu(!showShareMenu);
+              }}
+              className="p-2 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors"
+            >
+              <Share2 className="h-5 w-5" />
+            </motion.button>
+            
+            {/* Share Menu */}
+            {showShareMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute right-0 top-14 bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 p-2 space-y-1 min-w-[160px] z-10"
+              >
+                <button
+                  onClick={(e) => handleShare("copy", e)}
+                  className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                >
+                  {copySuccess ? (
+                    <Check className="h-4 w-4 text-green-400" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                  <span>{copySuccess ? "Copié!" : "Copier le lien"}</span>
+                </button>
+                <button
+                  onClick={(e) => handleShare("twitter", e)}
+                  className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                >
+                  <Twitter className="h-4 w-4" />
+                  <span>Twitter</span>
+                </button>
+                <button
+                  onClick={(e) => handleShare("facebook", e)}
+                  className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                >
+                  <Facebook className="h-4 w-4" />
+                  <span>Facebook</span>
+                </button>
+                <button
+                  onClick={(e) => handleShare("linkedin", e)}
+                  className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                >
+                  <Linkedin className="h-4 w-4" />
+                  <span>LinkedIn</span>
+                </button>
+              </motion.div>
+            )}
+          </div>
+        </div>
+        
+        {/* Likes Counter */}
+        <div className="absolute bottom-4 left-4 flex items-center space-x-2 px-3 py-2 bg-white/10 backdrop-blur-xl rounded-full">
+          <Heart className={`h-4 w-4 ${isLiked ? "text-red-400 fill-red-400" : "text-white/60"}`} />
+          <span className="text-sm font-medium">{likes}</span>
+        </div>
       </div>
 
       {/* Informations du produit */}
       <div className="space-y-2">
         <h3 className="text-xl font-bold text-white">{product.name}</h3>
         <p className="text-white/60 text-sm">{product.description}</p>
+        
+        {/* Stock */}
+        <div className="flex items-center space-x-2">
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            product.stock > 20
+              ? "bg-green-500/20 text-green-400"
+              : product.stock > 10
+                ? "bg-yellow-500/20 text-yellow-400"
+                : "bg-red-500/20 text-red-400"
+          }`}>
+            {product.stock} en stock
+          </span>
+        </div>
+        
         <div className="flex items-center justify-between pt-2">
           <span className="text-2xl font-bold text-white">
             €{product.price}
@@ -233,6 +391,47 @@ function ProductCard({
             <ShoppingBag className="h-4 w-4" />
           </motion.button>
         </div>
+        
+        {/* Size Selector */}
+        {showSizeSelector && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="pt-3"
+          >
+            <p className="text-white/60 text-sm mb-2">Sélectionnez une taille:</p>
+            <div className="flex flex-wrap gap-2">
+              {product.sizes.map((size) => (
+                <motion.button
+                  key={size}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedSize(size);
+                    setShowSizeSelector(false);
+                  }}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    selectedSize === size
+                      ? "bg-white text-black"
+                      : "bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                >
+                  {size}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Selected Size Display */}
+        {selectedSize && !showSizeSelector && (
+          <div className="pt-2">
+            <span className="text-white/60 text-sm">Taille: </span>
+            <span className="text-white font-medium">{selectedSize}</span>
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -248,6 +447,7 @@ export default function ProductSection() {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   // Fetch products from API
   useEffect(() => {
@@ -313,6 +513,11 @@ export default function ProductSection() {
   const handleAddToCart = () => {
     if (!selectedProduct) return;
 
+    if (!selectedSize) {
+      alert("Veuillez sélectionner une taille");
+      return;
+    }
+
     if (typeof window !== "undefined") {
       const btn = document.querySelector(".add-to-cart-btn");
       if (btn) {
@@ -337,7 +542,7 @@ export default function ProductSection() {
       price: selectedProduct.price,
       image: selectedProduct.image,
       color: selectedProduct.color,
-      size: "M",
+      size: selectedSize,
     });
 
     setIsAdded(true);
@@ -430,6 +635,42 @@ export default function ProductSection() {
                     €{(selectedProduct.price * 1.3).toFixed(2)}
                   </span>
                 </div>
+                
+                {/* Stock */}
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm px-3 py-1 rounded-full ${
+                    selectedProduct.stock > 20
+                      ? "bg-green-500/20 text-green-400"
+                      : selectedProduct.stock > 10
+                        ? "bg-yellow-500/20 text-yellow-400"
+                        : "bg-red-500/20 text-red-400"
+                  }`}>
+                    {selectedProduct.stock} unités en stock
+                  </span>
+                </div>
+                
+                {/* Tailles */}
+                <div>
+                  <h4 className="text-lg font-semibold mb-3">Taille</h4>
+                  <div className="flex flex-wrap gap-3">
+                    {selectedProduct.sizes.map((size) => (
+                      <motion.button
+                        key={size}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          selectedSize === size
+                            ? "bg-white text-black"
+                            : "bg-white/10 text-white hover:bg-white/20"
+                        }`}
+                      >
+                        {size}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="flex flex-wrap gap-3">
                   <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
                     Livraison gratuite

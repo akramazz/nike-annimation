@@ -8,7 +8,15 @@
     "stock": 25,
     "description": "Élégance audacieuse pour un style unique",
     "category": "Premium",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "updatedAt": "2026-03-30T06:01:07.520Z"
   },
   {
     "id": 2,
@@ -19,7 +27,14 @@
     "stock": 15,
     "description": "Sophistication et confort absolu",
     "category": "Luxury",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 3,
@@ -27,10 +42,17 @@
     "color": "Bleu",
     "image": "/products/blue.webp",
     "price": 59.99,
-    "stock": 30,
+    "stock": 29,
     "description": "Style moderne et dynamique",
     "category": "Classic",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 4,
@@ -41,7 +63,14 @@
     "stock": 40,
     "description": "Chaleur et élégance naturelle",
     "category": "Classic",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 5,
@@ -52,7 +81,14 @@
     "stock": 20,
     "description": "Minimalisme sophistiqué",
     "category": "Premium",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 6,
@@ -63,7 +99,14 @@
     "stock": 35,
     "description": "Intemporelle et raffinée",
     "category": "Classic",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 7,
@@ -74,7 +117,14 @@
     "stock": 18,
     "description": "Fraîcheur et originalité",
     "category": "Premium",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 8,
@@ -85,7 +135,14 @@
     "stock": 22,
     "description": "Couleur vive et esprit jeune",
     "category": "Premium",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   },
   {
     "id": 9,
@@ -97,6 +154,13 @@
     "description": "doudoune",
     "image": "/products/rose.webp",
     "createdAt": "2026-03-30T04:45:29.628Z",
-    "sizes": ["XS", "S", "M", "L", "XL", "XXL"]
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ]
   }
 ]

@@ -1,1 +1,26 @@
-{}
+{
+  "app\\page.tsx -> ./components/Footer": {
+    "id": "app\\page.tsx -> ./components/Footer",
+    "files": [
+      "static/chunks/_app-pages-browser_app_components_Footer_tsx.js"
+    ]
+  },
+  "app\\page.tsx -> ./components/HeroSection": {
+    "id": "app\\page.tsx -> ./components/HeroSection",
+    "files": [
+      "static/chunks/_app-pages-browser_app_components_HeroSection_tsx.js"
+    ]
+  },
+  "app\\page.tsx -> ./components/Navigation": {
+    "id": "app\\page.tsx -> ./components/Navigation",
+    "files": [
+      "static/chunks/_app-pages-browser_app_components_Navigation_tsx.js"
+    ]
+  },
+  "app\\page.tsx -> ./components/ProductSection": {
+    "id": "app\\page.tsx -> ./components/ProductSection",
+    "files": [
+      "static/chunks/_app-pages-browser_app_components_ProductSection_tsx.js"
+    ]
+  }
+}

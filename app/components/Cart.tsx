@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, clearCart, total, itemCount } =
@@ -13,6 +14,7 @@ export default function Cart() {
   const [isOpen, setIsOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Animation GSAP pour ouvrir/fermer le panier
   useEffect(() => {
@@ -99,6 +101,10 @@ export default function Cart() {
         });
       }
     }
+
+    // Redirect to checkout
+    setIsOpen(false);
+    router.push("/checkout");
   };
 
   return (

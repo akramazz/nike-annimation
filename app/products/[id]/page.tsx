@@ -31,6 +31,7 @@ interface Product {
   description: string;
   category: string;
   image: string;
+  sizes: string[];
 }
 
 export default function ProductDetailPage() {
@@ -39,7 +40,7 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [likes, setLikes] = useState(0);
@@ -124,6 +125,11 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product) return;
 
+    if (!selectedSize) {
+      alert("Veuillez sélectionner une taille");
+      return;
+    }
+
     if (typeof window !== "undefined") {
       const btn = document.querySelector(".add-to-cart-btn");
       if (btn) {
@@ -142,14 +148,17 @@ export default function ProductDetailPage() {
       }
     }
 
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      color: product.color,
-      size: selectedSize,
-    });
+    // Add item with quantity
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        color: product.color,
+        size: selectedSize,
+      });
+    }
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -267,8 +276,6 @@ export default function ProductDetailPage() {
       </div>
     );
   }
-
-  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
   return (
     <div className="min-h-screen bg-black">
@@ -449,7 +456,7 @@ export default function ProductDetailPage() {
               <div>
                 <h3 className="text-lg font-semibold mb-3">Taille</h3>
                 <div className="flex flex-wrap gap-3">
-                  {sizes.map((size) => (
+                  {product.sizes.map((size) => (
                     <motion.button
                       key={size}
                       whileHover={{ scale: 1.05 }}
@@ -465,6 +472,9 @@ export default function ProductDetailPage() {
                     </motion.button>
                   ))}
                 </div>
+                {!selectedSize && (
+                  <p className="text-white/60 text-sm mt-2">Veuillez sélectionner une taille</p>
+                )}
               </div>
 
               {/* Quantité */}
