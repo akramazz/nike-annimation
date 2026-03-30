@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "subject": "park",
+    "message": "salut",
+    "status": "unread",
+    "createdAt": "2026-03-30T04:44:30.445Z",
+    "updatedAt": "2026-03-30T04:44:30.445Z"
+  },
+  {
+    "id": 2,
+    "name": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "subject": "ece",
+    "message": "salut\n",
+    "status": "unread",
+    "createdAt": "2026-03-30T05:42:23.188Z",
+    "updatedAt": "2026-03-30T05:42:23.189Z"
+  },
+  {
+    "id": 3,
+    "name": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "subject": "park",
+    "message": "paarfait\n",
+    "status": "unread",
+    "createdAt": "2026-03-30T08:07:57.051Z",
+    "updatedAt": "2026-03-30T08:07:57.053Z"
+  }
+]

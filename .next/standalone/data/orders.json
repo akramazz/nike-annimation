@@ -1,0 +1,132 @@
+[
+  {
+    "id": 1,
+    "orderNumber": "ORD-1774850045889-AX1QS7PRO",
+    "customerName": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "phone": "028585254",
+    "address": "alger",
+    "city": "hamiz",
+    "postalCode": "93939",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 3,
+        "name": "Veste Bleue",
+        "price": 59.99,
+        "quantity": 1,
+        "color": "Bleu",
+        "size": "XXL",
+        "image": "/products/blue.webp"
+      }
+    ],
+    "total": 59.99,
+    "status": "pending",
+    "createdAt": "2026-03-30T05:54:05.889Z",
+    "updatedAt": "2026-03-30T05:54:05.889Z"
+  },
+  {
+    "id": 2,
+    "orderNumber": "ORD-1774850203172-HILS0XOAQ",
+    "customerName": "fzfqssf",
+    "email": "azd@gmail.com",
+    "phone": "fsqdfqsdf",
+    "address": "alger centre",
+    "city": "slamabier",
+    "postalCode": "52342",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 1,
+        "name": "Veste Rouge",
+        "price": 69.99,
+        "quantity": 20,
+        "color": "Rouge",
+        "size": "XXL",
+        "image": "/products/rouge.webp"
+      }
+    ],
+    "total": 1399.8,
+    "status": "pending",
+    "createdAt": "2026-03-30T05:56:43.172Z",
+    "updatedAt": "2026-03-30T05:56:43.172Z"
+  },
+  {
+    "id": 3,
+    "orderNumber": "ORD-1774850265703-TLWOTDOI1",
+    "customerName": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "phone": "028585254",
+    "address": "alger",
+    "city": "hamiz",
+    "postalCode": "93939",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 1,
+        "name": "Veste Rouge",
+        "price": 69.99,
+        "quantity": 5,
+        "color": "Rouge",
+        "size": "XXL",
+        "image": "/products/rouge.webp"
+      }
+    ],
+    "total": 349.95,
+    "status": "pending",
+    "createdAt": "2026-03-30T05:57:45.703Z",
+    "updatedAt": "2026-03-30T05:57:45.703Z"
+  },
+  {
+    "id": 4,
+    "orderNumber": "ORD-1774853456373-W7ZYTLF8U",
+    "customerName": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "phone": "028585254",
+    "address": "alger",
+    "city": "hamiz",
+    "postalCode": "93939",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 1,
+        "name": "Veste Rouge",
+        "price": 69.99,
+        "quantity": 1,
+        "color": "Rouge",
+        "size": "XL",
+        "image": "/products/rouge.webp"
+      }
+    ],
+    "total": 69.99,
+    "status": "pending",
+    "createdAt": "2026-03-30T06:50:56.374Z",
+    "updatedAt": "2026-03-30T06:50:56.374Z"
+  },
+  {
+    "id": 5,
+    "orderNumber": "ORD-1774855597922-JXYKOF7CT",
+    "customerName": "Akram Azzouz",
+    "email": "acccaymen@gmail.com",
+    "phone": "028585254",
+    "address": "alger",
+    "city": "hamiz",
+    "postalCode": "93939",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 6,
+        "name": "Veste Noire",
+        "price": 59.99,
+        "quantity": 1,
+        "color": "Noir",
+        "size": "L",
+        "image": "/products/noir.webp"
+      }
+    ],
+    "total": 59.99,
+    "status": "pending",
+    "createdAt": "2026-03-30T07:26:37.922Z",
+    "updatedAt": "2026-03-30T07:26:37.922Z"
+  }
+]
