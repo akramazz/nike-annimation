@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import gsap from "gsap";
 import Image from "next/image";
 import { useCart } from "../../context/CartContext";
+import { apiUrl } from "@/lib/api-client";
 import {
   ArrowLeft,
   ShoppingBag,
@@ -55,22 +56,22 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch("/api/products");
+        const response = await fetch(apiUrl("/api/products"));
         const data = await response.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.products)) {
+          const idNum = parseInt(String(params.id), 10);
           const foundProduct = data.products.find(
-            (p: Product) => p.id === parseInt(params.id as string)
+            (p: Product) => p.id === idNum,
           );
-          setProduct(foundProduct);
-          
-          // Load likes from localStorage
+          setProduct(foundProduct ?? null);
+
           const savedLikes = localStorage.getItem(`product_likes_${params.id}`);
           const savedIsLiked = localStorage.getItem(`product_liked_${params.id}`);
-          if (savedLikes) setLikes(parseInt(savedLikes));
+          if (savedLikes) setLikes(parseInt(savedLikes, 10) || 0);
           if (savedIsLiked) setIsLiked(savedIsLiked === "true");
         }
-      } catch (error) {
-        console.error("Error fetching product:", error);
+      } catch {
+        setProduct(null);
       }
       setIsLoading(false);
     };
@@ -148,17 +149,17 @@ export default function ProductDetailPage() {
       }
     }
 
-    // Add item with quantity
-    for (let i = 0; i < quantity; i++) {
-      addItem({
+    addItem(
+      {
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.image,
         color: product.color,
         size: selectedSize,
-      });
-    }
+      },
+      quantity,
+    );
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -321,6 +322,10 @@ export default function ProductDetailPage() {
                 fill
                 className="object-contain p-8"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized={
+                  product.image.startsWith("http://") ||
+                  product.image.startsWith("https://")
+                }
               />
 
               {/* Badges */}

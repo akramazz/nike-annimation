@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
 
+const appUrlRaw =
+  process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
+const appUrl = appUrlRaw.replace(/\/$/, "");
+
 export const metadata: Metadata = {
   title: "PREMIUM - Collection Exclusive de Vestes Haut de Gamme",
   description:
@@ -21,12 +25,12 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://premium-collection.com"),
+  metadataBase: new URL(appUrl),
   openGraph: {
     title: "PREMIUM - Collection Exclusive de Vestes Haut de Gamme",
     description:
       "Découvrez notre collection exclusive de vestes premium, alliant style, confort et qualité exceptionnelle.",
-    url: "https://premium-collection.com",
+    url: appUrl,
     siteName: "PREMIUM",
     images: [
       {
@@ -56,11 +60,6 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
-  },
-  verification: {
-    google: "google-site-verification-code",
-    yandex: "yandex-verification-code",
-    yahoo: "yahoo-verification-code",
   },
 };
 

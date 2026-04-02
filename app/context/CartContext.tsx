@@ -8,7 +8,7 @@ import {
   ReactNode,
 } from "react";
 
-interface CartItem {
+export interface CartItem {
   id: number;
   name: string;
   price: number;
@@ -20,7 +20,9 @@ interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  /** True after localStorage has been read on the client (avoids hydration / empty-cart flashes). */
+  isHydrated: boolean;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   removeItem: (id: number, size: string) => void;
   updateQuantity: (id: number, size: string, quantity: number) => void;
   clearCart: () => void;
@@ -30,23 +32,38 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const MAX_LINE_QTY = 99;
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load cart from localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setItems(JSON.parse(savedCart));
+    try {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart) as CartItem[];
+        if (Array.isArray(parsed)) {
+          setItems(parsed);
+        }
+      }
+    } catch {
+      /* ignore corrupt cart */
     }
+    setIsHydrated(true);
   }, []);
 
-  // Save cart to localStorage
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(items));
-  }, [items]);
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem("cart", JSON.stringify(items));
+    } catch {
+      /* storage full or disabled */
+    }
+  }, [items, isHydrated]);
 
-  const addItem = (item: Omit<CartItem, "quantity">) => {
+  const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
+    const qty = Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(quantity)));
     setItems((prev) => {
       const existing = prev.find(
         (i) => i.id === item.id && i.size === item.size,
@@ -54,11 +71,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((i) =>
           i.id === item.id && i.size === item.size
-            ? { ...i, quantity: i.quantity + 1 }
+            ? {
+                ...i,
+                quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
+              }
             : i,
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity: qty }];
     });
   };
 
@@ -71,9 +91,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(id, size);
       return;
     }
+    const q = Math.min(MAX_LINE_QTY, Math.max(1, Math.floor(quantity)));
     setItems((prev) =>
       prev.map((i) =>
-        i.id === id && i.size === size ? { ...i, quantity } : i,
+        i.id === id && i.size === size ? { ...i, quantity: q } : i,
       ),
     );
   };
@@ -92,6 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         items,
+        isHydrated,
         addItem,
         removeItem,
         updateQuantity,

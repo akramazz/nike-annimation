@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useCart } from "../context/CartContext";
+import { apiUrl } from "@/lib/api-client";
 import { ShoppingBag, Eye, Heart, Share2, Check, Copy, Twitter, Facebook, Linkedin } from "lucide-react";
 
 interface Product {
@@ -221,7 +222,7 @@ function ProductCard({
       onMouseEnter={handleCardHover}
       onMouseLeave={handleCardLeave}
       onClick={onClick}
-      className={`relative p-6 rounded-3xl backdrop-blur-2xl border transition-all duration-300 cursor-pointer ${
+      className={`group relative p-6 rounded-3xl backdrop-blur-2xl border transition-all duration-300 cursor-pointer ${
         isSelected
           ? "bg-white/20 border-white/40 shadow-2xl"
           : "bg-white/10 border-white/20 shadow-xl hover:bg-white/15"
@@ -256,6 +257,10 @@ function ProductCard({
           fill
           className="object-contain p-4"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized={
+            product.image.startsWith("http://") ||
+            product.image.startsWith("https://")
+          }
         />
 
         {/* Effet de brillance */}
@@ -453,14 +458,14 @@ export default function ProductSection() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/products");
+        const response = await fetch(apiUrl("/api/products"));
         const data = await response.json();
-        if (data.success && data.products.length > 0) {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           setProducts(data.products);
           setSelectedProduct(data.products[0]);
         }
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } catch {
+        /* network error — UI shows empty state */
       }
       setIsLoading(false);
     };
@@ -723,6 +728,10 @@ export default function ProductSection() {
                       fill
                       className="object-contain p-8"
                       sizes="(max-width: 768px) 100vw, 50vw"
+                      unoptimized={
+                        selectedProduct.image.startsWith("http://") ||
+                        selectedProduct.image.startsWith("https://")
+                      }
                     />
                   </motion.div>
                 </AnimatePresence>

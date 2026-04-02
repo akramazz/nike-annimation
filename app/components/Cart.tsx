@@ -192,6 +192,10 @@ export default function Cart() {
                           alt={item.name}
                           fill
                           className="object-contain p-2"
+                          unoptimized={
+                            item.image.startsWith("http://") ||
+                            item.image.startsWith("https://")
+                          }
                         />
                       </div>
 

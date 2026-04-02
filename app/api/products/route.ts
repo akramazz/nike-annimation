@@ -1,118 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { Prisma } from "@prisma/client";
+import { isAdminRequest } from "@/lib/admin-auth";
+import { prisma } from "@/lib/prisma";
+import {
+  normalizeProduct,
+  type ProductRecord,
+} from "@/lib/product-normalize";
+import { clampStr, parsePositiveInt, parsePrice } from "@/lib/sanitize";
+import { productToJson } from "@/lib/serialize-db";
 
-const dataFilePath = path.join(process.cwd(), "data", "products.json");
+export const dynamic = "force-dynamic";
 
-// Ensure data directory exists
-const ensureDataDir = () => {
-  const dataDir = path.join(process.cwd(), "data");
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(dataFilePath)) {
-    const initialProducts = [
-      {
-        id: 1,
-        name: "Veste Rouge",
-        color: "Rouge",
-        image: "/products/rouge.webp",
-        price: 69.99,
-        stock: 25,
-        description: "Élégance audacieuse pour un style unique",
-        category: "Premium",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 2,
-        name: "Veste Gris",
-        color: "Gris",
-        image: "/products/gris.webp",
-        price: 220.99,
-        stock: 15,
-        description: "Sophistication et confort absolu",
-        category: "Luxury",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 3,
-        name: "Veste Bleue",
-        color: "Bleu",
-        image: "/products/blue.webp",
-        price: 59.99,
-        stock: 30,
-        description: "Style moderne et dynamique",
-        category: "Classic",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 4,
-        name: "Veste Marron",
-        color: "Marron",
-        image: "/products/maron.webp",
-        price: 33.99,
-        stock: 40,
-        description: "Chaleur et élégance naturelle",
-        category: "Classic",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 5,
-        name: "Veste Beige",
-        color: "Beige",
-        image: "/products/beage.webp",
-        price: 59.99,
-        stock: 20,
-        description: "Minimalisme sophistiqué",
-        category: "Premium",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 6,
-        name: "Veste Noire",
-        color: "Noir",
-        image: "/products/noir.webp",
-        price: 59.99,
-        stock: 35,
-        description: "Intemporelle et raffinée",
-        category: "Classic",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 7,
-        name: "Veste Verte",
-        color: "Vert",
-        image: "/products/vert.webp",
-        price: 88.99,
-        stock: 18,
-        description: "Fraîcheur et originalité",
-        category: "Premium",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-      {
-        id: 8,
-        name: "Veste Pistache",
-        color: "Pistache",
-        image: "/products/pistache.webp",
-        price: 69.99,
-        stock: 22,
-        description: "Couleur vive et esprit jeune",
-        category: "Premium",
-        sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-      },
-    ];
-    fs.writeFileSync(dataFilePath, JSON.stringify(initialProducts, null, 2));
-  }
-};
+function parseProductBody(body: Record<string, unknown>, id: number): ProductRecord {
+  const sizesRaw = body.sizes;
+  const sizes =
+    Array.isArray(sizesRaw) && sizesRaw.length > 0
+      ? sizesRaw.map((s) => clampStr(s, 8))
+      : undefined;
 
-// GET all products
+  return normalizeProduct({
+    id,
+    name: clampStr(body.name, 120),
+    color: clampStr(body.color, 80),
+    image: clampStr(body.image, 500),
+    price: parsePrice(body.price),
+    stock: parsePositiveInt(body.stock, 0),
+    description: clampStr(body.description, 2000),
+    category: clampStr(body.category, 80),
+    ...(sizes ? { sizes } : {}),
+  });
+}
+
 export async function GET() {
   try {
-    ensureDataDir();
-    const data = fs.readFileSync(dataFilePath, "utf8");
-    const products = JSON.parse(data);
+    const rows = await prisma.product.findMany({ orderBy: { id: "asc" } });
+    const products = rows.map(productToJson);
     return NextResponse.json({ success: true, products });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: "Failed to fetch products" },
       { status: 500 },
@@ -120,31 +44,53 @@ export async function GET() {
   }
 }
 
-// POST new product
 export async function POST(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
   try {
-    ensureDataDir();
-    const body = await request.json();
-    const data = fs.readFileSync(dataFilePath, "utf8");
-    const products = JSON.parse(data);
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
 
-    const newProduct = {
-      id:
-        products.length > 0
-          ? Math.max(...products.map((p: any) => p.id)) + 1
-          : 1,
-      ...body,
-      createdAt: new Date().toISOString(),
-    };
+    if (!body.name || !String(body.name).trim()) {
+      return NextResponse.json(
+        { success: false, error: "Product name is required" },
+        { status: 400 },
+      );
+    }
 
-    products.push(newProduct);
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+    const parsed = parseProductBody(body, 0);
+    const created = await prisma.product.create({
+      data: {
+        name: parsed.name,
+        color: parsed.color,
+        image: parsed.image,
+        price: parsed.price,
+        stock: parsed.stock,
+        description: parsed.description,
+        category: parsed.category,
+        sizes: parsed.sizes,
+      },
+    });
 
     return NextResponse.json(
-      { success: true, product: newProduct },
+      { success: true, product: productToJson(created) },
       { status: 201 },
     );
-  } catch (error) {
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      return NextResponse.json(
+        { success: false, error: "Failed to create product" },
+        { status: 400 },
+      );
+    }
     return NextResponse.json(
       { success: false, error: "Failed to create product" },
       { status: 500 },
@@ -152,33 +98,65 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT update product
 export async function PUT(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
   try {
-    ensureDataDir();
-    const body = await request.json();
-    const { id, ...updates } = body;
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
 
-    const data = fs.readFileSync(dataFilePath, "utf8");
-    const products = JSON.parse(data);
+    const id = parsePositiveInt(body.id, -1);
+    if (id < 1) {
+      return NextResponse.json(
+        { success: false, error: "Valid product id is required" },
+        { status: 400 },
+      );
+    }
 
-    const index = products.findIndex((p: any) => p.id === id);
-    if (index === -1) {
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) {
       return NextResponse.json(
         { success: false, error: "Product not found" },
         { status: 404 },
       );
     }
 
-    products[index] = {
-      ...products[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+    const base = productToJson(existing);
+    const merged = parseProductBody(
+      { ...base, ...body } as Record<string, unknown>,
+      id,
+    );
 
-    return NextResponse.json({ success: true, product: products[index] });
-  } catch (error) {
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        name: merged.name,
+        color: merged.color,
+        image: merged.image,
+        price: merged.price,
+        stock: merged.stock,
+        description: merged.description,
+        category: merged.category,
+        sizes: merged.sizes,
+      },
+    });
+
+    return NextResponse.json({ success: true, product: productToJson(updated) });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+      return NextResponse.json(
+        { success: false, error: "Product not found" },
+        { status: 404 },
+      );
+    }
     return NextResponse.json(
       { success: false, error: "Failed to update product" },
       { status: 500 },
@@ -186,29 +164,34 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE product
 export async function DELETE(request: NextRequest) {
+  if (!isAdminRequest(request)) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
   try {
-    ensureDataDir();
     const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get("id") || "0");
-
-    const data = fs.readFileSync(dataFilePath, "utf8");
-    const products = JSON.parse(data);
-
-    const index = products.findIndex((p: any) => p.id === id);
-    if (index === -1) {
+    const id = parseInt(searchParams.get("id") || "0", 10);
+    if (!Number.isFinite(id) || id < 1) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
-        { status: 404 },
+        { success: false, error: "Valid product id is required" },
+        { status: 400 },
       );
     }
 
-    products.splice(index, 1);
-    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+    try {
+      await prisma.product.delete({ where: { id } });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+        return NextResponse.json(
+          { success: false, error: "Product not found" },
+          { status: 404 },
+        );
+      }
+      throw e;
+    }
 
     return NextResponse.json({ success: true, message: "Product deleted" });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: "Failed to delete product" },
       { status: 500 },

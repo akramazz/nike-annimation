@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import gsap from "gsap";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Mail, Phone, MapPin, Send, Check } from "lucide-react";
+import { apiUrl } from "@/lib/api-client";
 
 export default function ContactPage() {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function ContactPage() {
     };
 
     try {
-      const response = await fetch("/api/messages", {
+      const response = await fetch(apiUrl("/api/messages"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(messageData),
@@ -117,7 +118,6 @@ export default function ContactPage() {
       if (data.success) {
         setIsSuccess(true);
 
-        // Animation de succès
         if (typeof window !== "undefined") {
           gsap.to(".contact-form", {
             opacity: 0,
@@ -127,8 +127,8 @@ export default function ContactPage() {
           });
         }
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch {
+      /* network error — form stays visible */
     }
 
     setIsSubmitting(false);

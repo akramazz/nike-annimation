@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
+import { apiUrl } from "@/lib/api-client";
+import { DEFAULT_SIZES } from "@/lib/product-normalize";
 import {
   Package,
   ShoppingCart,
   MessageSquare,
   TrendingUp,
-  Users,
   DollarSign,
   Plus,
   Edit,
@@ -17,7 +18,6 @@ import {
   Check,
   X,
   Search,
-  Filter,
   RefreshCw,
 } from "lucide-react";
 
@@ -29,6 +29,8 @@ interface Product {
   stock: number;
   category: string;
   description: string;
+  image?: string;
+  sizes?: string[];
 }
 
 interface Order {
@@ -66,32 +68,103 @@ export default function AdminDashboard() {
     "product",
   );
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginSubmitting, setLoginSubmitting] = useState(false);
 
-  // Fetch data
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [productsRes, ordersRes, messagesRes] = await Promise.all([
-        fetch("/api/products"),
-        fetch("/api/orders"),
-        fetch("/api/messages"),
+        fetch(apiUrl("/api/products"), { credentials: "include" }),
+        fetch(apiUrl("/api/orders"), { credentials: "include" }),
+        fetch(apiUrl("/api/messages"), { credentials: "include" }),
       ]);
 
       const productsData = await productsRes.json();
       const ordersData = await ordersRes.json();
       const messagesData = await messagesRes.json();
 
-      if (productsData.success) setProducts(productsData.products);
-      if (ordersData.success) setOrders(ordersData.orders);
-      if (messagesData.success) setMessages(messagesData.messages);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+      if (productsRes.ok && productsData.success) {
+        setProducts(productsData.products);
+      }
+      if (ordersRes.ok && ordersData.success) {
+        setOrders(ordersData.orders);
+      }
+      if (messagesRes.ok && messagesData.success) {
+        setMessages(messagesData.messages);
+      }
+    } catch {
+      /* ignore */
     }
     setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(apiUrl("/api/auth/admin/me"), {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (!cancelled && data.success) {
+          setAuthRequired(Boolean(data.authRequired));
+          setAuthenticated(Boolean(data.authenticated));
+          if (!data.authRequired || data.authenticated) {
+            await fetchData();
+          }
+        }
+      } catch {
+        if (!cancelled) setAuthenticated(false);
+      } finally {
+        if (!cancelled) setSessionChecked(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchData]);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    setLoginSubmitting(true);
+    try {
+      const res = await fetch(apiUrl("/api/auth/admin/login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ password: loginPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setLoginError(
+          typeof data.error === "string" ? data.error : "Connexion refusée.",
+        );
+        setLoginSubmitting(false);
+        return;
+      }
+      setLoginPassword("");
+      setAuthenticated(true);
+      await fetchData();
+    } catch {
+      setLoginError("Erreur réseau.");
+    }
+    setLoginSubmitting(false);
+  };
+
+  const handleAdminLogout = async () => {
+    await fetch(apiUrl("/api/auth/admin/logout"), {
+      method: "POST",
+      credentials: "include",
+    });
+    setAuthenticated(false);
+    setOrders([]);
+    setMessages([]);
   };
 
   // Stats
@@ -119,7 +192,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Revenus",
-      value: `€${orders.reduce((sum, o) => sum + o.total, 0).toFixed(2)}`,
+      value: `€${orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0).toFixed(2)}`,
       icon: DollarSign,
       color: "from-orange-500 to-orange-600",
       change: "+15%",
@@ -140,38 +213,105 @@ export default function AdminDashboard() {
   const handleDeleteProduct = async (id: number) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
     try {
-      await fetch(`/api/products?id=${id}`, { method: "DELETE" });
-      setProducts(products.filter((p) => p.id !== id));
-    } catch (error) {
-      console.error("Error deleting product:", error);
+      const res = await fetch(apiUrl(`/api/products?id=${id}`), {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setProducts(products.filter((p) => p.id !== id));
+      } else {
+        await fetchData();
+      }
+    } catch {
+      await fetchData();
     }
   };
 
   const handleUpdateOrderStatus = async (id: number, status: string) => {
     try {
-      await fetch("/api/orders", {
+      const res = await fetch(apiUrl("/api/orders"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ id, status }),
       });
-      setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
-    } catch (error) {
-      console.error("Error updating order:", error);
+      if (res.ok) {
+        setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
+      }
+    } catch {
+      /* ignore */
     }
   };
 
   const handleUpdateMessageStatus = async (id: number, status: string) => {
     try {
-      await fetch("/api/messages", {
+      const res = await fetch(apiUrl("/api/messages"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ id, status }),
       });
-      setMessages(messages.map((m) => (m.id === id ? { ...m, status } : m)));
-    } catch (error) {
-      console.error("Error updating message:", error);
+      if (res.ok) {
+        setMessages(messages.map((m) => (m.id === id ? { ...m, status } : m)));
+      }
+    } catch {
+      /* ignore */
     }
   };
+
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
+
+  if (authRequired && !authenticated) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <motion.form
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleAdminLogin}
+          className="w-full max-w-md p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6"
+        >
+          <h1 className="text-2xl font-bold">Admin — connexion</h1>
+          <p className="text-white/60 text-sm">
+            Entrez la valeur de{" "}
+            <code className="text-white/80">ADMIN_API_SECRET</code> définie sur
+            le serveur.
+          </p>
+          <input
+            type="password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            placeholder="Secret administrateur"
+            required
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+          />
+          {loginError && (
+            <p className="text-red-400 text-sm" role="alert">
+              {loginError}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loginSubmitting}
+            className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 disabled:opacity-50"
+          >
+            {loginSubmitting ? "Connexion…" : "Se connecter"}
+          </button>
+          <a
+            href="/"
+            className="block text-center text-white/60 hover:text-white text-sm"
+          >
+            Retour au site
+          </a>
+        </motion.form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -193,9 +333,20 @@ export default function AdminDashboard() {
               <button
                 onClick={fetchData}
                 className="p-2 text-white/80 hover:text-white transition-colors"
+                type="button"
+                aria-label="Rafraîchir les données"
               >
                 <RefreshCw className="h-5 w-5" />
               </button>
+              {authRequired && (
+                <button
+                  type="button"
+                  onClick={handleAdminLogout}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium transition-colors"
+                >
+                  Déconnexion
+                </button>
+              )}
               <a
                 href="/"
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium transition-colors"
@@ -281,7 +432,9 @@ export default function AdminDashboard() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold">€{order.total.toFixed(2)}</p>
+                          <p className="font-bold">
+                            €{Number(order.total || 0).toFixed(2)}
+                          </p>
                           <span
                             className={`text-xs px-2 py-1 rounded-full ${
                               order.status === "pending"
@@ -503,7 +656,7 @@ export default function AdminDashboard() {
                         <td className="p-4">{order.customerName}</td>
                         <td className="p-4 text-white/60">{order.email}</td>
                         <td className="p-4 font-bold">
-                          €{order.total.toFixed(2)}
+                          €{Number(order.total || 0).toFixed(2)}
                         </td>
                         <td className="p-4">
                           <select
@@ -629,34 +782,49 @@ export default function AdminDashboard() {
                 onSubmit={async (e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
+                  const sizesRaw = String(formData.get("sizes") ?? "");
+                  const sizes = sizesRaw
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                  const imageInput = String(formData.get("image") ?? "").trim();
+                  const color = String(formData.get("color") ?? "").trim();
                   const productData = {
                     name: formData.get("name"),
-                    color: formData.get("color"),
+                    color,
                     price: parseFloat(formData.get("price") as string),
-                    stock: parseInt(formData.get("stock") as string),
+                    stock: parseInt(formData.get("stock") as string, 10),
                     category: formData.get("category"),
                     description: formData.get("description"),
-                    image: `/products/${(formData.get("color") as string).toLowerCase()}.webp`,
+                    image:
+                      imageInput ||
+                      `/products/${color.toLowerCase().replace(/\s+/g, "-")}.webp`,
+                    ...(sizes.length > 0 ? { sizes } : {}),
+                  };
+
+                  const opts = {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include" as RequestCredentials,
+                    body: JSON.stringify(
+                      editingItem
+                        ? { id: editingItem.id, ...productData }
+                        : productData,
+                    ),
                   };
 
                   if (editingItem) {
-                    await fetch("/api/products", {
+                    await fetch(apiUrl("/api/products"), {
                       method: "PUT",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        id: editingItem.id,
-                        ...productData,
-                      }),
+                      ...opts,
                     });
                   } else {
-                    await fetch("/api/products", {
+                    await fetch(apiUrl("/api/products"), {
                       method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(productData),
+                      ...opts,
                     });
                   }
 
-                  fetchData();
+                  await fetchData();
                   setShowModal(false);
                 }}
               >
@@ -709,6 +877,22 @@ export default function AdminDashboard() {
                     defaultValue={editingItem?.description}
                     rows={3}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 resize-none"
+                  />
+                  <input
+                    name="image"
+                    placeholder="Image (URL ou chemin, ex. /products/noir.webp)"
+                    defaultValue={editingItem?.image}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                  />
+                  <input
+                    name="sizes"
+                    placeholder={`Tailles séparées par des virgules (défaut: ${DEFAULT_SIZES.join(",")})`}
+                    defaultValue={
+                      editingItem?.sizes?.length
+                        ? editingItem.sizes.join(",")
+                        : DEFAULT_SIZES.join(",")
+                    }
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
                   />
                 </div>
                 <div className="flex space-x-4 mt-6">

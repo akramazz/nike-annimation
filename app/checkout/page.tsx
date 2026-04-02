@@ -6,15 +6,24 @@ import gsap from "gsap";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useCart } from "../context/CartContext";
+import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
 
 export default function CheckoutPage() {
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, isHydrated } = useCart();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (items.length === 0 && !isSuccess) {
+      router.replace("/");
+    }
+  }, [isHydrated, items.length, isSuccess, router]);
 
   // Animation GSAP au chargement
   useEffect(() => {
@@ -94,6 +103,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitError(null);
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
@@ -118,7 +128,7 @@ export default function CheckoutPage() {
     };
 
     try {
-      const response = await fetch("/api/orders", {
+      const response = await fetch(apiUrl("/api/orders"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
@@ -130,7 +140,6 @@ export default function CheckoutPage() {
         setIsSuccess(true);
         clearCart();
 
-        // Animation de succès
         if (typeof window !== "undefined") {
           gsap.to(".checkout-form", {
             opacity: 0,
@@ -139,13 +148,25 @@ export default function CheckoutPage() {
             ease: "power2.in",
           });
         }
+      } else {
+        setSubmitError(
+          typeof data.error === "string" ? data.error : "La commande a échoué.",
+        );
       }
-    } catch (error) {
-      console.error("Error creating order:", error);
+    } catch {
+      setSubmitError("Erreur réseau. Réessayez dans un instant.");
     }
 
     setIsSubmitting(false);
   };
+
+  if (!isHydrated || (items.length === 0 && !isSuccess)) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
@@ -300,6 +321,12 @@ export default function CheckoutPage() {
               </div>
 
               {/* Bouton de paiement */}
+              {submitError && (
+                <p className="text-red-400 text-sm text-center" role="alert">
+                  {submitError}
+                </p>
+              )}
+
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.02 }}
@@ -349,6 +376,10 @@ export default function CheckoutPage() {
                           alt={item.name}
                           fill
                           className="object-contain p-2"
+                          unoptimized={
+                            item.image.startsWith("http://") ||
+                            item.image.startsWith("https://")
+                          }
                         />
                       </div>
                       <div className="flex-1">

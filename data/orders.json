@@ -128,5 +128,31 @@
     "status": "pending",
     "createdAt": "2026-03-30T07:26:37.922Z",
     "updatedAt": "2026-03-30T07:26:37.922Z"
+  },
+  {
+    "id": 6,
+    "orderNumber": "ORD-1774927351150-6LJ6PBLUS",
+    "customerName": "ahelm et sohaib",
+    "email": "ahlemsohaib@gmail.com",
+    "phone": "028585254",
+    "address": "alger",
+    "city": "bab zouar",
+    "postalCode": "93939",
+    "country": "Algérie",
+    "items": [
+      {
+        "productId": 3,
+        "name": "Veste Bleue",
+        "price": 59.99,
+        "quantity": 1,
+        "color": "Bleu",
+        "size": "M",
+        "image": "/products/blue.webp"
+      }
+    ],
+    "total": 59.99,
+    "status": "pending",
+    "createdAt": "2026-03-31T03:22:31.150Z",
+    "updatedAt": "2026-03-31T03:22:31.150Z"
   }
 ]

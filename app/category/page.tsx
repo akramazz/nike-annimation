@@ -7,7 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import CategoryScene from "../components/CategoryScene";
-import productsData from "../../data/products.json";
+import { apiUrl } from "@/lib/api-client";
+import { DEFAULT_SIZES } from "@/lib/product-normalize";
 
 // Enregistrement du plugin ScrollTrigger de GSAP
 if (typeof window !== "undefined") {
@@ -47,10 +48,36 @@ export default function CategoryPage() {
   const categoriesRef = useRef<HTMLDivElement>(null);
   const productsRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
-  // S'assurer que le composant est monté côté client
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(apiUrl("/api/products"));
+        const data = await res.json();
+        if (!cancelled && data.success && Array.isArray(data.products)) {
+          setProducts(
+            data.products.map((p: Product) => ({
+              ...p,
+              sizes: Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : [...DEFAULT_SIZES],
+            })),
+          );
+        }
+      } catch {
+        if (!cancelled) setProducts([]);
+      } finally {
+        if (!cancelled) setProductsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Catégories disponibles
@@ -61,10 +88,10 @@ export default function CategoryPage() {
     { id: "Classic", name: "Classic", icon: "🎯" },
   ];
 
-  // Filtrer les produits par catégorie
-  const filteredProducts = selectedCategory === "all"
-    ? productsData
-    : productsData.filter((product) => product.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === "all"
+      ? products
+      : products.filter((product) => product.category === selectedCategory);
 
   // Animation GSAP au chargement de la page
   useEffect(() => {
@@ -266,7 +293,13 @@ export default function CategoryPage() {
                 ref={productsRef}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
               >
-                {filteredProducts.map((product, index) => (
+                {productsLoading && (
+                  <div className="col-span-full text-center py-20 text-white/80">
+                    Chargement des produits…
+                  </div>
+                )}
+                {!productsLoading &&
+                  filteredProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
                     className="product-card group relative bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 cursor-pointer"
@@ -335,7 +368,7 @@ export default function CategoryPage() {
 
                       {/* Tailles disponibles */}
                       <div className="flex flex-wrap gap-2">
-                        {product.sizes.slice(0, 5).map((size) => (
+                        {(product.sizes ?? [...DEFAULT_SIZES]).slice(0, 5).map((size) => (
                           <span
                             key={size}
                             className="px-2 py-1 bg-white/10 rounded text-white/70 text-xs"
@@ -343,9 +376,9 @@ export default function CategoryPage() {
                             {size}
                           </span>
                         ))}
-                        {product.sizes.length > 5 && (
+                        {(product.sizes ?? [...DEFAULT_SIZES]).length > 5 && (
                           <span className="px-2 py-1 bg-white/10 rounded text-white/70 text-xs">
-                            +{product.sizes.length - 5}
+                            +{(product.sizes ?? [...DEFAULT_SIZES]).length - 5}
                           </span>
                         )}
                       </div>
@@ -358,7 +391,7 @@ export default function CategoryPage() {
               </div>
 
               {/* Message si aucun produit */}
-              {filteredProducts.length === 0 && (
+              {!productsLoading && filteredProducts.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -453,7 +486,7 @@ export default function CategoryPage() {
                   <div className="mb-8">
                     <span className="text-white/60 text-sm mb-3 block">Tailles disponibles</span>
                     <div className="flex flex-wrap gap-2">
-                      {selectedProduct.sizes.map((size) => (
+                      {(selectedProduct.sizes ?? [...DEFAULT_SIZES]).map((size) => (
                         <motion.button
                           key={size}
                           whileHover={{ scale: 1.1 }}
