@@ -277,19 +277,22 @@ export default function ProductSection() {
 
   const getBackgroundGradient = (category: string) => {
     switch (category) {
-      case 'Premium': return 'from-purple-900 via-purple-800 to-black';
-      case 'Luxury': return 'from-amber-900 via-amber-800 to-black';
-      case 'Classic': return 'from-slate-900 via-slate-800 to-black';
-      default: return 'from-gray-900 via-gray-800 to-black';
+      case 'Premium': return 'from-indigo-950 via-slate-900 to-black';
+      case 'Luxury': return 'from-amber-950 via-orange-950/50 to-black';
+      case 'Classic': return 'from-slate-950 via-zinc-900 to-black';
+      case 'New': return 'from-violet-950 via-purple-900 to-black';
+      case 'Sale': return 'from-red-950 via-rose-900 to-black';
+      default: return 'from-gray-950 via-slate-900 to-black';
     }
   };
 
   return (
     <section ref={sectionRef} className="relative min-h-screen py-20 px-4 sm:px-6 lg:px-8">
+      {/* Background dynamique simple et économique */}
       {selectedProduct && (
-        <motion.div key={selectedProduct.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }} className={`absolute inset-0 bg-gradient-to-br ${getBackgroundGradient(selectedProduct.category)} opacity-90`} />
+        <div className={`absolute inset-0 bg-gradient-to-br ${getBackgroundGradient(selectedProduct.category)}`} />
       )}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.h2 ref={titleRef} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">Collection Premium</motion.h2>
