@@ -145,11 +145,11 @@ function ProductCard({
       }`}
     >
       {isSelected && (
-        <motion.div layoutId="selectedBadge" className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center" transition={{ type: "spring", stiffness: 500, damping: 30 }}>
+        <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center">
           <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-        </motion.div>
+        </div>
       )}
 
       <div className="relative w-full aspect-square mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10">
@@ -157,7 +157,7 @@ function ProductCard({
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
         <div className="absolute top-4 right-4 flex flex-col space-y-2">
-          <motion.button ref={viewButtonRef} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={(e) => { e.stopPropagation(); router.push(`/products/${product.id}`); }} className="p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <motion.button ref={viewButtonRef} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={(e) => { e.stopPropagation(); router.push(`/products/${product._id}`); }} className="p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Eye className="h-5 w-5" />
           </motion.button>
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleLike} className={`p-2 backdrop-blur-xl rounded-full transition-colors ${isLiked ? "bg-red-500/20 text-red-400" : "bg-white/10 text-white hover:bg-white/20"}`}>
@@ -316,7 +316,7 @@ export default function ProductSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} isSelected={selectedProduct?.id === product.id} onClick={() => setSelectedProduct(product)} index={index} />
+            <ProductCard key={product._id || product.id} product={product} isSelected={selectedProduct?._id === product._id} onClick={() => setSelectedProduct(product)} index={index} />
           ))}
         </div>
         {selectedProduct && (
@@ -326,8 +326,19 @@ export default function ProductSection() {
                 <h3 className="text-3xl md:text-4xl font-bold text-white">{selectedProduct.name}</h3>
                 <p className="text-white/70 text-lg">{selectedProduct.description}</p>
                 <div className="flex items-center space-x-4">
-                  <span className="text-4xl font-bold text-white">€{selectedProduct.price}</span>
-                  <span className="text-white/50 line-through text-xl">€{(selectedProduct.price * 1.3).toFixed(2)}</span>
+                  {selectedProduct.onSale && selectedProduct.salePrice ? (
+                    <>
+                      <span className="text-4xl font-bold text-white">€{selectedProduct.salePrice}</span>
+                      <span className="text-white/50 line-through text-xl">€{selectedProduct.price}</span>
+                      {selectedProduct.salePercent && (
+                        <span className="px-3 py-1 bg-red-500 text-white font-bold text-sm rounded-full">
+                          -{selectedProduct.salePercent}%
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-4xl font-bold text-white">€{selectedProduct.price}</span>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className={`text-sm px-3 py-1 rounded-full ${selectedProduct.stock > 20 ? "bg-green-500/20 text-green-400" : selectedProduct.stock > 10 ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}>{selectedProduct.stock} unités en stock</span>
@@ -350,17 +361,15 @@ export default function ProductSection() {
                     <span>{isAdded ? "Ajouté !" : "Ajouter au panier"}</span>
                     <ShoppingBag className="h-5 w-5" />
                   </motion.button>
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => router.push(`/products/${selectedProduct.id}`)} className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors duration-300 border border-white/20">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => router.push(`/products/${selectedProduct._id}`)} className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors duration-300 border border-white/20">
                     Voir le produit
                   </motion.button>
                 </div>
               </div>
-              <div className="h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
-                <AnimatePresence mode="wait">
-                  <motion.div key={selectedProduct.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.5 }} className="relative w-full h-full">
-                    <Image src={selectedProduct.image} alt={selectedProduct.name} fill className="object-contain p-8" sizes="(max-width: 768px) 100vw, 50vw" unoptimized={selectedProduct.image.startsWith("http://") || selectedProduct.image.startsWith("https://")} />
-                  </motion.div>
-                </AnimatePresence>
+              <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
+                <div className="relative w-full h-full">
+                  <Image src={selectedProduct.image} alt={selectedProduct.name} fill className="object-contain p-4 sm:p-8" sizes="(max-width: 768px) 100vw, 50vw" unoptimized={selectedProduct.image.startsWith("http://") || selectedProduct.image.startsWith("https://")} />
+                </div>
               </div>
             </div>
           </motion.div>
