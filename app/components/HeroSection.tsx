@@ -131,16 +131,32 @@ export default function HeroSection() {
       ref={heroRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background avec effet de mode */}
+      {/* Premium Background avec effets visuels attracts */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        {/* Layer 1: Gradient principal */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
+        
+        {/* Layer 2: Effet de lumière premium */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[128px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[128px]" />
+        
+        {/* Layer 3: Particules/lumières animées */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.1) 0%, transparent 40%)`,
         }} />
+        
+        {/* Layer 4: Motif géométrique subtil */}
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+        }} />
+        
+        {/* Layer 5: Glow effects */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-blue-600/10 to-purple-600/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Overlay de gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 z-10" />
+      {/* Overlay pour la lisibilité */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70 z-10" />
 
       {/* Contenu principal */}
       <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
