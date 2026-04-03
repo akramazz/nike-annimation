@@ -94,11 +94,12 @@ function ProductCard({
 
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const productId = product.id || 0;
     if (!selectedSize) {
       setShowSizeSelector(true);
       return;
     }
-    addItem({ id: product.id, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSize });
+    addItem({ id: productId, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSize });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -276,7 +277,8 @@ export default function ProductSection() {
   const handleAddToCart = () => {
     if (!selectedProduct) return;
     if (!selectedSize) { alert("Veuillez sélectionner une taille"); return; }
-    addItem({ id: selectedProduct.id, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
+    const productId = selectedProduct.id || 0;
+    addItem({ id: productId, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };

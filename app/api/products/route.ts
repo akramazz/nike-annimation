@@ -9,8 +9,9 @@ export async function GET() {
   try {
     await connectDB();
     const products = await Product.find({}).sort({ _id: 1 }).lean();
-    const plainProducts = products.map((p) => ({
+    const plainProducts = products.map((p, index) => ({
       ...p,
+      id: index + 1,
       _id: p._id.toString(),
       createdAt: p.createdAt?.toISOString(),
       updatedAt: p.updatedAt?.toISOString(),
