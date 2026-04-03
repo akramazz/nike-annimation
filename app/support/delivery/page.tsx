@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
-import { Truck, MapPin, Clock, Package, Check } from "lucide-react";
+import { Truck, Clock, Check, Package } from "lucide-react";
 
 export default function DeliveryPage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -98,19 +98,16 @@ export default function DeliveryPage() {
 
           <div className="mb-16">
             <h2 className="text-2xl font-bold text-white mb-8 text-center">Suivi de Votre Commande</h2>
-            <div className="relative">
-              <div className="flex justify-between mb-4">
-                {steps.map((step, index) => (
-                  <div key={step.number} className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2">
-                      <span className="text-white font-bold">{step.number}</span>
-                    </div>
-                    <span className="text-white text-sm font-medium text-center">{step.title}</span>
-                    <span className="text-white/60 text-xs text-center">{step.description}</span>
+            <div className="flex justify-between mb-4">
+              {steps.map((step) => (
+                <div key={step.number} className="flex flex-col items-center flex-1">
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2">
+                    <span className="text-white font-bold">{step.number}</span>
                   </div>
-                ))}
-              </div>
-              <div className="absolute top-6 left-0 right-0 h-0.5 bg-white/10" />
+                  <span className="text-white text-sm font-medium text-center">{step.title}</span>
+                  <span className="text-white/60 text-xs text-center">{step.description}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -123,11 +120,11 @@ export default function DeliveryPage() {
               </div>
               <div>
                 <h3 className="text-white font-medium mb-2">Puis-je modifier mon adresse de livraison ?</h3>
-                <p className="text-white/70 text-sm">Vous pouvez modifier l'adresse avant l'expédition. Contactez-nous rapidement après votre commande.</p>
+                <p className="text-white/70 text-sm">Vous pouvez modifier l'adresse avant l'expéditions. Contactez-nous rapidement après votre commande.</p>
               </div>
               <div>
                 <h3 className="text-white font-medium mb-2">La livraison est-elle sécurisée ?</h3>
-                <p className="text-white/70 text-sm">Oui, tous nos colis sont suivis et assurée. Vous recevrez un numéro de suivi par email.</p>
+                <p className="text-white/70 text-sm">Oui, tous nos colis sont suivis et assurés. Vous recevrez un numéro de suivi par email.</p>
               </div>
             </div>
           </div>

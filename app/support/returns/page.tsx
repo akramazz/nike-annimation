@@ -36,7 +36,7 @@ export default function ReturnsPage() {
               Retours & Échanges
             </h1>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
-              Notre politique de retour flexible pour votre tranquilidad.
+              Notre politique de retour flexible pour votre tranquillité.
             </p>
           </motion.div>
 

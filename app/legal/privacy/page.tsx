@@ -19,7 +19,7 @@ export default function PrivacyPage() {
     },
     {
       title: "Utilisation des données",
-      content: "Vos données sont utilisées pour traiter vos commandes, améliorer notre服务, vous envoyer des informations sur nos produits et promotions, et répondre à vos demandes. Nous ne partageons vos données avec aucun tiers без votre consentement explicite."
+      content: "Vos données sont utilisées pour traiter vos commandes, améliorer nos services, vous envoyer des informations sur nos produits et promotions, et répondre à vos demandes. Nous ne partageons vos données avec aucun tiers sans votre consentement explicite."
     },
     {
       title: "Cookies",

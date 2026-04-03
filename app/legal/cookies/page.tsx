@@ -21,14 +21,14 @@ export default function CookiesPage() {
     },
     {
       name: "Cookies analytiques",
-      description: "Nous aident à comprendre comment vous utilisez notre site pour l'améliorer. Ces cookies收集des informations anonymes sur votre navigation.",
+      description: "Nous aident à comprendre comment vous utilisez notre site pour l'améliorer. Ces cookies collectent des informations anonymes sur votre navigation.",
       examples: ["Pages visitées", "Temps passé sur le site", "Origine du trafic"],
       required: false
     },
     {
       name: "Cookies marketing",
       description: "Utilisés pour vous proposer des publicités personnalisées en fonction de vos intérêts et limiter le nombre d'affichages.",
-      examples: ["Publicités personnalisées", "Remerciements sponsors"],
+      examples: ["Publicités personnalisées", "Remarketing"],
       required: false
     }
   ];

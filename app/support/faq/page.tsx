@@ -25,7 +25,7 @@ export default function FAQPage() {
     },
     {
       question: "Quelle est la politique de retour ?",
-      answer: "Vous disposeZ de 30 jours pour retourner votre commande. Les articles doivent être non portés et dans leur emballage d'origine. Les retours sont gratuits pour les commandes françaises."
+      answer: "Vous disposez de 30 jours pour retourner votre commande. Les articles doivent être non portés et dans leur emballage d'origine. Les retours sont gratuits pour les commandes françaises."
     },
     {
       question: "Comment puis-je suivre ma commande ?",
