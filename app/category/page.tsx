@@ -9,6 +9,8 @@ import Footer from "../components/Footer";
 import CategoryScene from "../components/CategoryScene";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES } from "@/lib/product-normalize";
+import { useCart } from "../context/CartContext";
+import { useRouter } from "next/navigation";
 
 // Enregistrement du plugin ScrollTrigger de GSAP
 if (typeof window !== "undefined") {
@@ -26,7 +28,8 @@ function LoadingSpinner() {
 
 // Interface pour les produits
 interface Product {
-  id: number;
+  _id: string;
+  id?: number;
   name: string;
   color: string;
   image: string;
@@ -39,9 +42,13 @@ interface Product {
 
 // Page Catégorie avec animations 3D
 export default function CategoryPage() {
+  const { addItem } = useCart();
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [isAdded, setIsAdded] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -187,6 +194,35 @@ export default function CategoryPage() {
   // Fermer la modal
   const closeModal = () => {
     setSelectedProduct(null);
+    setSelectedSize(null);
+    setIsAdded(false);
+  };
+
+  // Ajouter au panier depuis la modal
+  const handleAddToCart = () => {
+    if (!selectedProduct) return;
+
+    if (!selectedSize) {
+      alert("Veuillez sélectionner une taille");
+      return;
+    }
+
+    addItem(
+      {
+        id: Number(selectedProduct._id) || selectedProduct.id!,
+        name: selectedProduct.name,
+        price: selectedProduct.price,
+        image: selectedProduct.image,
+        color: selectedProduct.color,
+        size: selectedSize,
+      },
+      1,
+    );
+
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 2000);
   };
 
   return (
@@ -293,7 +329,7 @@ export default function CategoryPage() {
                 ref={productsRef}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
               >
-                {productsLoading && (
+                  {productsLoading && (
                   <div className="col-span-full text-center py-20 text-white/80">
                     Chargement des produits…
                   </div>
@@ -301,9 +337,9 @@ export default function CategoryPage() {
                 {!productsLoading &&
                   filteredProducts.map((product, index) => (
                   <motion.div
-                    key={product.id}
+                    key={product._id}
                     className="product-card group relative bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 cursor-pointer"
-                    onMouseEnter={() => handleProductHover(product.id)}
+                    onMouseEnter={() => handleProductHover(Number(product._id) || product.id!)}
                     onMouseLeave={handleProductLeave}
                     onClick={() => handleProductClick(product)}
                     whileHover={{ y: -10 }}
@@ -491,21 +527,33 @@ export default function CategoryPage() {
                           key={size}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
-                          className="px-4 py-2 bg-white/10 backdrop-blur-xl rounded-lg text-white font-medium border border-white/20 hover:bg-white/20 transition-colors duration-300"
+                          onClick={() => setSelectedSize(size)}
+                          className={`px-4 py-2 bg-white/10 backdrop-blur-xl rounded-lg text-white font-medium border transition-colors duration-300 ${
+                            selectedSize === size
+                              ? "bg-white text-black border-white"
+                              : "border-white/20 hover:bg-white/20"
+                          }`}
                         >
                           {size}
                         </motion.button>
                       ))}
                     </div>
+                    {!selectedSize && (
+                      <p className="text-white/60 text-sm mt-2">Veuillez sélectionner une taille</p>
+                    )}
                   </div>
 
                   {/* Bouton d'achat */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full py-4 bg-white text-black font-bold text-lg rounded-full shadow-2xl hover:bg-white/90 transition-all duration-300 relative overflow-hidden group"
+                    onClick={handleAddToCart}
+                    disabled={isAdded}
+                    className="w-full py-4 bg-white text-black font-bold text-lg rounded-full shadow-2xl hover:bg-white/90 transition-all duration-300 disabled:opacity-50 relative overflow-hidden group"
                   >
-                    <span className="relative z-10">Ajouter au Panier</span>
+                    <span className="relative z-10">
+                      {isAdded ? "Ajouté !" : "Ajouter au Panier"}
+                    </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   </motion.button>
                 </div>

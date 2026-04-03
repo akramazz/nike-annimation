@@ -22,7 +22,8 @@ import {
 } from "lucide-react";
 
 interface Product {
-  id: number;
+  _id: string;
+  id?: number;
   name: string;
   color: string;
   price: number;
@@ -34,7 +35,8 @@ interface Product {
 }
 
 interface Order {
-  id: number;
+  _id: string;
+  id?: number;
   orderNumber: string;
   customerName: string;
   email: string;
@@ -47,7 +49,8 @@ interface Order {
 }
 
 interface Message {
-  id: number;
+  _id: string;
+  id?: number;
   name: string;
   email: string;
   subject: string;
@@ -210,7 +213,7 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteProduct = async (id: string) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
     try {
       const res = await fetch(apiUrl(`/api/products?id=${id}`), {
@@ -218,7 +221,7 @@ export default function AdminDashboard() {
         credentials: "include",
       });
       if (res.ok) {
-        setProducts(products.filter((p) => p.id !== id));
+        setProducts(products.filter((p) => p._id !== id));
       } else {
         await fetchData();
       }
@@ -227,7 +230,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateOrderStatus = async (id: number, status: string) => {
+  const handleUpdateOrderStatus = async (id: string, status: string) => {
     try {
       const res = await fetch(apiUrl("/api/orders"), {
         method: "PUT",
@@ -236,14 +239,14 @@ export default function AdminDashboard() {
         body: JSON.stringify({ id, status }),
       });
       if (res.ok) {
-        setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
+        setOrders(orders.map((o) => (o._id === id ? { ...o, status } : o)));
       }
     } catch {
       /* ignore */
     }
   };
 
-  const handleUpdateMessageStatus = async (id: number, status: string) => {
+  const handleUpdateMessageStatus = async (id: string, status: string) => {
     try {
       const res = await fetch(apiUrl("/api/messages"), {
         method: "PUT",
@@ -252,7 +255,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ id, status }),
       });
       if (res.ok) {
-        setMessages(messages.map((m) => (m.id === id ? { ...m, status } : m)));
+        setMessages(messages.map((m) => (m._id === id ? { ...m, status } : m)));
       }
     } catch {
       /* ignore */
@@ -542,14 +545,14 @@ export default function AdminDashboard() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                    <tbody>
                     {products
                       .filter((p) =>
                         p.name.toLowerCase().includes(searchTerm.toLowerCase()),
                       )
                       .map((product) => (
                         <tr
-                          key={product.id}
+                          key={product._id}
                           className="border-b border-white/5 hover:bg-white/5"
                         >
                           <td className="p-4">
@@ -593,7 +596,7 @@ export default function AdminDashboard() {
                                 <Edit className="h-4 w-4 text-blue-400" />
                               </button>
                               <button
-                                onClick={() => handleDeleteProduct(product.id)}
+                                onClick={() => handleDeleteProduct(product._id)}
                                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                               >
                                 <Trash2 className="h-4 w-4 text-red-400" />
@@ -647,7 +650,7 @@ export default function AdminDashboard() {
                   <tbody>
                     {orders.map((order) => (
                       <tr
-                        key={order.id}
+                        key={order._id}
                         className="border-b border-white/5 hover:bg-white/5"
                       >
                         <td className="p-4 font-mono text-sm">
@@ -662,7 +665,7 @@ export default function AdminDashboard() {
                           <select
                             value={order.status}
                             onChange={(e) =>
-                              handleUpdateOrderStatus(order.id, e.target.value)
+                              handleUpdateOrderStatus(order._id, e.target.value)
                             }
                             className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm focus:outline-none"
                           >
@@ -703,7 +706,7 @@ export default function AdminDashboard() {
               <div className="space-y-4">
                 {messages.map((msg) => (
                   <div
-                    key={msg.id}
+                    key={msg._id}
                     className={`p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 ${
                       msg.status === "unread"
                         ? "bg-white/10 border-white/20"
@@ -730,7 +733,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             handleUpdateMessageStatus(
-                              msg.id,
+                              msg._id,
                               msg.status === "unread" ? "read" : "unread",
                             )
                           }
@@ -807,7 +810,7 @@ export default function AdminDashboard() {
                     credentials: "include" as RequestCredentials,
                     body: JSON.stringify(
                       editingItem
-                        ? { id: editingItem.id, ...productData }
+                        ? { id: editingItem._id, ...productData }
                         : productData,
                     ),
                   };

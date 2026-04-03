@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 
 interface Product {
-  id: number;
+  _id: string;
+  id?: number;
   name: string;
   color: string;
   price: number;
@@ -59,16 +60,18 @@ export default function ProductDetailPage() {
         const response = await fetch(apiUrl("/api/products"));
         const data = await response.json();
         if (data.success && Array.isArray(data.products)) {
-          const idNum = parseInt(String(params.id), 10);
+          const productId = String(params.id);
           const foundProduct = data.products.find(
-            (p: Product) => p.id === idNum,
+            (p: Product) => p._id === productId || String(p.id) === productId,
           );
           setProduct(foundProduct ?? null);
 
-          const savedLikes = localStorage.getItem(`product_likes_${params.id}`);
-          const savedIsLiked = localStorage.getItem(`product_liked_${params.id}`);
-          if (savedLikes) setLikes(parseInt(savedLikes, 10) || 0);
-          if (savedIsLiked) setIsLiked(savedIsLiked === "true");
+          if (foundProduct) {
+            const savedLikes = localStorage.getItem(`product_likes_${foundProduct._id}`);
+            const savedIsLiked = localStorage.getItem(`product_liked_${foundProduct._id}`);
+            if (savedLikes) setLikes(parseInt(savedLikes, 10) || 0);
+            if (savedIsLiked) setIsLiked(savedIsLiked === "true");
+          }
         }
       } catch {
         setProduct(null);
@@ -151,7 +154,7 @@ export default function ProductDetailPage() {
 
     addItem(
       {
-        id: product.id,
+        id: Number(product._id) || product.id!,
         name: product.name,
         price: product.price,
         image: product.image,
@@ -192,8 +195,10 @@ export default function ProductDetailPage() {
     setLikes(newLikes);
     
     // Save to localStorage
-    localStorage.setItem(`product_likes_${params.id}`, newLikes.toString());
-    localStorage.setItem(`product_liked_${params.id}`, newIsLiked.toString());
+    if (product?._id) {
+      localStorage.setItem(`product_likes_${product._id}`, newLikes.toString());
+      localStorage.setItem(`product_liked_${product._id}`, newIsLiked.toString());
+    }
   };
 
   // Handle Share

@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
+import { useRouter } from "next/navigation";
 import GarageScene from "./GarageScene";
 
 // Composant de section héro avec animation 3D du garage
 export default function HeroSection() {
+  const router = useRouter();
   const heroRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -123,15 +125,7 @@ export default function HeroSection() {
         },
       });
 
-      // Scroll vers la section produits
-      const productsSection = document.getElementById("products");
-      if (productsSection) {
-        gsap.to(window, {
-          duration: 1.5,
-          scrollTo: { y: productsSection, offsetY: 80 },
-          ease: "power3.inOut",
-        });
-      }
+      router.push("/category");
     }
   };
 
