@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "seed": "tsx seed.ts"
+    "seed": "dotenv -e .env.local -- tsx seed.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

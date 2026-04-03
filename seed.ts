@@ -1,6 +1,9 @@
 import "dotenv/config";
+import mongoose from "mongoose";
 import connectDB from "./utils/mongodb";
 import Product from "./models/Product";
+import Order from "./models/Order";
+import Message from "./models/Message";
 
 const seedProducts = [
   {
@@ -85,18 +88,117 @@ const seedProducts = [
   },
 ];
 
+const seedOrders = [
+  {
+    orderNumber: "ORD-DEMO-001",
+    customerName: "Jean Dupont",
+    email: "jean.dupont@example.com",
+    phone: "+33 6 12 34 56 78",
+    address: "123 Rue de la Paix",
+    city: "Paris",
+    postalCode: "75001",
+    country: "France",
+    total: 139.98,
+    status: "confirmed",
+    items: [
+      {
+        name: "Veste Rouge",
+        price: 69.99,
+        quantity: 2,
+        color: "Rouge",
+        size: "M",
+        image: "/products/rouge.webp",
+      },
+    ],
+  },
+  {
+    orderNumber: "ORD-DEMO-002",
+    customerName: "Marie Martin",
+    email: "marie.martin@example.com",
+    phone: "+33 6 98 76 54 32",
+    address: "45 Avenue des Champs-Élysées",
+    city: "Lyon",
+    postalCode: "69002",
+    country: "France",
+    total: 220.99,
+    status: "pending",
+    items: [
+      {
+        name: "Veste Gris",
+        price: 220.99,
+        quantity: 1,
+        color: "Gris",
+        size: "L",
+        image: "/products/gris.webp",
+      },
+    ],
+  },
+];
+
+const seedMessages = [
+  {
+    name: "Client Demo",
+    email: "client@example.com",
+    subject: "Question sur les tailles",
+    message: "Bonjour, quelle taille recommendez-vous pour quelqu'un mesurant 1m75?",
+    status: "unread",
+  },
+  {
+    name: "Acheteur Test",
+    email: "test@example.com",
+    subject: "Délai de livraison",
+    message: "Quel est le délai de livraison pour la France?",
+    status: "read",
+  },
+];
+
+async function checkCollections(conn: typeof mongoose) {
+  const db = conn.db;
+  if (!db) return false;
+
+  const collections = await db.listCollections().toArray();
+  const collectionNames = collections.map((c) => c.name);
+  
+  console.log("Collections found:", collectionNames.join(", "));
+  return collectionNames;
+}
+
+async function resetCollections() {
+  const conn = await connectDB();
+  await checkCollections(conn);
+
+  await Promise.all([
+    Product.deleteMany({}),
+    Order.deleteMany({}),
+    Message.deleteMany({}),
+  ]);
+  
+  console.log("All collections cleared");
+}
+
 async function seed() {
   try {
-    await connectDB();
+    console.log("Starting database seed...\n");
 
-    const count = await Product.countDocuments();
-    if (count > 0) {
-      console.log("Database already has products, skipping seed");
-      return;
-    }
+    await resetCollections();
 
     await Product.insertMany(seedProducts);
-    console.log("Seed completed successfully!");
+    console.log(`✓ Inserted ${seedProducts.length} products`);
+
+    await Order.insertMany(seedOrders);
+    console.log(`✓ Inserted ${seedOrders.length} orders`);
+
+    await Message.insertMany(seedMessages);
+    console.log(`✓ Inserted ${seedMessages.length} messages`);
+
+    const productCount = await Product.countDocuments();
+    const orderCount = await Order.countDocuments();
+    const messageCount = await Message.countDocuments();
+
+    console.log(`\nDatabase reset and seeded successfully!`);
+    console.log(`Total: ${productCount} products, ${orderCount} orders, ${messageCount} messages`);
+
+    process.exit(0);
   } catch (error) {
     console.error("Seed error:", error);
     process.exit(1);
