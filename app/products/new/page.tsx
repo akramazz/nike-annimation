@@ -17,6 +17,10 @@ interface Product {
   description: string;
   category: string;
   sizes: string[];
+  onSale?: boolean;
+  salePrice?: number;
+  salePercent?: number;
+  likes?: number;
 }
 
 export default function NewProductsPage() {

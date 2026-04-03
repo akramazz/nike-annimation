@@ -34,6 +34,10 @@ interface Product {
   category: string;
   image: string;
   sizes: string[];
+  onSale?: boolean;
+  salePrice?: number;
+  salePercent?: number;
+  likes?: number;
 }
 
 export default function ProductDetailPage() {
@@ -155,7 +159,7 @@ export default function ProductDetailPage() {
       {
         id: Number(product._id) || product.id!,
         name: product.name,
-        price: product.price,
+        price: product.onSale && product.salePrice ? product.salePrice : product.price,
         image: product.image,
         color: product.color,
         size: selectedSize,
@@ -290,39 +294,39 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             <button
               onClick={() => router.back()}
-              className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 text-white/80 hover:text-white transition-colors"
             >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Retour</span>
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-sm sm:text-base">Retour</span>
             </button>
             <div className="flex items-center space-x-2">
               <svg
-                className="h-8 w-auto text-white"
+                className="h-6 w-6 sm:h-8 sm:w-auto text-white"
                 viewBox="0 0 69 32"
                 fill="currentColor"
               >
                 <path d="M68.56 4.58c-.2-.2-.5-.3-.8-.2-3.2 1.1-6.5 2.3-9.7 3.4-7.2 2.5-14.4 5-21.6 7.5-4.6 1.6-9.2 3.2-13.8 4.8-2.3.8-4.6 1.6-6.9 2.4-1.2.4-2.3.8-3.5 1.2-.6.2-1.1.4-1.7.6-.3.1-.5.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.6.1-.9.1-.3 0-.6 0-.9-.1-.3-.1-.6-.2-.8-.4-.3-.2-.5-.4-.7-.7-.2-.3-.3-.6-.3-.9 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1.3.1.6.2.8.3.1 0 .2.1.3.1.1 0 .2 0 .3.1.3.1.5.2.8.3.6.2 1.1.4 1.7.6 1.2.4 2.3.8 3.5 1.2 2.3.8 4.6 1.6 6.9 2.4 4.6 1.6 9.2 3.2 13.8 4.8 7.2 2.5 14.4 5 21.6 7.5 3.2 1.1 6.5 2.3 9.7 3.4.3.1.6.1.9 0 .3-.1.6-.3.8-.5.2-.2.3-.5.3-.8 0-.3 0-.6-.1-.9-.1-.3-.2-.6-.4-.8-.2-.3-.4-.5-.7-.7-.3-.2-.6-.3-.9-.3-.3 0-.6 0-.9.1-.3.1-.6.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.5.2-.8.3-.6.2-1.1.4-1.7.6-1.2.4-2.3.8-3.5 1.2-2.3.8-4.6 1.6-6.9 2.4-4.6 1.6-9.2 3.2-13.8 4.8-7.2 2.5-14.4 5-21.6 7.5-3.2 1.1-6.5 2.3-9.7 3.4-.3.1-.6.1-.9 0-.3-.1-.6-.3-.8-.5-.2-.2-.3-.5-.3-.8 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1z" />
               </svg>
-              <span className="text-white font-bold text-xl">PREMIUM</span>
+              <span className="text-white font-bold text-lg sm:text-xl">PREMIUM</span>
             </div>
-            <div className="w-20" />
+            <div className="w-12 sm:w-20" />
           </div>
         </div>
       </header>
 
-      <div ref={productRef} className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div ref={productRef} className="pt-20 pb-12 px-3 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {/* Image du produit */}
             <div
               ref={imageRef}
               onMouseEnter={handleImageHover}
               onMouseLeave={handleImageLeave}
-              className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 cursor-pointer"
+              className="relative aspect-square rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 cursor-pointer"
             >
               <Image
                 src={product.image}
@@ -341,6 +345,11 @@ export default function ProductDetailPage() {
                 <span className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-medium">
                   {product.category}
                 </span>
+                {product.onSale && product.salePercent && (
+                  <span className="px-3 py-1 bg-red-500 text-white font-bold text-xs">
+                    -{product.salePercent}%
+                  </span>
+                )}
                 {product.stock < 10 && (
                   <span className="px-3 py-1 bg-red-500/20 backdrop-blur-xl rounded-full text-xs font-medium text-red-400">
                     Stock limité
@@ -424,23 +433,33 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Informations du produit */}
-            <div ref={infoRef} className="space-y-6">
+            <div ref={infoRef} className="space-y-4 sm:space-y-6">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl md:text-5xl font-bold mb-1 sm:mb-2">
                   {product.name}
                 </h1>
-                <p className="text-white/60 text-lg">{product.color}</p>
+                <p className="text-white/60 text-base sm:text-lg">{product.color}</p>
               </div>
 
               {/* Prix */}
-              <div className="flex items-center space-x-4">
-                <span className="text-4xl font-bold">€{product.price}</span>
-                <span className="text-white/50 line-through text-xl">
-                  €{(product.price * 1.3).toFixed(2)}
-                </span>
-                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">
-                  -23%
-                </span>
+              <div className="flex flex-wrap items-center gap-3">
+                {product.onSale && product.salePrice ? (
+                  <>
+                    <span className="text-3xl md:text-4xl font-bold">€{product.salePrice}</span>
+                    <span className="text-white/50 line-through text-lg md:text-xl">
+                      €{product.price}
+                    </span>
+                    {product.salePercent && (
+                      <span className="px-3 py-1 bg-red-500 text-white font-bold text-sm rounded-full">
+                        -{product.salePercent}%
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl md:text-4xl font-bold">€{product.price}</span>
+                  </>
+                )}
               </div>
 
               {/* Description */}
@@ -517,7 +536,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Boutons d'action */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -525,12 +544,12 @@ export default function ProductDetailPage() {
                   onMouseEnter={handleButtonHover}
                   onMouseLeave={handleButtonLeave}
                   disabled={isAdded}
-                  className="add-to-cart-btn flex-1 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group flex items-center justify-center space-x-2"
+                  className="add-to-cart-btn flex-1 py-3 sm:py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group flex items-center justify-center space-x-2"
                 >
-                  <span className="relative z-10">
+                  <span className="relative z-10 text-sm sm:text-base">
                     {isAdded ? "Ajouté !" : "Ajouter au panier"}
                   </span>
-                  <ShoppingBag className="h-5 w-5 relative z-10" />
+                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" />
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </motion.button>
               </div>
