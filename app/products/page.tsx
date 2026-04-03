@@ -2,13 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
+import Image from "next/image";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { apiUrl } from "@/lib/api-client";
+import { useCart } from "../context/CartContext";
+import Link from "next/link";
+import { ShoppingBag, Heart, Eye } from "lucide-react";
 
 interface Product {
   _id: string;
+  id?: number;
   name: string;
   color: string;
   image: string;
@@ -21,7 +25,179 @@ interface Product {
   salePrice?: number;
   salePercent?: number;
   likes?: number;
+  type?: "jacket" | "accessory";
 }
+
+const accessoriesData: Product[] = [
+  {
+    _id: "acc-1",
+    id: 1,
+    name: "Casquette Noir",
+    color: "Accessoires",
+    description: "Casquette premium en coton avec logo brodé",
+    price: 49.99,
+    stock: 50,
+    image: "/products/casquette.webp",
+    category: "Accessoires",
+    sizes: ["S/M", "L/XL"],
+    likes: 12,
+    type: "accessory"
+  },
+  {
+    _id: "acc-2",
+    id: 2,
+    name: "Casquette Noire",
+    color: "Accessoires",
+    description: "Casquette anatomique avec strap arrière",
+    price: 39.99,
+    stock: 45,
+    image: "/products/casquettenoire.png",
+    category: "Accessoires",
+    sizes: ["S/M", "L/XL"],
+    likes: 8,
+    type: "accessory"
+  },
+  {
+    _id: "acc-3",
+    id: 3,
+    name: "Écharpe Rouge",
+    color: "Accessoires",
+    description: "Écharpe en laine premium rouge élégante",
+    price: 89.99,
+    stock: 30,
+    image: "/products/chalrouge.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 25,
+    type: "accessory"
+  },
+  {
+    _id: "acc-4",
+    id: 4,
+    name: "Écharpe Vert",
+    color: "Accessoires",
+    description: "Écharpe超 douce en cachemire",
+    price: 129.99,
+    stock: 25,
+    image: "/products/chal.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 18,
+    type: "accessory"
+  },
+  {
+    _id: "acc-5",
+    id: 5,
+    name: "Ceinture Beige",
+    color: "Accessoires",
+    description: "Ceinture cuir avec boucle argentée",
+    price: 79.99,
+    stock: 40,
+    image: "/products/sinture.webp",
+    category: "Accessoires",
+    sizes: ["S", "M", "L", "XL"],
+    likes: 15,
+    type: "accessory"
+  },
+  {
+    _id: "acc-6",
+    id: 6,
+    name: "Casque Audio",
+    color: "Accessoires",
+    description: "Casque premium sans fil avec réduction de bruit",
+    price: 199.99,
+    stock: 20,
+    image: "/products/cascadia.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 32,
+    type: "accessory"
+  },
+  {
+    _id: "acc-7",
+    id: 7,
+    name: "Bob Noir",
+    color: "Accessoires",
+    description: "Bob léger pour l'été",
+    price: 29.99,
+    stock: 60,
+    image: "/products/bobnoir.webp",
+    category: "Accessoires",
+    sizes: ["S/M", "L/XL"],
+    likes: 5,
+    type: "accessory"
+  },
+  {
+    _id: "acc-8",
+    id: 8,
+    name: "Sac Voyage",
+    color: "Accessoires",
+    description: "Sac weekend en toile premium",
+    price: 149.99,
+    stock: 15,
+    image: "/products/tavares.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 22,
+    type: "accessory"
+  },
+  {
+    _id: "acc-9",
+    id: 9,
+    name: "Lunettes Soleil",
+    color: "Accessoires",
+    description: "Lunettes premium avec Protection UV400",
+    price: 159.99,
+    stock: 35,
+    image: "/products/facebeage.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 45,
+    type: "accessory"
+  },
+  {
+    _id: "acc-10",
+    id: 10,
+    name: "Montre Classic",
+    color: "Accessoires",
+    description: "Montre automatique avec bracelet cuir",
+    price: 299.99,
+    stock: 10,
+    image: "/products/vertface.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 67,
+    type: "accessory"
+  },
+  {
+    _id: "acc-11",
+    id: 11,
+    name: "Montre Sport",
+    color: "Accessoires",
+    description: "Montre connectée avec GPS",
+    price: 399.99,
+    stock: 8,
+    image: "/products/orangeface.webp",
+    category: "Accessoires",
+    sizes: ["Unique"],
+    likes: 89,
+    type: "accessory"
+  },
+  {
+    _id: "acc-12",
+    id: 12,
+    name: "Bracelet Cuir",
+    color: "Accessoires",
+    description: "Bracelet tressé premium",
+    price: 34.99,
+    stock: 55,
+    image: "/products/milangeface.webp",
+    category: "Accessoires",
+    sizes: ["S", "M", "L"],
+    likes: 11,
+    type: "accessory"
+  },
+];
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -31,6 +207,9 @@ export default function ProductsPage() {
   const gridRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const { addItem } = useCart();
+  const [likes, setLikes] = useState<Record<string, number>>({});
+  const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setIsMounted(true);
@@ -42,28 +221,74 @@ export default function ProductsPage() {
         const res = await fetch(apiUrl("/api/products"));
         const data = await res.json();
         if (data.success && Array.isArray(data.products)) {
-          setProducts(data.products);
+          const jackets = data.products.map((p: Product) => ({ ...p, type: "jacket" as const }));
+          setProducts([...accessoriesData, ...jackets]);
+          
+          const likesMap: Record<string, number> = {};
+          const isLikedMap: Record<string, boolean> = {};
+          accessoriesData.forEach(acc => {
+            likesMap[acc._id] = acc.likes || 0;
+            if (typeof window !== "undefined") {
+              isLikedMap[acc._id] = localStorage.getItem(`product_liked_${acc.id}`) === "true";
+            }
+          });
+          setLikes(likesMap);
+          setIsLiked(isLikedMap);
         }
       } catch (e) {
         console.error(e);
+        setProducts(accessoriesData);
       }
       setLoading(false);
     };
     fetchProducts();
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || !isMounted || !gridRef.current) return;
+  const handleAddToCart = (product: Product) => {
+    const size = product.sizes?.[0] || "Unique";
+    addItem({
+      id: product.id || Math.random(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      color: product.color,
+      size,
+    });
+  };
 
-    gsap.fromTo(
-      gridRef.current.children,
-      { opacity: 0, y: 30, scale: 0.95 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.1, ease: "power3.out" }
-    );
-  }, [selectedCategory, isMounted]);
+  const handleLike = async (product: Product) => {
+    const productId = product.id?.toString() || product._id;
+    const action = isLiked[productId] ? "unlike" : "like";
+    
+    setIsLiked(prev => ({ ...prev, [productId]: action === "like" }));
+    setLikes(prev => ({ 
+      ...prev, 
+      [product._id]: action === "like" 
+        ? (prev[product._id] || 0) + 1 
+        : Math.max(0, (prev[product._id] || 0) - 1)
+    }));
+
+    if (product.id) {
+      try {
+        await fetch(apiUrl("/api/products/likes"), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: product.id, action }),
+        });
+      } catch { /* ignore */ }
+    }
+  };
+
+  const getProductLink = (product: Product) => {
+    if (product.type === "accessory") {
+      return `/products/accessories/${product.id}`;
+    }
+    return `/products/${product._id}`;
+  };
 
   const categories = [
     { id: "all", name: "Tous" },
+    { id: "Accessoires", name: "Accessoires" },
     { id: "Premium", name: "Premium" },
     { id: "Luxury", name: "Luxury" },
     { id: "Classic", name: "Classic" },
@@ -78,28 +303,28 @@ export default function ProductsPage() {
       <Navigation />
       
       <main className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <h1 ref={titleRef} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">
+            <h1 ref={titleRef} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">
               Nos Produits
             </h1>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto">
+            <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto">
               Explorez notre collection complète de vestes premium et accessoires.
             </p>
           </motion.div>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12">
             {categories.map((cat) => (
               <motion.button
                 key={cat.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-medium transition-all duration-300 text-sm sm:text-base ${
                   selectedCategory === cat.id
                     ? "bg-white text-black"
                     : "bg-white/10 text-white hover:bg-white/20"
@@ -115,44 +340,67 @@ export default function ProductsPage() {
               <div className="loading-spinner" />
             </div>
           ) : (
-            <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+            <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {filteredProducts.map((product, index) => (
                 <motion.div
                   key={product._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
                   onMouseEnter={() => setHoveredProduct(product._id)}
                   onMouseLeave={() => setHoveredProduct(null)}
-                  className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500"
+                  className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300"
                 >
-                  <div className="relative h-48 sm:h-64 overflow-hidden">
-                    <img
+                  <div className="relative h-40 sm:h-48 overflow-hidden">
+                    <Image
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
+                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 px-2 sm:px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
                       {product.category}
                     </div>
                     {product.onSale && product.salePercent && (
-                      <div className="absolute top-3 right-3 px-3 py-1 bg-red-500 text-white font-bold text-xs rounded-full">
+                      <div className="absolute top-2 sm:top-3 right-2 sm:right-3 px-2 sm:px-3 py-1 bg-red-500 text-white font-bold text-xs rounded-full">
                         -{product.salePercent}%
                       </div>
                     )}
+                    
+                    <div className="absolute top-2 right-2 flex flex-col gap-1 sm:gap-2">
+                      <button
+                        onClick={() => handleLike(product)}
+                        className={`p-1.5 sm:p-2 rounded-full backdrop-blur-xl transition-colors ${
+                          isLiked[product._id] 
+                            ? "bg-red-500/20 text-red-400" 
+                            : "bg-white/10 text-white hover:bg-white/20"
+                        }`}
+                      >
+                        <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isLiked[product._id] ? "fill-current" : ""}`} />
+                      </button>
+                    </div>
+                    
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 bg-white/10 backdrop-blur-xl rounded-full">
+                      <Heart className="h-3 w-3 text-white/60" />
+                      <span className="text-xs text-white/60">{likes[product._id] || product.likes || 0}</span>
+                    </div>
                   </div>
-                  <div className="p-4 sm:p-5">
-                    <h3 className="text-base sm:text-lg font-bold text-white mb-1">{product.name}</h3>
-                    <p className="text-white/60 text-sm mb-2 sm:mb-3">{product.color}</p>
-                    <div className="flex items-center justify-between">
+                  
+                  <div className="p-3 sm:p-4">
+                    <h3 className="text-sm sm:text-base font-bold text-white mb-1 truncate">{product.name}</h3>
+                    <p className="text-white/60 text-xs sm:text-sm mb-2 line-clamp-2">{product.description || product.color}</p>
+                    
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
                       <div className="flex flex-col">
                         {product.onSale && product.salePrice ? (
                           <>
-                            <span className="text-lg sm:text-2xl font-bold text-white">€{product.salePrice.toFixed(2)}</span>
-                            <span className="text-white/40 line-through text-xs sm:text-sm">€{product.price.toFixed(2)}</span>
+                            <span className="text-base sm:text-lg font-bold text-white">€{product.salePrice.toFixed(2)}</span>
+                            <span className="text-white/40 line-through text-xs">€{product.price.toFixed(2)}</span>
                           </>
                         ) : (
-                          <span className="text-lg sm:text-2xl font-bold text-white">€{product.price.toFixed(2)}</span>
+                          <span className="text-base sm:text-lg font-bold text-white">€{product.price.toFixed(2)}</span>
                         )}
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
@@ -160,6 +408,32 @@ export default function ProductsPage() {
                       }`}>
                         {product.stock} en stock
                       </span>
+                    </div>
+
+                    {product.sizes && product.sizes.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
+                        {product.sizes.slice(0, 4).map((size) => (
+                          <span key={size} className="px-1.5 py-0.5 text-xs rounded border border-white/20 text-white/60">
+                            {size}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        className="flex-1 py-2 bg-white text-black text-xs sm:text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-1 sm:gap-2"
+                      >
+                        <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span>Ajouter</span>
+                      </button>
+                      <Link
+                        href={getProductLink(product)}
+                        className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors flex items-center justify-center"
+                      >
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
