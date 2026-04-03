@@ -82,7 +82,7 @@ export default function Page() {
         <Navigation />
       </Suspense>
 
-      {/* Section héro avec scène 3D du garage */}
+      {/* Section héro avec animation premium */}
       <Suspense fallback={<LoadingSpinner />}>
         <HeroSection />
       </Suspense>

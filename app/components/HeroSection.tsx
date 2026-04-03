@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { useRouter } from "next/navigation";
-import GarageScene from "./GarageScene";
 
-// Composant de section héro avec animation 3D du garage
 export default function HeroSection() {
   const router = useRouter();
   const heroRef = useRef<HTMLElement>(null);
@@ -16,7 +14,6 @@ export default function HeroSection() {
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // S'assurer que le composant est monté côté client
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -134,9 +131,12 @@ export default function HeroSection() {
       ref={heroRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Scène 3D du garage en arrière-plan */}
+      {/* Background avec effet de mode */}
       <div className="absolute inset-0 z-0">
-        <GarageScene />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
       </div>
 
       {/* Overlay de gradient */}
@@ -164,7 +164,7 @@ export default function HeroSection() {
         >
           <span className="block">L'Excellence</span>
           <span className="block bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
-            Automobile
+            de la Mode
           </span>
         </h1>
 
@@ -173,8 +173,8 @@ export default function HeroSection() {
           ref={subtitleRef}
           className="text-lg sm:text-xl md:text-2xl text-white/80 max-w-3xl mx-auto mb-10 leading-relaxed"
         >
-          Découvrez notre collection exclusive de vestes premium, inspirées par
-          l'élégance et la performance des plus grandes marques automobiles.
+          Découvrez notre collection exclusive de vestes premium inspirées des plus grandes maisons de mode. 
+          Qualité exceptionnelle, design intemporel et confort absolu.
         </p>
 
         {/* Bouton CTA avec animation GSAP */}
