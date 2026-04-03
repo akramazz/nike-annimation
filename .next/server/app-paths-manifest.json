@@ -1,12 +1,5 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/products/page": "app/products/page.js",
-  "/api/products/route": "app/api/products/route.js",
-  "/category/page": "app/category/page.js",
-  "/support/page": "app/support/page.js",
-  "/support/faq/page": "app/support/faq/page.js",
-  "/contact/page": "app/contact/page.js",
-  "/support/delivery/page": "app/support/delivery/page.js",
   "/page": "app/page.js",
-  "/legal/cookies/page": "app/legal/cookies/page.js"
+  "/api/products/route": "app/api/products/route.js"
 }
