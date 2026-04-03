@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import "dotenv/config";
+import connectDB from "./utils/mongodb";
+import Product from "./models/Product";
 
 const seedProducts = [
   {
@@ -85,21 +85,22 @@ const seedProducts = [
   },
 ];
 
-async function main() {
-  const existing = await prisma.product.count();
-  if (existing > 0) {
-    return;
-  }
+async function seed() {
+  try {
+    await connectDB();
 
-  await prisma.product.createMany({
-    data: seedProducts,
-  });
+    const count = await Product.countDocuments();
+    if (count > 0) {
+      console.log("Database already has products, skipping seed");
+      return;
+    }
+
+    await Product.insertMany(seedProducts);
+    console.log("Seed completed successfully!");
+  } catch (error) {
+    console.error("Seed error:", error);
+    process.exit(1);
+  }
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch((e) => {
-    console.error(e);
-    prisma.$disconnect();
-    process.exit(1);
-  });
+seed();

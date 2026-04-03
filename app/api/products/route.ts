@@ -1,45 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import connectDB from "@/utils/mongodb";
+import Product from "@/models/Product";
 import { isAdminRequest } from "@/lib/admin-auth";
-import { prisma } from "@/lib/prisma";
-import {
-  normalizeProduct,
-  type ProductRecord,
-} from "@/lib/product-normalize";
-import { clampStr, parsePositiveInt, parsePrice } from "@/lib/sanitize";
-import { productToJson } from "@/lib/serialize-db";
 
 export const dynamic = "force-dynamic";
 
-function parseProductBody(body: Record<string, unknown>, id: number): ProductRecord {
-  const sizesRaw = body.sizes;
-  const sizes =
-    Array.isArray(sizesRaw) && sizesRaw.length > 0
-      ? sizesRaw.map((s) => clampStr(s, 8))
-      : undefined;
-
-  return normalizeProduct({
-    id,
-    name: clampStr(body.name, 120),
-    color: clampStr(body.color, 80),
-    image: clampStr(body.image, 500),
-    price: parsePrice(body.price),
-    stock: parsePositiveInt(body.stock, 0),
-    description: clampStr(body.description, 2000),
-    category: clampStr(body.category, 80),
-    ...(sizes ? { sizes } : {}),
-  });
-}
-
 export async function GET() {
   try {
-    const rows = await prisma.product.findMany({ orderBy: { id: "asc" } });
-    const products = rows.map(productToJson);
-    return NextResponse.json({ success: true, products });
+    await connectDB();
+    const products = await Product.find({}).sort({ _id: 1 }).lean();
+    const plainProducts = products.map((p) => ({
+      ...p,
+      _id: p._id.toString(),
+      createdAt: p.createdAt?.toISOString(),
+      updatedAt: p.updatedAt?.toISOString(),
+    }));
+    return NextResponse.json({ success: true, products: plainProducts });
   } catch {
     return NextResponse.json(
       { success: false, error: "Failed to fetch products" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -49,52 +29,39 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
-    let body: Record<string, unknown>;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Invalid JSON body" },
-        { status: 400 },
-      );
+    await connectDB();
+    const body = await request.json();
+
+    const name = String(body.name || "").trim().slice(0, 120);
+    if (!name) {
+      return NextResponse.json({ success: false, error: "Product name is required" }, { status: 400 });
     }
 
-    if (!body.name || !String(body.name).trim()) {
-      return NextResponse.json(
-        { success: false, error: "Product name is required" },
-        { status: 400 },
-      );
-    }
+    const sizes = Array.isArray(body.sizes) && body.sizes.length > 0
+      ? body.sizes.slice(0, 10).map((s: string) => String(s).slice(0, 8))
+      : ["XS", "S", "M", "L", "XL", "XXL"];
 
-    const parsed = parseProductBody(body, 0);
-    const created = await prisma.product.create({
-      data: {
-        name: parsed.name,
-        color: parsed.color,
-        image: parsed.image,
-        price: parsed.price,
-        stock: parsed.stock,
-        description: parsed.description,
-        category: parsed.category,
-        sizes: parsed.sizes,
-      },
+    const product = await Product.create({
+      name,
+      color: String(body.color || "").slice(0, 80) || "Default",
+      image: String(body.image || "").slice(0, 500) || `/products/default.webp`,
+      price: Number(body.price) || 0,
+      stock: Number(body.stock) || 0,
+      description: String(body.description || "").slice(0, 2000),
+      category: String(body.category || "Classic").slice(0, 80),
+      sizes,
     });
 
-    return NextResponse.json(
-      { success: true, product: productToJson(created) },
-      { status: 201 },
-    );
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      return NextResponse.json(
-        { success: false, error: "Failed to create product" },
-        { status: 400 },
-      );
-    }
-    return NextResponse.json(
-      { success: false, error: "Failed to create product" },
-      { status: 500 },
-    );
+    const plain = {
+      ...product.toObject(),
+      _id: product._id.toString(),
+      createdAt: product.createdAt?.toISOString(),
+      updatedAt: product.updatedAt?.toISOString(),
+    };
+
+    return NextResponse.json({ success: true, product: plain }, { status: 201 });
+  } catch {
+    return NextResponse.json({ success: false, error: "Failed to create product" }, { status: 500 });
   }
 }
 
@@ -103,64 +70,52 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
-    let body: Record<string, unknown>;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Invalid JSON body" },
-        { status: 400 },
-      );
+    await connectDB();
+    const body = await request.json();
+    const id = String(body.id || "").trim();
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Valid product id is required" }, { status: 400 });
     }
 
-    const id = parsePositiveInt(body.id, -1);
-    if (id < 1) {
-      return NextResponse.json(
-        { success: false, error: "Valid product id is required" },
-        { status: 400 },
-      );
-    }
-
-    const existing = await prisma.product.findUnique({ where: { id } });
+    const existing = await Product.findById(id);
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: "Product not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
     }
 
-    const base = productToJson(existing);
-    const merged = parseProductBody(
-      { ...base, ...body } as Record<string, unknown>,
+    const sizes = Array.isArray(body.sizes) && body.sizes.length > 0
+      ? body.sizes.slice(0, 10).map((s: string) => String(s).slice(0, 8))
+      : existing.sizes;
+
+    const updated = await Product.findByIdAndUpdate(
       id,
-    );
-
-    const updated = await prisma.product.update({
-      where: { id },
-      data: {
-        name: merged.name,
-        color: merged.color,
-        image: merged.image,
-        price: merged.price,
-        stock: merged.stock,
-        description: merged.description,
-        category: merged.category,
-        sizes: merged.sizes,
+      {
+        name: String(body.name || existing.name).slice(0, 120),
+        color: String(body.color || existing.color).slice(0, 80),
+        image: String(body.image || existing.image).slice(0, 500),
+        price: Number(body.price) || existing.price,
+        stock: Number(body.stock) || existing.stock,
+        description: String(body.description || existing.description).slice(0, 2000),
+        category: String(body.category || existing.category).slice(0, 80),
+        sizes,
       },
-    });
+      { new: true }
+    ).lean();
 
-    return NextResponse.json({ success: true, product: productToJson(updated) });
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-      return NextResponse.json(
-        { success: false, error: "Product not found" },
-        { status: 404 },
-      );
+    if (!updated) {
+      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
     }
-    return NextResponse.json(
-      { success: false, error: "Failed to update product" },
-      { status: 500 },
-    );
+
+    const plain = {
+      ...updated,
+      _id: updated._id.toString(),
+      createdAt: updated.createdAt?.toISOString(),
+      updatedAt: updated.updatedAt?.toISOString(),
+    };
+
+    return NextResponse.json({ success: true, product: plain });
+  } catch {
+    return NextResponse.json({ success: false, error: "Failed to update product" }, { status: 500 });
   }
 }
 
@@ -169,32 +124,21 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
+    await connectDB();
     const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get("id") || "0", 10);
-    if (!Number.isFinite(id) || id < 1) {
-      return NextResponse.json(
-        { success: false, error: "Valid product id is required" },
-        { status: 400 },
-      );
+    const id = searchParams.get("id") || "";
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Valid product id is required" }, { status: 400 });
     }
 
-    try {
-      await prisma.product.delete({ where: { id } });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-        return NextResponse.json(
-          { success: false, error: "Product not found" },
-          { status: 404 },
-        );
-      }
-      throw e;
+    const deleted = await Product.findByIdAndDelete(id);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, message: "Product deleted" });
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Failed to delete product" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: "Failed to delete product" }, { status: 500 });
   }
 }

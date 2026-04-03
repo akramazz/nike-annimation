@@ -7,7 +7,10 @@
   "regions": ["iad1"],
   "functions": {
     "app/**/*.{js,ts,jsx,tsx}": {
-      "maxDuration": 30
+      "maxDuration": 60
+    },
+    "app/api/**/*.ts": {
+      "maxDuration": 60
     }
   },
   "headers": [
@@ -55,18 +58,12 @@
       ]
     }
   ],
-  "redirects": [],
-  "rewrites": [],
   "trailingSlash": false,
   "cleanUrls": true,
-  "optimizeFonts": true,
   "images": {
     "domains": [],
     "sizes": [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     "minimumCacheTTL": 60,
     "formats": ["image/avif", "image/webp"]
-  },
-  "env": {
-    "NEXT_PUBLIC_SITE_URL": "https://premium-collection.com"
   }
 }

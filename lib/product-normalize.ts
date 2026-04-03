@@ -1,35 +1,17 @@
-export const DEFAULT_SIZES = ["XS", "S", "M", "L", "XL", "XXL"] as const;
+export const DEFAULT_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
-export type ProductRecord = {
-  id: number;
-  name: string;
-  color: string;
-  image: string;
-  price: number;
-  stock: number;
-  description: string;
-  category: string;
-  sizes: string[];
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-export function normalizeProduct(p: Partial<ProductRecord> & { id: number }): ProductRecord {
-  const sizes = Array.isArray(p.sizes) && p.sizes.length > 0
-    ? p.sizes.map(String)
-    : [...DEFAULT_SIZES];
-
+export function normalizeProduct<T extends { id?: number; name?: string; color?: string; image?: string; price?: number; stock?: number; description?: string; category?: string; sizes?: string[] }>(data: T) {
   return {
-    id: p.id,
-    name: String(p.name ?? "").trim() || "Produit",
-    color: String(p.color ?? "").trim() || "—",
-    image: String(p.image ?? "").trim() || "/products/noir.webp",
-    price: typeof p.price === "number" && !Number.isNaN(p.price) ? p.price : 0,
-    stock: typeof p.stock === "number" && p.stock >= 0 ? Math.floor(p.stock) : 0,
-    description: String(p.description ?? "").trim() || "",
-    category: String(p.category ?? "Classic").trim() || "Classic",
-    sizes,
-    ...(p.createdAt ? { createdAt: p.createdAt } : {}),
-    ...(p.updatedAt ? { updatedAt: p.updatedAt } : {}),
+    id: data.id ?? 0,
+    name: String(data.name ?? "").slice(0, 120),
+    color: String(data.color ?? "").slice(0, 80),
+    image: String(data.image ?? "/products/default.webp").slice(0, 500),
+    price: Math.max(0, Number(data.price ?? 0)),
+    stock: Math.max(0, Math.floor(Number(data.stock ?? 0))),
+    description: String(data.description ?? "").slice(0, 2000),
+    category: String(data.category ?? "Classic").slice(0, 80),
+    sizes: Array.isArray(data.sizes) && data.sizes.length > 0 ? data.sizes : DEFAULT_SIZES,
   };
 }
+
+export type ProductRecord = ReturnType<typeof normalizeProduct>;

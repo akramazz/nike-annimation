@@ -1,50 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import connectDB from "@/utils/mongodb";
+import Message from "@/models/Message";
 import { isAdminRequest } from "@/lib/admin-auth";
-import { prisma } from "@/lib/prisma";
-import { clampStr, parsePositiveInt } from "@/lib/sanitize";
-import { messageToJson } from "@/lib/serialize-db";
 
 export const dynamic = "force-dynamic";
 
 const MESSAGE_STATUSES = new Set(["unread", "read"]);
+
+function clampStr(str: unknown, maxLen: number): string {
+  return String(str || "").slice(0, maxLen).trim();
+}
+
+function parseIntSafely(val: unknown, fallback: number): number {
+  const num = Number(val);
+  return Number.isFinite(num) ? Math.floor(num) : fallback;
+}
 
 export async function GET(request: NextRequest) {
   if (!isAdminRequest(request)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
+    await connectDB();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 
-    const messages = await prisma.message.findMany({
-      where: status ? { status } : undefined,
-      orderBy: { createdAt: "desc" },
-    });
+    const query = status && MESSAGE_STATUSES.has(status) ? { status } : {};
+    const messages = await Message.find(query).sort({ createdAt: -1 }).lean();
 
-    return NextResponse.json({
-      success: true,
-      messages: messages.map(messageToJson),
-    });
+    const plainMessages = messages.map((m) => ({
+      ...m,
+      _id: m._id.toString(),
+      createdAt: m.createdAt?.toISOString(),
+      updatedAt: m.updatedAt?.toISOString(),
+    }));
+
+    return NextResponse.json({ success: true, messages: plainMessages });
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch messages" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: "Failed to fetch messages" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    let body: Record<string, unknown>;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Invalid JSON body" },
-        { status: 400 },
-      );
-    }
+    await connectDB();
+    const body = await request.json();
 
     const name = clampStr(body.name, 120);
     const email = clampStr(body.email, 254);
@@ -52,31 +52,27 @@ export async function POST(request: NextRequest) {
     const message = clampStr(body.message, 8000);
 
     if (!name || !email || !subject || !message) {
-      return NextResponse.json(
-        { success: false, error: "Name, email, subject, and message are required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: "Name, email, subject, and message are required" }, { status: 400 });
     }
 
-    const created = await prisma.message.create({
-      data: {
-        name,
-        email,
-        subject,
-        message,
-        status: "unread",
-      },
+    const created = await Message.create({
+      name,
+      email,
+      subject,
+      message,
+      status: "unread",
     });
 
-    return NextResponse.json(
-      { success: true, message: messageToJson(created) },
-      { status: 201 },
-    );
+    const plain = {
+      ...created.toObject(),
+      _id: created._id.toString(),
+      createdAt: created.createdAt?.toISOString(),
+      updatedAt: created.updatedAt?.toISOString(),
+    };
+
+    return NextResponse.json({ success: true, message: plain }, { status: 201 });
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Failed to create message" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: "Failed to create message" }, { status: 500 });
   }
 }
 
@@ -85,48 +81,31 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
-    let body: { id?: unknown; status?: unknown };
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { success: false, error: "Invalid JSON body" },
-        { status: 400 },
-      );
+    await connectDB();
+    const body = await request.json();
+    const id = String(body.id || "").trim();
+    const status = String(body.status || "").trim();
+
+    if (!id || !MESSAGE_STATUSES.has(status)) {
+      return NextResponse.json({ success: false, error: "Valid message id and status are required" }, { status: 400 });
     }
 
-    const id = parsePositiveInt(body.id, -1);
-    const status = String(body.status ?? "");
-    if (id < 1 || !MESSAGE_STATUSES.has(status)) {
-      return NextResponse.json(
-        { success: false, error: "Valid message id and status are required" },
-        { status: 400 },
-      );
+    const updated = await Message.findByIdAndUpdate(id, { status }, { new: true }).lean();
+
+    if (!updated) {
+      return NextResponse.json({ success: false, error: "Message not found" }, { status: 404 });
     }
 
-    try {
-      const updated = await prisma.message.update({
-        where: { id },
-        data: { status },
-      });
-      return NextResponse.json({
-        success: true,
-        message: messageToJson(updated),
-      });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-        return NextResponse.json(
-          { success: false, error: "Message not found" },
-          { status: 404 },
-        );
-      }
-      throw e;
-    }
+    const plain = {
+      ...updated,
+      _id: updated._id.toString(),
+      createdAt: updated.createdAt?.toISOString(),
+      updatedAt: updated.updatedAt?.toISOString(),
+    };
+
+    return NextResponse.json({ success: true, message: plain });
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Failed to update message" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: "Failed to update message" }, { status: 500 });
   }
 }
 
@@ -135,32 +114,22 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
+    await connectDB();
     const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get("id") || "0", 10);
-    if (!Number.isFinite(id) || id < 1) {
-      return NextResponse.json(
-        { success: false, error: "Valid message id is required" },
-        { status: 400 },
-      );
+    const id = searchParams.get("id") || "";
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Valid message id is required" }, { status: 400 });
     }
 
-    try {
-      await prisma.message.delete({ where: { id } });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-        return NextResponse.json(
-          { success: false, error: "Message not found" },
-          { status: 404 },
-        );
-      }
-      throw e;
+    const deleted = await Message.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: "Message not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, message: "Message deleted" });
   } catch {
-    return NextResponse.json(
-      { success: false, error: "Failed to delete message" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, error: "Failed to delete message" }, { status: 500 });
   }
 }
