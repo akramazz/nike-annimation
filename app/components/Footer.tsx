@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
+import Link from "next/link";
 
-// Composant de pied de page animé avec GSAP
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -13,31 +13,25 @@ export default function Footer() {
   const copyrightRef = useRef<HTMLParagraphElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // S'assurer que le composant est monté côté client
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Animation GSAP au scroll
   useEffect(() => {
-    // Vérifier si on est côté client
     if (typeof window === "undefined" || !isMounted) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Timeline GSAP pour les animations séquentielles
             const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-            // Animation du logo
             tl.fromTo(
               logoRef.current,
               { opacity: 0, y: 30, scale: 0.9 },
               { opacity: 1, y: 0, scale: 1, duration: 0.8 }
             );
 
-            // Animation des liens avec stagger
             tl.fromTo(
               linksRef.current,
               { opacity: 0, y: 20 },
@@ -50,7 +44,6 @@ export default function Footer() {
               "-=0.5"
             );
 
-            // Animation des icônes sociales avec stagger
             tl.fromTo(
               socialRef.current,
               { opacity: 0, scale: 0.5, rotation: -180 },
@@ -65,7 +58,6 @@ export default function Footer() {
               "-=0.3"
             );
 
-            // Animation du copyright
             tl.fromTo(
               copyrightRef.current,
               { opacity: 0, y: 20 },
@@ -85,7 +77,6 @@ export default function Footer() {
     return () => observer.disconnect();
   }, [isMounted]);
 
-  // Animation GSAP au hover des liens
   const handleLinkHover = (index: number) => {
     if (typeof window !== "undefined" && linksRef.current[index]) {
       gsap.to(linksRef.current[index], {
@@ -108,7 +99,6 @@ export default function Footer() {
     }
   };
 
-  // Animation GSAP au hover des icônes sociales
   const handleSocialHover = (index: number) => {
     if (typeof window !== "undefined" && socialRef.current[index]) {
       gsap.to(socialRef.current[index], {
@@ -131,27 +121,46 @@ export default function Footer() {
     }
   };
 
-  // Données des liens du footer
   const footerLinks = [
     {
       title: "Produits",
-      links: ["Vestes", "Accessoires", "Nouveautés", "Promotions"],
+      links: [
+        { name: "Tous les produits", href: "/products" },
+        { name: "Vestes", href: "/products/jackets" },
+        { name: "Accessoires", href: "/products/accessories" },
+        { name: "Nouveautés", href: "/products/new" },
+        { name: "Promotions", href: "/products/sales" },
+      ],
     },
     {
       title: "À propos",
-      links: ["Notre histoire", "Engagements", "Durabilité", "Carrières"],
+      links: [
+        { name: "Notre histoire", href: "/about/history" },
+        { name: "Engagements", href: "/about/commitments" },
+        { name: "Durabilité", href: "/about/sustainability" },
+        { name: "Carrières", href: "/about/careers" },
+      ],
     },
     {
       title: "Support",
-      links: ["FAQ", "Contact", "Livraison", "Retours"],
+      links: [
+        { name: "Centre d'aide", href: "/support" },
+        { name: "FAQ", href: "/support/faq" },
+        { name: "Livraison", href: "/support/delivery" },
+        { name: "Retours", href: "/support/returns" },
+      ],
     },
     {
       title: "Légal",
-      links: ["Mentions légales", "Confidentialité", "CGV", "Cookies"],
+      links: [
+        { name: "Mentions légales", href: "/legal" },
+        { name: "Confidentialité", href: "/legal/privacy" },
+        { name: "CGV", href: "/legal/terms" },
+        { name: "Cookies", href: "/legal/cookies" },
+      ],
     },
   ];
 
-  // Données des icônes sociales
   const socialIcons = [
     {
       name: "Facebook",
@@ -176,25 +185,24 @@ export default function Footer() {
       ref={footerRef}
       className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent to-black/50"
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
       
-      {/* Contenu */}
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12">
-          {/* Logo et description */}
           <div className="lg:col-span-2">
             <div ref={logoRef} className="flex items-center mb-6">
-              <svg
-                className="h-10 w-auto text-white"
-                viewBox="0 0 69 32"
-                fill="currentColor"
-              >
-                <path d="M68.56 4.58c-.2-.2-.5-.3-.8-.2-3.2 1.1-6.5 2.3-9.7 3.4-7.2 2.5-14.4 5-21.6 7.5-4.6 1.6-9.2 3.2-13.8 4.8-2.3.8-4.6 1.6-6.9 2.4-1.2.4-2.3.8-3.5 1.2-.6.2-1.1.4-1.7.6-.3.1-.5.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.6.1-.9.1-.3 0-.6 0-.9-.1-.3-.1-.6-.2-.8-.4-.3-.2-.5-.4-.7-.7-.2-.3-.3-.6-.3-.9 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1.3.1.6.2.8.3.1 0 .2.1.3.1.1 0 .2 0 .3.1.3.1.5.2.8.3.6.2 1.1.4 1.7.6 1.2.4 2.3.8 3.5 1.2 2.3.8 4.6 1.6 6.9 2.4 4.6 1.6 9.2 3.2 13.8 4.8 7.2 2.5 14.4 5 21.6 7.5 3.2 1.1 6.5 2.3 9.7 3.4.3.1.6.1.9 0 .3-.1.6-.3.8-.5.2-.2.3-.5.3-.8 0-.3 0-.6-.1-.9-.1-.3-.2-.6-.4-.8-.2-.3-.4-.5-.7-.7-.3-.2-.6-.3-.9-.3-.3 0-.6 0-.9.1-.3.1-.6.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.5.2-.8.3-.6.2-1.1.4-1.7.6-1.2.4-2.3.8-3.5 1.2-2.3.8-4.6 1.6-6.9 2.4-4.6 1.6-9.2 3.2-13.8 4.8-7.2 2.5-14.4 5-21.6 7.5-3.2 1.1-6.5 2.3-9.7 3.4-.3.1-.6.1-.9 0-.3-.1-.6-.3-.8-.5-.2-.2-.3-.5-.3-.8 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1z" />
-              </svg>
-              <span className="ml-3 text-white font-bold text-2xl">
-                PREMIUM
-              </span>
+              <Link href="/" className="flex items-center">
+                <svg
+                  className="h-10 w-auto text-white"
+                  viewBox="0 0 69 32"
+                  fill="currentColor"
+                >
+                  <path d="M68.56 4.58c-.2-.2-.5-.3-.8-.2-3.2 1.1-6.5 2.3-9.7 3.4-7.2 2.5-14.4 5-21.6 7.5-4.6 1.6-9.2 3.2-13.8 4.8-2.3.8-4.6 1.6-6.9 2.4-1.2.4-2.3.8-3.5 1.2-.6.2-1.1.4-1.7.6-.3.1-.5.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.6.1-.9.1-.3 0-.6 0-.9-.1-.3-.1-.6-.2-.8-.4-.3-.2-.5-.4-.7-.7-.2-.3-.3-.6-.3-.9 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1.3.1.6.2.8.3.1 0 .2.1.3.1.1 0 .2 0 .3.1.3.1.5.2.8.3.6.2 1.1.4 1.7.6 1.2.4 2.3.8 3.5 1.2 2.3.8 4.6 1.6 6.9 2.4 4.6 1.6 9.2 3.2 13.8 4.8 7.2 2.5 14.4 5 21.6 7.5 3.2 1.1 6.5 2.3 9.7 3.4.3.1.6.1.9 0 .3-.1.6-.3.8-.5.2-.2.3-.5.3-.8 0-.3 0-.6-.1-.9-.1-.3-.2-.6-.4-.8-.2-.3-.4-.5-.7-.7-.3-.2-.6-.3-.9-.3-.3 0-.6 0-.9.1-.3.1-.6.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.5.2-.8.3-.6.2-1.1.4-1.7.6-1.2.4-2.3.8-3.5 1.2-2.3.8-4.6 1.6-6.9 2.4-4.6 1.6-9.2 3.2-13.8 4.8-7.2 2.5-14.4 5-21.6 7.5-3.2 1.1-6.5 2.3-9.7 3.4-.3.1-.6.1-.9 0-.3-.1-.6-.3-.8-.5-.2-.2-.3-.5-.3-.8 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1z" />
+                </svg>
+                <span className="ml-3 text-white font-bold text-2xl">
+                  PREMIUM
+                </span>
+              </Link>
             </div>
             <p className="text-white/70 text-sm leading-relaxed mb-6">
               Découvrez notre collection exclusive de vestes haut de gamme. 
@@ -202,7 +210,6 @@ export default function Footer() {
               pour un style unique.
             </p>
             
-            {/* Icônes sociales */}
             <div className="flex space-x-4">
               {socialIcons.map((social, index) => (
                 <a
@@ -226,7 +233,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Liens du footer */}
           {footerLinks.map((section, sectionIndex) => (
             <div
               key={section.title}
@@ -237,15 +243,15 @@ export default function Footer() {
               </h3>
               <ul className="space-y-3">
                 {section.links.map((link, linkIndex) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
                       onMouseEnter={() => handleLinkHover(sectionIndex * 4 + linkIndex)}
                       onMouseLeave={() => handleLinkLeave(sectionIndex * 4 + linkIndex)}
                       className="text-white/70 hover:text-white transition-colors duration-200 text-sm"
                     >
-                      {link}
-                    </a>
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -253,10 +259,8 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Séparateur */}
         <div className="border-t border-white/10 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Copyright */}
             <p
               ref={copyrightRef}
               className="text-white/50 text-sm text-center md:text-left"
@@ -264,13 +268,12 @@ export default function Footer() {
               © 2024 Premium. Tous droits réservés.
             </p>
 
-            {/* Informations supplémentaires */}
             <div className="flex flex-wrap items-center justify-center gap-4 text-white/50 text-sm">
-              <span>Livraison gratuite dès $50</span>
+              <Link href="/support/delivery" className="hover:text-white transition-colors">Livraison gratuite dès €100</Link>
               <span>•</span>
-              <span>Retour sous 30 jours</span>
+              <Link href="/support/returns" className="hover:text-white transition-colors">Retour sous 30 jours</Link>
               <span>•</span>
-              <span>Support 24/7</span>
+              <Link href="/contact" className="hover:text-white transition-colors">Support 24/7</Link>
             </div>
           </div>
         </div>

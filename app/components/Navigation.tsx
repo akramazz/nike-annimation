@@ -2,46 +2,73 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import gsap from "gsap";
 import Cart from "./Cart";
+import Link from "next/link";
 
-// Composant de navigation animée avec GSAP
+interface NavItem {
+  name: string;
+  href?: string;
+  children?: { name: string; href: string }[];
+}
+
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
-  const navItemsRef = useRef<(HTMLAnchorElement | null)[]>([]);
+  const navItemsRef = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Éléments de navigation
-  const navItems = [
-    { name: "Produits", href: "#products" },
-    { name: "À propos", href: "/about" },
+  const navItems: NavItem[] = [
+    { 
+      name: "Produits", 
+      children: [
+        { name: "Tous les produits", href: "/products" },
+        { name: "Vestes", href: "/products/jackets" },
+        { name: "Accessoires", href: "/products/accessories" },
+        { name: "Nouveautés", href: "/products/new" },
+        { name: "Promotions", href: "/products/sales" },
+      ]
+    },
     { name: "Catégorie", href: "/category" },
+    { 
+      name: "À propos", 
+      children: [
+        { name: "Notre histoire", href: "/about/history" },
+        { name: "Engagements", href: "/about/commitments" },
+        { name: "Durabilité", href: "/about/sustainability" },
+        { name: "Carrières", href: "/about/careers" },
+      ]
+    },
+    { 
+      name: "Support", 
+      children: [
+        { name: "Centre d'aide", href: "/support" },
+        { name: "FAQ", href: "/support/faq" },
+        { name: "Livraison", href: "/support/delivery" },
+        { name: "Retours", href: "/support/returns" },
+      ]
+    },
     { name: "Contact", href: "/contact" },
   ];
 
-  // S'assurer que le composant est monté côté client
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Animation GSAP au chargement de la navigation
   useEffect(() => {
-    // Vérifier si on est côté client
     if (typeof window === "undefined" || !isMounted) return;
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    // Animation du logo
     tl.fromTo(
       logoRef.current,
       { opacity: 0, x: -50, scale: 0.8 },
       { opacity: 1, x: 0, scale: 1, duration: 0.8 },
     );
 
-    // Animation des éléments de navigation avec stagger
     tl.fromTo(
       navItemsRef.current,
       { opacity: 0, y: -20, scale: 0.9 },
@@ -56,11 +83,10 @@ export default function Navigation() {
     );
   }, [isMounted]);
 
-  // Animation GSAP au hover des éléments de navigation
   const handleNavHover = (index: number) => {
     if (typeof window !== "undefined" && navItemsRef.current[index]) {
       gsap.to(navItemsRef.current[index], {
-        scale: 1.1,
+        scale: 1.05,
         color: "#ffffff",
         duration: 0.3,
         ease: "power2.out",
@@ -86,9 +112,8 @@ export default function Navigation() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo avec animation GSAP */}
           <div ref={logoRef} className="flex items-center">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <svg
                 className="h-8 w-auto text-white"
                 viewBox="0 0 69 32"
@@ -99,35 +124,74 @@ export default function Navigation() {
               <span className="ml-2 text-white font-bold text-xl hidden sm:block">
                 PREMIUM
               </span>
-            </a>
+            </Link>
           </div>
 
-          {/* Navigation desktop avec animations GSAP */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item, index) => (
-              <a
+              <div
                 key={item.name}
-                href={item.href}
-                ref={(el) => {
-                  navItemsRef.current[index] = el;
-                }}
-                onMouseEnter={() => handleNavHover(index)}
-                onMouseLeave={() => handleNavLeave(index)}
-                className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium relative group"
+                className="relative"
+                onMouseEnter={() => item.children && setOpenDropdown(item.name)}
+                onMouseLeave={() => setOpenDropdown(null)}
               >
-                {item.name}
-                {/* Ligne animée sous l'élément au hover */}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
-              </a>
+                {item.href && !item.children ? (
+                  <Link
+                    href={item.href}
+                    ref={(el) => {
+                      navItemsRef.current[index] = el;
+                    }}
+                    onMouseEnter={() => handleNavHover(index)}
+                    onMouseLeave={() => handleNavLeave(index)}
+                    className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium px-3 py-2 relative group flex items-center gap-1"
+                  >
+                    {item.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ) : (
+                  <button
+                    ref={(el) => {
+                      navItemsRef.current[index] = el;
+                    }}
+                    onMouseEnter={() => handleNavHover(index)}
+                    onMouseLeave={() => handleNavLeave(index)}
+                    className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium px-3 py-2 relative group flex items-center gap-1"
+                  >
+                    {item.name}
+                    <ChevronDown className="h-4 w-4" />
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
+                  </button>
+                )}
+
+                <AnimatePresence>
+                  {item.children && openDropdown === item.name && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 w-48 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl overflow-hidden"
+                    >
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className="block px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 transition-colors duration-200 text-sm"
+                          onClick={() => setOpenDropdown(null)}
+                        >
+                          {child.name}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
           </nav>
 
-          {/* Panier et menu mobile */}
           <div className="flex items-center space-x-4">
-            {/* Composant Panier */}
             <Cart />
 
-            {/* Bouton menu mobile */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -144,7 +208,6 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Menu mobile animé avec Framer Motion */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.nav
@@ -154,20 +217,50 @@ export default function Navigation() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="md:hidden border-t border-white/10 overflow-hidden bg-black/50 backdrop-blur-xl"
           >
-            <div className="flex flex-col px-4 py-6 space-y-4">
+            <div className="flex flex-col px-4 py-6 space-y-2">
               {navItems.map((item, index) => (
-                <motion.a
-                  key={item.name}
-                  href={item.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ x: 10, color: "#ffffff" }}
-                  className="text-white/80 hover:text-white transition-colors duration-200 text-lg font-medium py-2 border-b border-white/10"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </motion.a>
+                <div key={item.name}>
+                  {item.href && !item.children ? (
+                    <Link
+                      href={item.href}
+                      className="text-white/80 hover:text-white transition-colors duration-200 text-lg font-medium py-3 border-b border-white/10"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        className="flex items-center justify-between w-full text-white/80 hover:text-white transition-colors duration-200 text-lg font-medium py-3 border-b border-white/10"
+                        onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
+                      >
+                        {item.name}
+                        <ChevronDown className={`h-5 w-5 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
+                      </button>
+                      <AnimatePresence>
+                        {item.children && openDropdown === item.name && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="pl-4 space-y-1"
+                          >
+                            {item.children.map((child) => (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                className="block text-white/60 hover:text-white transition-colors duration-200 py-2"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {child.name}
+                              </Link>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
           </motion.nav>
