@@ -19,6 +19,10 @@ interface Product {
   description: string;
   category: string;
   sizes: string[];
+  onSale?: boolean;
+  salePrice?: number;
+  salePercent?: number;
+  likes?: number;
 }
 
 function ProductCard({
@@ -46,13 +50,31 @@ function ProductCard({
   const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
+    if (product.likes) {
+      setLikes(product.likes);
+    }
     if (typeof window !== "undefined") {
-      const savedLikes = localStorage.getItem(`product_likes_${product.id}`);
       const savedIsLiked = localStorage.getItem(`product_liked_${product.id}`);
-      if (savedLikes) setLikes(parseInt(savedLikes));
       if (savedIsLiked) setIsLiked(savedIsLiked === "true");
     }
-  }, [product.id]);
+  }, [product.id, product.likes]);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const action = isLiked ? "unlike" : "like";
+    try {
+      const res = await fetch(apiUrl("/api/products/likes"), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: product.id, action }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLikes(data.likes);
+        setIsLiked(action === "like");
+      }
+    } catch { /* ignore */ }
+  };
 
   const handleCardHover = () => {
     if (typeof window !== "undefined" && cardRef.current) {
@@ -75,18 +97,6 @@ function ProductCard({
     addItem({ id: product.id, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSize });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
-  };
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newIsLiked = !isLiked;
-    const newLikes = newIsLiked ? likes + 1 : likes - 1;
-    setIsLiked(newIsLiked);
-    setLikes(newLikes);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(`product_likes_${product.id}`, newLikes.toString());
-      localStorage.setItem(`product_liked_${product.id}`, newIsLiked.toString());
-    }
   };
 
   const handleShare = (platform: string, e: React.MouseEvent) => {

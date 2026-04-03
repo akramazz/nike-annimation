@@ -67,9 +67,8 @@ export default function ProductDetailPage() {
           setProduct(foundProduct ?? null);
 
           if (foundProduct) {
-            const savedLikes = localStorage.getItem(`product_likes_${foundProduct._id}`);
+            if (foundProduct.likes) setLikes(foundProduct.likes);
             const savedIsLiked = localStorage.getItem(`product_liked_${foundProduct._id}`);
-            if (savedLikes) setLikes(parseInt(savedLikes, 10) || 0);
             if (savedIsLiked) setIsLiked(savedIsLiked === "true");
           }
         }
@@ -169,7 +168,9 @@ export default function ProductDetailPage() {
   };
 
   // Handle Like
-  const handleLike = () => {
+  const handleLike = async () => {
+    if (!product) return;
+    
     if (typeof window !== "undefined") {
       const btn = document.querySelector(".like-btn");
       if (btn) {
@@ -188,17 +189,19 @@ export default function ProductDetailPage() {
       }
     }
 
-    const newIsLiked = !isLiked;
-    const newLikes = newIsLiked ? likes + 1 : likes - 1;
-    
-    setIsLiked(newIsLiked);
-    setLikes(newLikes);
-    
-    // Save to localStorage
-    if (product?._id) {
-      localStorage.setItem(`product_likes_${product._id}`, newLikes.toString());
-      localStorage.setItem(`product_liked_${product._id}`, newIsLiked.toString());
-    }
+    const action = isLiked ? "unlike" : "like";
+    try {
+      const res = await fetch(apiUrl("/api/products/likes"), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: product._id, action }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLikes(data.likes);
+        setIsLiked(action === "like");
+      }
+    } catch { /* ignore */ }
   };
 
   // Handle Share

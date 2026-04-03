@@ -9,6 +9,10 @@ export interface IProduct extends Document {
   description: string;
   category: string;
   sizes: string[];
+  onSale: boolean;
+  salePrice: number;
+  salePercent: number;
+  likes: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +27,10 @@ const ProductSchema = new Schema<IProduct>(
     description: { type: String, default: "", maxlength: 2000 },
     category: { type: String, default: "Classic", maxlength: 80 },
     sizes: { type: [String], default: ["XS", "S", "M", "L", "XL", "XXL"] },
+    onSale: { type: Boolean, default: false },
+    salePrice: { type: Number, default: 0, min: 0 },
+    salePercent: { type: Number, default: 0, min: 0, max: 100 },
+    likes: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true }
 );
