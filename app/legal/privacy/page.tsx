@@ -76,7 +76,7 @@ export default function PrivacyPage() {
 
           <div className="mt-12 p-6 bg-white/5 rounded-2xl border border-white/10">
             <p className="text-white/70 text-sm text-center">
-              Dernière mise à jour : Avril 2024. Pour toute question, contactez-nous à privacy@premium.com
+              Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à privacy@premium.com
             </p>
           </div>
         </div>

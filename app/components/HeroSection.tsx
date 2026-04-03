@@ -153,7 +153,7 @@ export default function HeroSection() {
         >
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2" />
           <span className="text-white/90 text-sm font-medium">
-            Nouvelle Collection 2024
+            Nouvelle Collection 2026
           </span>
         </motion.div>
 

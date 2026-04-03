@@ -41,7 +41,7 @@ export default function SustainabilityPage() {
   ];
 
   const goals = [
-    { year: "2025", target: "Carbono neutro" },
+    { year: "2026", target: "Carbono neutro" },
     { year: "2030", target: "100% materiales reciclados" },
     { year: "2035", target: "Produccion cero residuos" }
   ];

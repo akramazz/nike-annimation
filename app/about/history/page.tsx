@@ -40,15 +40,22 @@ export default function HistoryPage() {
       description: "Lancement de notre ligne Eco-Premium avec des matériaux 100% recyclés."
     },
     {
-      year: "2023",
-      title: "50 000 Clients",
+      year: "2024",
+      title: "50K+ Clients",
       description: "Nous célébrons nos 50 000 clients satisfaits à travers le monde."
     },
     {
-      year: "2024",
-      title: "Innovation Continue",
-      description: "Présentation de nouvelles technologies de tissage pour un confort optimal."
+      year: "2026",
+      title: "Expansion Mondiale",
+      description: "Nous étendons notre présence à l'échelle mondiale avec de nouveaux marchés."
     }
+  ];
+
+  const stats = [
+    { icon: Calendar, value: "2018", label: "Année de création" },
+    { icon: Users, value: "50K+", label: "Clients" },
+    { icon: Globe, value: "25+", label: "Pays" },
+    { icon: Award, value: "500+", label: "Modèles" }
   ];
 
   return (

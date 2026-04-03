@@ -265,7 +265,7 @@ export default function Footer() {
               ref={copyrightRef}
               className="text-white/50 text-sm text-center md:text-left"
             >
-              © 2024 Premium. Tous droits réservés.
+              © 2026 Premium. Tous droits réservés.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-white/50 text-sm">
