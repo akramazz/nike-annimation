@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
+import Navigation from "../components/Navigation";
+import Footer from "../components/Footer";
 import Link from "next/link";
 import { HelpCircle, MessageCircle, Truck, RotateCcw, Mail, Phone } from "lucide-react";
 

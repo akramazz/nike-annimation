@@ -1,22 +1,22 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 let MONGODB_URI: string;
 
-async function connectDB(): Promise<typeof mongoose> {
+interface MongooseCache {
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
+}
+
+declare global {
+  var mongoose: MongooseCache | undefined;
+}
+
+async function connectDB(): Promise<Mongoose> {
   if (!MONGODB_URI) {
     MONGODB_URI = process.env.MONGODB_URI!;
     if (!MONGODB_URI) {
       throw new Error("Please define the MONGODB_URI environment variable");
     }
-  }
-
-  interface MongooseCache {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  }
-
-  declare global {
-    var mongoose: MongooseCache | undefined;
   }
 
   let cached: MongooseCache = global.mongoose || { conn: null, promise: null };

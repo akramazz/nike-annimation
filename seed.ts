@@ -152,8 +152,9 @@ const seedMessages = [
   },
 ];
 
-async function checkCollections(conn: typeof mongoose) {
-  const db = conn.db;
+async function checkCollections() {
+  const conn = await connectDB();
+  const db = conn.connection.db;
   if (!db) return false;
 
   const collections = await db.listCollections().toArray();
@@ -164,8 +165,7 @@ async function checkCollections(conn: typeof mongoose) {
 }
 
 async function resetCollections() {
-  const conn = await connectDB();
-  await checkCollections(conn);
+  await checkCollections();
 
   await Promise.all([
     Product.deleteMany({}),
