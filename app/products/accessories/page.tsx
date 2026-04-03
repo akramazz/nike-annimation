@@ -8,6 +8,7 @@ import Footer from "../../components/Footer";
 import { useCart } from "../../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ShoppingBag, Heart, Eye, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 interface Accessory {
   _id?: string;
@@ -300,12 +301,12 @@ export default function AccessoriesPage() {
                       <ShoppingBag className="h-4 w-4" />
                       <span>{isAdded ? "Ajouté!" : "Ajouter"}</span>
                     </button>
-                    <button
-                      onClick={() => setSelectedProduct(product)}
+                    <Link
+                      href={`/products/accessories/${product.id}`}
                       className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
                     >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
+                      <Eye className="h-4 w-4" />
+                    </Link>
                   </div>
                 </div>
               </motion.div>
