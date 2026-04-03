@@ -10,6 +10,7 @@ import { ShoppingBag, Eye, Heart, Share2, Check, Copy, Twitter, Facebook, Linked
 import { useRouter } from "next/navigation";
 
 interface Product {
+  _id?: string;
   id: number;
   name: string;
   color: string;
@@ -72,6 +73,9 @@ function ProductCard({
       if (data.success) {
         setLikes(data.likes);
         setIsLiked(action === "like");
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`product_liked_${product.id}`, (action === "like").toString());
+        }
       }
     } catch { /* ignore */ }
   };
