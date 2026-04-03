@@ -262,6 +262,21 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteMessage = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce message ?")) return;
+    try {
+      const res = await fetch(apiUrl(`/api/messages?id=${id}`), {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setMessages(messages.filter((m) => m._id !== id));
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
   if (!sessionChecked) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -767,6 +782,12 @@ export default function AdminDashboard() {
                           ) : (
                             <X className="h-4 w-4 text-white/60" />
                           )}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMessage(msg._id)}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-400" />
                         </button>
                       </div>
                     </div>
