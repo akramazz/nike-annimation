@@ -625,6 +625,9 @@ export default function AdminDashboard() {
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="text-left p-4 font-medium text-white/60">
+                        Produits
+                      </th>
+                      <th className="text-left p-4 font-medium text-white/60">
                         N° Commande
                       </th>
                       <th className="text-left p-4 font-medium text-white/60">
@@ -653,6 +656,23 @@ export default function AdminDashboard() {
                         key={order._id}
                         className="border-b border-white/5 hover:bg-white/5"
                       >
+                        <td className="p-4">
+                          <div className="flex -space-x-2">
+                            {order.items?.slice(0, 3).map((item: any, idx: number) => (
+                              <img
+                                key={idx}
+                                src={item.image || "/products/default.webp"}
+                                alt={item.name}
+                                className="w-10 h-10 rounded-lg object-cover border-2 border-black"
+                              />
+                            ))}
+                            {order.items?.length > 3 && (
+                              <div className="w-10 h-10 rounded-lg bg-white/10 border-2 border-black flex items-center justify-center text-xs">
+                                +{order.items.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="p-4 font-mono text-sm">
                           {order.orderNumber}
                         </td>
@@ -682,7 +702,10 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="p-4">
-                          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                          <button 
+                            onClick={() => { setEditingItem(order); setShowModal(true); setModalType("order"); }}
+                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          >
                             <Eye className="h-4 w-4 text-blue-400" />
                           </button>
                         </td>
@@ -779,7 +802,7 @@ export default function AdminDashboard() {
               className="w-full max-w-lg p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20"
             >
               <h2 className="text-2xl font-bold mb-6">
-                {editingItem ? "Modifier le produit" : "Ajouter un produit"}
+                {modalType === "order" ? "Détails de la commande" : (editingItem ? "Modifier le produit" : "Ajouter un produit")}
               </h2>
               <form
                 onSubmit={async (e) => {
@@ -914,6 +937,34 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+              
+              {/* Order Details Modal */}
+              {modalType === "order" && editingItem && (
+                <div className="mt-6 pt-6 border-t border-white/20">
+                  <h3 className="text-lg font-bold mb-4">Détails de la commande</h3>
+                  <div className="space-y-4 max-h-60 overflow-y-auto">
+                    {editingItem.items?.map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
+                        <img src={item.image || "/products/default.webp"} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
+                        <div className="flex-1">
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-white/60 text-sm">Taille: {item.size} | Qté: {item.quantity}</p>
+                        </div>
+                        <p className="font-bold">€{(item.price * item.quantity).toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex space-x-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(false)}
+                      className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-medium transition-colors"
+                    >
+                      Fermer
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
