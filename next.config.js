@@ -11,6 +11,9 @@ const imageRemotePatterns = imageRemoteHost
   : [];
 
 const nextConfig = {
+  // Configuration Turbopack (Next.js 16+)
+  turbopack: {},
+
   // Configuration pour les images
   images: {
     domains: [],
