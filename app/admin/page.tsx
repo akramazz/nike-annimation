@@ -911,9 +911,13 @@ export default function AdminDashboard() {
                   </div>
                   <select
                     name="category"
-                    defaultValue={editingItem?.category || "Classic"}
+                    defaultValue={editingItem?.category || "Vestes"}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
                   >
+                    <option value="Vestes">Vestes</option>
+                    <option value="Accessoires">Accessoires</option>
+                    <option value="Nouveautés">Nouveautés</option>
+                    <option value="Promotions">Promotions</option>
                     <option value="Classic">Classic</option>
                     <option value="Premium">Premium</option>
                     <option value="Luxury">Luxury</option>

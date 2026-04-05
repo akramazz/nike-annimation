@@ -199,6 +199,18 @@ const accessoriesData: Product[] = [
   },
 ];
 
+// Fallback jackets data - used when MongoDB is not available
+const fallbackJackets: Product[] = [
+  { _id: "j-1", id: 101, name: "Veste Rouge", color: "Rouge", price: 69.99, stock: 25, image: "/products/rouge.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Élégance audacieuse", type: "jacket", likes: 45 },
+  { _id: "j-2", id: 102, name: "Veste Gris", color: "Gris", price: 220.99, stock: 15, image: "/products/gris.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Sophistication absolue", type: "jacket", likes: 32 },
+  { _id: "j-3", id: 103, name: "Veste Bleue", color: "Bleu", price: 59.99, stock: 30, image: "/products/blue.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Style moderne", type: "jacket", likes: 28 },
+  { _id: "j-4", id: 104, name: "Veste Marron", color: "Marron", price: 33.99, stock: 40, image: "/products/maron.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Chaleur naturelle", type: "jacket", likes: 19 },
+  { _id: "j-5", id: 105, name: "Veste Beige", color: "Beige", price: 59.99, stock: 20, image: "/products/beage.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Minimalisme élégant", type: "jacket", likes: 41 },
+  { _id: "j-6", id: 106, name: "Veste Noire", color: "Noir", price: 59.99, stock: 35, image: "/products/noir.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Intemporelle", type: "jacket", likes: 67 },
+  { _id: "j-7", id: 107, name: "Veste Verte", color: "Vert", price: 88.99, stock: 18, image: "/products/vert.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Fraîcheur originale", type: "jacket", likes: 23 },
+  { _id: "j-8", id: 108, name: "Veste Pistache", color: "Pistache", price: 69.99, stock: 22, image: "/products/pistache.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Couleur vibrante", type: "jacket", likes: 36 },
+];
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,6 +222,8 @@ export default function ProductsPage() {
   const { addItem } = useCart();
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
+  const [showSizeError, setShowSizeError] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setIsMounted(true);
@@ -220,7 +234,7 @@ export default function ProductsPage() {
       try {
         const res = await fetch(apiUrl("/api/products"));
         const data = await res.json();
-        if (data.success && Array.isArray(data.products)) {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           const jackets = data.products.map((p: Product) => ({ ...p, type: "jacket" as const }));
           setProducts([...accessoriesData, ...jackets]);
           
@@ -234,10 +248,13 @@ export default function ProductsPage() {
           });
           setLikes(likesMap);
           setIsLiked(isLikedMap);
+        } else {
+          // Use fallback data if API returns empty
+          setProducts([...accessoriesData, ...fallbackJackets]);
         }
-      } catch (e) {
-        console.error(e);
-        setProducts(accessoriesData);
+      } catch {
+        // Use fallback data if API fails
+        setProducts([...accessoriesData, ...fallbackJackets]);
       }
       setLoading(false);
     };
@@ -245,15 +262,32 @@ export default function ProductsPage() {
   }, []);
 
   const handleAddToCart = (product: Product) => {
-    const size = product.sizes?.[0] || "Unique";
+    const productId = product._id;
+    const selectedSize = selectedSizes[productId];
+    
+    // Check if size selection is required
+    if (product.sizes && product.sizes.length > 0 && product.sizes[0] !== "Unique" && !selectedSize) {
+      setShowSizeError(prev => ({ ...prev, [productId]: true }));
+      return;
+    }
+    
+    // Clear error and add to cart
+    setShowSizeError(prev => ({ ...prev, [productId]: false }));
+    const size = selectedSize || product.sizes?.[0] || "Unique";
+    const productNumericId = product.id || 1;
     addItem({
-      id: product.id || Math.random(),
+      id: productNumericId,
       name: product.name,
       price: product.price,
       image: product.image,
       color: product.color,
       size,
     });
+  };
+  
+  const handleSizeSelect = (productId: string, size: string) => {
+    setSelectedSizes(prev => ({ ...prev, [productId]: size }));
+    setShowSizeError(prev => ({ ...prev, [productId]: false }));
   };
 
   const handleLike = async (product: Product) => {
@@ -410,13 +444,33 @@ export default function ProductsPage() {
                       </span>
                     </div>
 
-                    {product.sizes && product.sizes.length > 0 && (
+                    {product.sizes && product.sizes.length > 0 && product.sizes[0] !== "Unique" && (
                       <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
                         {product.sizes.slice(0, 4).map((size) => (
-                          <span key={size} className="px-1.5 py-0.5 text-xs rounded border border-white/20 text-white/60">
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => handleSizeSelect(product._id, size)}
+                            className={`px-1.5 py-0.5 text-xs rounded border transition-colors ${
+                              selectedSizes[product._id] === size
+                                ? "bg-white text-black border-white"
+                                : "border-white/20 text-white/60 hover:border-white/40"
+                            }`}
+                          >
                             {size}
-                          </span>
+                          </button>
                         ))}
+                        {showSizeError[product._id] && (
+                          <p className="text-red-400 text-xs w-full">Sélectionnez une taille</p>
+                        )}
+                      </div>
+                    )}
+
+                    {(!product.sizes || product.sizes.length === 0 || product.sizes[0] === "Unique") && (
+                      <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
+                        <span className="px-1.5 py-0.5 text-xs rounded border border-white/20 text-white/60">
+                          Taille unique
+                        </span>
                       </div>
                     )}
                     

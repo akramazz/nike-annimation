@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, Suspense, lazy } from "react";
+import { useEffect, Suspense, lazy, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Dynamic imports for components that use GSAP
+// Dynamic imports for components
 const Navigation = lazy(() => import("./components/Navigation"));
 const HeroSection = lazy(() => import("./components/HeroSection"));
 const ProductSection = lazy(() => import("./components/ProductSection"));
 const Footer = lazy(() => import("./components/Footer"));
-
-// Enregistrement du plugin ScrollTrigger de GSAP
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 // Composant de chargement
 function LoadingSpinner() {
@@ -24,24 +19,28 @@ function LoadingSpinner() {
   );
 }
 
-// Page principale ultra premium avec animations GSAP
+// Page principale
 export default function Page() {
-  // Animation GSAP pour les transitions entre sections
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
-    // Vérifier si on est côté client
-    if (typeof window === "undefined") return;
+    setIsMounted(true);
+  }, []);
+
+  // Animation GSAP - only runs on client after mount
+  useEffect(() => {
+    if (!isMounted || typeof window === "undefined") return;
+
+    // Register ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
 
     // Animation de transition entre les sections
     const sections = gsap.utils.toArray<HTMLElement>("section");
     
-    sections.forEach((section, index) => {
-      // Animation de fade-in et slide-up pour chaque section
+    sections.forEach((section) => {
       gsap.fromTo(
         section,
-        {
-          opacity: 0,
-          y: 50,
-        },
+        { opacity: 0, y: 50 },
         {
           opacity: 1,
           y: 0,
@@ -57,49 +56,33 @@ export default function Page() {
       );
     });
 
-    // Animation de parallaxe pour le background
-    gsap.to("body", {
-      backgroundPosition: "50% 100%",
-      ease: "none",
-      scrollTrigger: {
-        trigger: "body",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: true,
-      },
-    });
-
-    // Nettoyage des animations
+    // Cleanup
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, []);
+  }, [isMounted]);
 
   return (
     <div className="relative min-h-screen bg-black">
-      {/* Navigation fixe animée */}
       <Suspense fallback={<div className="fixed top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-xl z-50" />}>
         <Navigation />
       </Suspense>
 
-      {/* Section héro avec animation premium */}
       <Suspense fallback={<LoadingSpinner />}>
         <HeroSection />
       </Suspense>
 
-      {/* Section produits avec glassmorphism et 3D */}
       <section id="products">
         <Suspense fallback={<LoadingSpinner />}>
           <ProductSection />
         </Suspense>
       </section>
 
-      {/* Pied de page animé */}
       <Suspense fallback={<div className="h-64 bg-black/30" />}>
         <Footer />
       </Suspense>
 
-      {/* Effet de grain de film pour un look premium */}
+      {/* Film grain effect */}
       <div 
         className="fixed inset-0 pointer-events-none z-50 opacity-5"
         style={{

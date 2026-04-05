@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, CreditCard } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import Image from "next/image";
@@ -12,91 +11,19 @@ export default function Cart() {
   const { items, removeItem, updateQuantity, clearCart, total, itemCount } =
     useCart();
   const [isOpen, setIsOpen] = useState(false);
-  const cartRef = useRef<HTMLDivElement>(null);
-  const itemsRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && cartRef.current) {
-      if (isOpen) {
-        gsap.fromTo(
-          cartRef.current,
-          { x: "100%", opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
-        );
-      }
-    }
-  }, [isOpen]);
+  // This effect ensures we only render client-side content after mount
+  useState(() => {
+    setIsMounted(true);
+  });
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && itemsRef.current && isOpen) {
-      const itemElements = itemsRef.current.children;
-      gsap.fromTo(
-        itemElements,
-        { opacity: 0, x: 50, scale: 0.9 },
-        {
-          opacity: 1,
-          x: 0,
-          scale: 1,
-          duration: 0.4,
-          stagger: 0.1,
-          ease: "back.out(1.7)",
-        },
-      );
-    }
-  }, [items, isOpen]);
-
-  const handleItemHover = (element: HTMLElement) => {
-    gsap.to(element, {
-      scale: 1.02,
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  };
-
-  const handleItemLeave = (element: HTMLElement) => {
-    gsap.to(element, {
-      scale: 1,
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  };
-
-  const handleRemoveClick = (
-    id: number,
-    size: string,
-    element: HTMLElement,
-  ) => {
-    gsap.to(element, {
-      x: 100,
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in",
-      onComplete: () => removeItem(id, size),
-    });
+  const handleRemoveClick = (id: number, size: string) => {
+    removeItem(id, size);
   };
 
   const handleCheckoutClick = () => {
-    if (typeof window !== "undefined") {
-      const checkoutBtn = document.querySelector(".checkout-btn");
-      if (checkoutBtn) {
-        gsap.to(checkoutBtn, {
-          scale: 0.95,
-          duration: 0.1,
-          ease: "power2.out",
-          onComplete: () => {
-            gsap.to(checkoutBtn, {
-              scale: 1,
-              duration: 0.3,
-              ease: "elastic.out(1, 0.3)",
-            });
-          },
-        });
-      }
-    }
-
     setIsOpen(false);
     router.push("/checkout");
   };
@@ -104,6 +31,15 @@ export default function Cart() {
   const subtotal = total;
   const shipping = total >= 100 ? 0 : 9.99;
   const grandTotal = subtotal + shipping;
+
+  // Show placeholder during SSR to prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <div className="relative p-2 text-white/80">
+        <ShoppingBag className="h-6 w-6" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -137,7 +73,6 @@ export default function Cart() {
             />
 
             <motion.div
-              ref={cartRef}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -166,10 +101,7 @@ export default function Cart() {
                 </div>
               </div>
 
-              <div
-                ref={itemsRef}
-                className="flex-1 overflow-y-auto p-4 space-y-3"
-              >
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {items.length === 0 ? (
                   <div className="text-center py-16">
                     <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center">
@@ -194,8 +126,6 @@ export default function Cart() {
                     <motion.div
                       key={`${item.id}-${item.size}`}
                       layout
-                      onMouseEnter={(e) => handleItemHover(e.currentTarget)}
-                      onMouseLeave={(e) => handleItemLeave(e.currentTarget)}
                       className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10"
                     >
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
@@ -253,13 +183,7 @@ export default function Cart() {
                       <motion.button
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={(e) =>
-                          handleRemoveClick(
-                            item.id,
-                            item.size,
-                            e.currentTarget.parentElement!,
-                          )
-                        }
+                        onClick={() => handleRemoveClick(item.id, item.size)}
                         className="p-2 hover:bg-red-500/20 rounded-lg transition-colors flex-shrink-0"
                       >
                         <Trash2 className="h-4 w-4 text-red-400" />
