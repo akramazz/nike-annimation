@@ -87,12 +87,12 @@ export default function CategoryPage() {
     };
   }, []);
 
-  // Catégories disponibles
+   // Catégories disponibles
    const categories = [
-     { id: "all", name: "Tous", icon: "" },
-     { id: "Premium", name: "Premium", icon: "" },
-     { id: "Luxury", name: "Luxury", icon: "" },
-     { id: "Classic", name: "Classic", icon: "" },
+     { id: "all", name: "Tous" },
+     { id: "Premium", name: "Premium" },
+     { id: "Luxury", name: "Luxury" },
+     { id: "Classic", name: "Classic" },
    ];
 
   const filteredProducts =
@@ -305,7 +305,6 @@ export default function CategoryPage() {
                     : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/20"
                 }`}
               >
-                <span className="text-xl">{category.icon}</span>
                 <span>{category.name}</span>
               </motion.button>
             ))}
