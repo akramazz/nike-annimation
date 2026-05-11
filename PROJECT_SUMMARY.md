@@ -301,7 +301,7 @@ curl -X POST http://localhost:3000/api/messages \
   }'
 ```
 
-## 🎯 Next Steps (Optional Enhancements)
+## Next Steps (Optional Enhancements)
 
 1. **User Authentication**
    - Admin login system

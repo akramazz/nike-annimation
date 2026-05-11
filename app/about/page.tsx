@@ -61,12 +61,12 @@ export default function AboutPage() {
   ];
 
   const values = [
-    { icon: "✨", title: "Excellence", description: "Nous visons l'excellence dans chaque détail." },
-    { icon: "🎯", title: "Innovation", description: "Nous repoussons les limites de la créativité." },
-    { icon: "💎", title: "Qualité", description: "Des matériaux premium et finition impeccable." },
-    { icon: "🤝", title: "Confiance", description: "Une relation transparente avec nos clients." },
-    { icon: "🌍", title: "Durabilité", description: "Engagés pour une mode responsable." },
-    { icon: "💡", title: "Créativité", description: "L'inspiration au cœur de chaque création." }
+    { icon: "Excellence", title: "Excellence", description: "Nous visons l'excellence dans chaque détail." },
+    { icon: "Innovation", title: "Innovation", description: "Nous repoussons les limites de la créativité." },
+    { icon: "Qualité", title: "Qualité", description: "Des matériaux premium et finition impeccable." },
+    { icon: "Confiance", title: "Confiance", description: "Une relation transparente avec nos clients." },
+    { icon: "Durabilité", title: "Durabilité", description: "Engagés pour une mode responsable." },
+    { icon: "Créativité", title: "Créativité", description: "L'inspiration au cœur de chaque création." }
   ];
 
   return (

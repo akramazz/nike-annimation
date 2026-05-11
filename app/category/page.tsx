@@ -88,12 +88,12 @@ export default function CategoryPage() {
   }, []);
 
   // Catégories disponibles
-  const categories = [
-    { id: "all", name: "Tous", icon: "✨" },
-    { id: "Premium", name: "Premium", icon: "💎" },
-    { id: "Luxury", name: "Luxury", icon: "👑" },
-    { id: "Classic", name: "Classic", icon: "🎯" },
-  ];
+   const categories = [
+     { id: "all", name: "Tous", icon: "" },
+     { id: "Premium", name: "Premium", icon: "" },
+     { id: "Luxury", name: "Luxury", icon: "" },
+     { id: "Classic", name: "Classic", icon: "" },
+   ];
 
   const filteredProducts =
     selectedCategory === "all"
