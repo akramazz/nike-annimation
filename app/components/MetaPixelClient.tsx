@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-const PIXEL_ID = "1668719870942213";
+const PIXEL_ID = "517991158551582";
 const FB_SCRIPT = "https://connect.facebook.net/en_US/fbevents.js";
 
 let pixelInitialized = false;
