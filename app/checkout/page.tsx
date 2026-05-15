@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
+import { event } from "@/lib/facebookPixel";
 
 export default function CheckoutPage() {
   const { items, total, clearCart, isHydrated } = useCart();
@@ -136,18 +137,27 @@ export default function CheckoutPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        setIsSuccess(true);
-        clearCart();
+       if (data.success) {
+         setIsSuccess(true);
+         clearCart();
 
-        if (typeof window !== "undefined") {
-          gsap.to(".checkout-form", {
-            opacity: 0,
-            y: -50,
-            duration: 0.5,
-            ease: "power2.in",
-          });
-        }
+         // Track Purchase event
+         if (typeof window !== 'undefined' && window.fbq) {
+           window.fbq('track', 'Purchase', {
+             value: total,
+             currency: 'EUR'
+           });
+         }
+
+         if (typeof window !== "undefined") {
+           gsap.to(".checkout-form", {
+             opacity: 0,
+             y: -50,
+             duration: 0.5,
+             ease: "power2.in",
+           });
+         }
+       }
       } else {
         setSubmitError(
           typeof data.error === "string" ? data.error : "La commande a échoué.",

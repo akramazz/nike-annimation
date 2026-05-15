@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { event } from "@/lib/facebookPixel";
 
 export interface CartItem {
   id: number;
@@ -62,25 +63,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isHydrated]);
 
-  const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
-    const qty = Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(quantity)));
-    setItems((prev) => {
-      const existing = prev.find(
-        (i) => i.id === item.id && i.size === item.size,
-      );
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id && i.size === item.size
-            ? {
-                ...i,
-                quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
-              }
-            : i,
-        );
-      }
-      return [...prev, { ...item, quantity: qty }];
-    });
-  };
+   const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
+     const qty = Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(quantity)));
+     setItems((prev) => {
+       const existing = prev.find(
+         (i) => i.id === item.id && i.size === item.size,
+       );
+       if (existing) {
+         return prev.map((i) =>
+           i.id === item.id && i.size === item.size
+             ? {
+                 ...i,
+                 quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
+               }
+             : i,
+         );
+       }
+       return [...prev, { ...item, quantity: qty }];
+     });
+     
+     // Track AddToCart event
+     if (typeof window !== 'undefined' && window.fbq) {
+       window.fbq('track', 'AddToCart', {
+         content_name: item.name,
+         content_type: 'product',
+         value: item.price,
+         currency: 'EUR'
+       });
+     }
+   };
 
   const removeItem = (id: number, size: string) => {
     setItems((prev) => prev.filter((i) => !(i.id === id && i.size === size)));
@@ -99,9 +110,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const clearCart = () => {
-    setItems([]);
-  };
+   const clearCart = () => {
+     setItems([]);
+   };
 
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
