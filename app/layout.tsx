@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
+import Script from "next/script";
 
 const appUrlRaw =
   process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
@@ -121,6 +122,25 @@ export default function RootLayout({
 
         {/* Disable automatic email detection */}
         <meta name="format-detection" content="email=no" />
+
+        {/* Meta Pixel Initialization */}
+        <Script
+          strategy="afterInteractive"
+          id="facebook-pixel"
+          dangerouslySetInnerHTML={{
+            __html: `
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '1668719870942213');
+            `,
+          }}
+        />
       </head>
       <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
         {/* Skip to main content pour l'accessibilité */}
@@ -135,6 +155,9 @@ export default function RootLayout({
         <CartProvider>
           <main id="main-content">{children}</main>
         </CartProvider>
+
+        {/* Pixel Tracker for route changes */}
+        <PixelTracker />
 
         {/* Scripts de performance (chargés de manière asynchrone) */}
         <script
