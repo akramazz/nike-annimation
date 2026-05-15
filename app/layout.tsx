@@ -126,6 +126,15 @@ export default function RootLayout({
 
         </head>
         <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=1668719870942213&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
           <MetaPixelClient />
           {/* Skip to main content pour l'accessibilité */}
          <a

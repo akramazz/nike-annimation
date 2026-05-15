@@ -22,6 +22,8 @@
   "/legal/privacy/page": "app/legal/privacy/page.js",
   "/legal/terms/page": "app/legal/terms/page.js",
   "/page": "app/page.js",
+  "/pixel-debug/page": "app/pixel-debug/page.js",
+  "/pixel-test/page": "app/pixel-test/page.js",
   "/products/[id]/page": "app/products/[id]/page.js",
   "/products/accessories/[id]/page": "app/products/accessories/[id]/page.js",
   "/products/accessories/page": "app/products/accessories/page.js",

@@ -7,8 +7,6 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { event } from "@/lib/facebookPixel";
-
 export interface CartItem {
   id: number;
   name: string;

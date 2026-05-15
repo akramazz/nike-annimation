@@ -8,8 +8,6 @@ import Image from "next/image";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
-import { event } from "@/lib/facebookPixel";
-
 export default function CheckoutPage() {
   const { items, total, clearCart, isHydrated } = useCart();
   const router = useRouter();
@@ -157,7 +155,6 @@ export default function CheckoutPage() {
              ease: "power2.in",
            });
          }
-       }
       } else {
         setSubmitError(
           typeof data.error === "string" ? data.error : "La commande a échoué.",

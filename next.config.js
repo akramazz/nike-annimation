@@ -31,8 +31,11 @@ const nextConfig = {
 
   // Configuration pour le compilateur
   compiler: {
-    // Supprimer les console.log en production
-    removeConsole: process.env.NODE_ENV === "production",
+    // Keep console.log in production for Meta Pixel verification
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["log", "warn", "error"] }
+        : false,
   },
 
   // Configuration pour les expérimentales

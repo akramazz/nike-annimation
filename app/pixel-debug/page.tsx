@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function PixelDebugPage() {
   const [fbqExists, setFbqExists] = useState(false);
@@ -20,7 +20,7 @@ export default function PixelDebugPage() {
           setStatusMessage('FBQ is loaded and functional');
         } catch (error) {
           setPixelIdActive(false);
-          setStatusMessage('FBQ loaded but error: ' + error.message);
+          setStatusMessage('FBQ loaded but error: ' + (error instanceof Error ? error.message : String(error)));
         }
       } else {
         setStatusMessage('FBQ not found');

@@ -1,43 +1,63 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+
+const PIXEL_ID = "1668719870942213";
+const FB_SCRIPT = "https://connect.facebook.net/en_US/fbevents.js";
+
+let pixelInitialized = false;
+
+function loadFbqScript(): void {
+  if (typeof window === "undefined" || window.fbq) return;
+
+  const fbq = function (...args: unknown[]) {
+    fbq.callMethod ? fbq.callMethod.apply(fbq, args) : fbq.queue.push(args);
+  } as FacebookPixel;
+
+  fbq.push = fbq;
+  fbq.loaded = true;
+  fbq.version = "2.0";
+  fbq.queue = [];
+
+  window.fbq = fbq;
+  if (!window._fbq) window._fbq = fbq;
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = FB_SCRIPT;
+
+  const firstScript = document.getElementsByTagName("script")[0];
+  if (firstScript?.parentNode) {
+    firstScript.parentNode.insertBefore(script, firstScript);
+  } else {
+    (document.head || document.documentElement).appendChild(script);
+  }
+}
 
 export default function MetaPixelClient() {
+  const pathname = usePathname();
+  const loggedRef = useRef(false);
+
   useEffect(() => {
-    // Prevent double initialization
-    if (window.fbq) {
-      console.log('META PIXEL ALREADY INITIALIZED');
-      return;
+    loadFbqScript();
+
+    const fbq = window.fbq;
+    if (!fbq) return;
+
+    if (!pixelInitialized) {
+      fbq("init", PIXEL_ID);
+      pixelInitialized = true;
+
+      if (!loggedRef.current) {
+        console.log("META PIXEL LOADED");
+        console.log("FBQ STATUS:", window.fbq);
+        loggedRef.current = true;
+      }
     }
 
-    // Load Facebook Pixel script
-    !(function(f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function() {
-        n.callMethod
-          ? n.callMethod.apply(n, arguments)
-          : n.queue.push(arguments);
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-
-    // Initialize and track PageView
-    window.fbq('init', '1668719870942213');
-    window.fbq('track', 'PageView');
-
-    // Debug logs
-    console.log('META PIXEL LOADED');
-    console.log('FBQ:', window.fbq);
-  }, []);
+    fbq("track", "PageView");
+  }, [pathname]);
 
   return null;
 }
