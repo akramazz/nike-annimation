@@ -1,153 +1,128 @@
 'use client';
 
-import React, { useState } from 'react';
-import { pageview, event } from '@/lib/facebookPixel';
-
-type LogEntry = {
-  time: string;
-  message: string;
-};
+import { useState } from 'react';
 
 export default function PixelDebugPage() {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [fbqDetected, setFbqDetected] = useState(false);
-
-  const addLog = (message: string) => {
-    setLogs((prev) => [
-      ...prev,
-      { time: new Date().toLocaleTimeString(), message },
-    ]);
-  };
+  const [fbqExists, setFbqExists] = useState(false);
+  const [pixelIdActive, setPixelIdActive] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
 
   const checkFbq = () => {
-    const detected = typeof window !== 'undefined' && !!window.fbq;
-    setFbqDetected(detected);
-  };
-
-  const handlePageView = () => {
-    try {
-      pageview();
-      addLog('✅ PageView fired successfully');
-    } catch (err) {
-      addLog(`❌ PageView error: ${err}`);
+    if (typeof window !== 'undefined') {
+      const exists = !!window.fbq;
+      setFbqExists(exists);
+      
+      if (exists) {
+        try {
+          // Try to get pixel ID - this is a simplified check
+          // In reality, fbq doesn't expose the ID directly, but we can check if it's functional
+          setPixelIdActive(true);
+          setStatusMessage('FBQ is loaded and functional');
+        } catch (error) {
+          setPixelIdActive(false);
+          setStatusMessage('FBQ loaded but error: ' + error.message);
+        }
+      } else {
+        setStatusMessage('FBQ not found');
+      }
     }
   };
 
-  const handleAddToCart = () => {
-    try {
-      event('AddToCart', { content_name: 'Test', value: 100, currency: 'DZD' });
-      addLog('✅ AddToCart event fired successfully');
-    } catch (err) {
-      addLog(`❌ AddToCart error: ${err}`);
+  const trackPageView = () => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'PageView');
+      setStatusMessage('PageView event sent');
+      console.log('PageView event sent');
+    } else {
+      setStatusMessage('FBQ not available');
+      console.log('FBQ not available');
     }
   };
 
-  const handlePurchase = () => {
-    try {
-      event('Purchase', { value: 200, currency: 'DZD' });
-      addLog('✅ Purchase event fired successfully');
-    } catch (err) {
-      addLog(`❌ Purchase error: ${err}`);
+  const trackAddToCart = () => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'AddToCart');
+      setStatusMessage('AddToCart event sent');
+      console.log('AddToCart event sent');
+    } else {
+      setStatusMessage('FBQ not available');
+      console.log('FBQ not available');
     }
   };
+
+  const trackPurchase = () => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'Purchase', {
+        value: 99.99,
+        currency: 'EUR'
+      });
+      setStatusMessage('Purchase event sent');
+      console.log('Purchase event sent');
+    } else {
+      setStatusMessage('FBQ not available');
+      console.log('FBQ not available');
+    }
+  };
+
+  // Check FBQ status on load
+  useEffect(() => {
+    checkFbq();
+  }, []);
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Meta Pixel Debug</h1>
-
-      {/* Statut fbq */}
-      <section style={{ marginBottom: '1.5rem' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-8">
+      <h1 className="text-3xl font-bold mb-6">Meta Pixel Debug</h1>
+      
+      <div className="space-y-4 mb-6">
+        <button
+          onClick={trackPageView}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Test PageView
+        </button>
+        <button
+          onClick={trackAddToCart}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Test AddToCart
+        </button>
+        <button
+          onClick={trackPurchase}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Test Purchase
+        </button>
         <button
           onClick={checkFbq}
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#0066cc',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
+          className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded"
         >
-          🔍 Vérifier fbq
+          Check FBQ Status
         </button>
-        <p style={{ marginTop: '0.5rem', fontSize: '1.2rem' }}>
-          fbq détecté :&nbsp;
-          <strong>{fbqDetected ? '✅ Oui' : '❌ Non'}</strong>
-        </p>
-      </section>
+      </div>
 
-      {/* Boutons de test */}
-      <section style={{ marginBottom: '2rem' }}>
-        <button
-          onClick={handlePageView}
-          style={{
-            marginRight: '0.75rem',
-            marginBottom: '0.75rem',
-            padding: '0.6rem 1.2rem',
-            background: '#1877f2',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
-        >
-          📄 Test PageView
-        </button>
-        <button
-          onClick={handleAddToCart}
-          style={{
-            marginRight: '0.75rem',
-            marginBottom: '0.75rem',
-            padding: '0.6rem 1.2rem',
-            background: '#ff6b00',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
-        >
-          🛒 Test AddToCart
-        </button>
-        <button
-          onClick={handlePurchase}
-          style={{
-            padding: '0.6rem 1.2rem',
-            background: '#42b72a',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
-        >
-          💳 Test Purchase
-        </button>
-      </section>
+      <div className="bg-gray-800 p-4 rounded w-full max-w-xs">
+        <h2 className="text-lg font-semibold mb-2">Status:</h2>
+        <p className="mb-1"><span className="font-bold">FBQ exists:</span> {fbqExists ? 'YES' : 'NO'}</p>
+        <p className="mb-1"><span className="font-bold">Pixel ID active:</span> {pixelIdActive ? 'YES' : 'NO'}</p>
+        <p className="mb-1 text-sm"><span className="font-bold">Message:</span> {statusMessage}</p>
+      </div>
 
-      {/* Logs en temps réel */}
-      <section>
-        <h2>Logs</h2>
-        <div
-          style={{
-            background: '#1e1e1e',
-            color: '#d4d4d4',
-            padding: '1rem',
-            borderRadius: '8px',
-            fontFamily: 'monospace',
-            fontSize: '0.9rem',
-            maxHeight: '400px',
-            overflowY: 'auto',
-          }}
-        >
-          {logs.length === 0 && (
-            <p style={{ color: '#888' }}>Aucun log pour le moment.</p>
-          )}
-          {logs.map((entry, index) => (
-            <p key={index} style={{ margin: '0.25rem 0', color: '#fff' }}>
-              [{entry.time}] {entry.message}
-            </p>
-          ))}
-        </div>
-      </section>
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold mb-2">Instructions:</h2>
+        <ul className="list-disc list-inside space-y-1 text-sm">
+          <li>Click "Check FBQ Status" to verify pixel loading</li>
+          <li>Click test buttons to send events</li>
+          <li>Check browser console for detailed logs</li>
+          <li>Use Meta Pixel Helper Chrome extension to verify</li>
+          <li>Check Meta Events Manager for real-time activity</li>
+        </ul>
+      </div>
+
+      <div className="mt-6">
+        <a href="/" className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">
+          Go to Home
+        </a>
+      </div>
     </div>
   );
 }

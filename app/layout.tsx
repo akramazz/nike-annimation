@@ -123,29 +123,11 @@ export default function RootLayout({
         {/* Disable automatic email detection */}
         <meta name="format-detection" content="email=no" />
 
-         {/* Meta Pixel Initialization */}
-         <Script
-           strategy="afterInteractive"
-           id="facebook-pixel"
-           dangerouslySetInnerHTML={{
-             __html: `
-               !function(f,b,e,v,n,t,s)
-               {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-               if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-               n.queue=[];t=b.createElement(e);t.async=!0;
-               t.src=v;s=b.getElementsByTagName(e)[0];
-               s.parentNode.insertBefore(t,s)}(window, document,'script',
-               'https://connect.facebook.net/en_US/fbevents.js');
-               fbq('init', '1668719870942213');
-               fbq('track', 'PageView');
-               console.log("META PIXEL LOADED");
-             `,
-           }}
-         />
-      </head>
-      <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
-        {/* Skip to main content pour l'accessibilité */}
+
+       </head>
+       <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
+         <MetaPixel />
+         {/* Skip to main content pour l'accessibilité */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:font-semibold"
