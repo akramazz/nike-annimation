@@ -1,7 +1,11 @@
 export const pageview = () => {
-  window.fbq('track', 'PageView');
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', 'PageView');
+  }
 };
 
-export const event = (name, options = {}) => {
-  window.fbq('track', name, options);
+export const event = (name: string, options = {}) => {
+  if (typeof window !== 'undefined' && window.fbq) {
+    window.fbq('track', name, options);
+  }
 };
