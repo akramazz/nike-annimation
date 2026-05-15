@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
-import Script from "next/script";
+import MetaPixelClient from "./components/MetaPixelClient";
 
 const appUrlRaw =
   process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
@@ -124,52 +124,49 @@ export default function RootLayout({
         <meta name="format-detection" content="email=no" />
 
 
-       </head>
-       <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
-         <MetaPixel />
-         {/* Skip to main content pour l'accessibilité */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:font-semibold"
-        >
-          Aller au contenu principal
-        </a>
+        </head>
+        <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
+          <MetaPixelClient />
+          {/* Skip to main content pour l'accessibilité */}
+         <a
+           href="#main-content"
+           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:font-semibold"
+         >
+           Aller au contenu principal
+         </a>
 
-        {/* Contenu principal avec CartProvider */}
-        <CartProvider>
-          <main id="main-content">{children}</main>
-        </CartProvider>
+         {/* Contenu principal avec CartProvider */}
+         <CartProvider>
+           <main id="main-content">{children}</main>
+         </CartProvider>
 
-        {/* Pixel Tracker for route changes */}
-        <PixelTracker />
-
-        {/* Scripts de performance (chargés de manière asynchrone) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Optimisation des performances
-              if ('loading' in HTMLImageElement.prototype) {
-                const images = document.querySelectorAll('img[loading="lazy"]');
-                images.forEach(img => {
-                  img.src = img.dataset.src;
-                });
-              }
-              
-              // Préchargement des ressources critiques
-              const preloadLinks = [
-                { rel: 'preload', href: '/products/rouge.webp', as: 'image' },
-                { rel: 'preload', href: '/products/blue.webp', as: 'image' },
-              ];
-              
-              preloadLinks.forEach(link => {
-                const linkEl = document.createElement('link');
-                Object.assign(linkEl, link);
-                document.head.appendChild(linkEl);
-              });
-            `,
-          }}
-        />
-      </body>
-    </html>
-  );
+         {/* Scripts de performance (chargés de manière asynchrone) */}
+         <script
+           dangerouslySetInnerHTML={{
+             __html: `
+               // Optimisation des performances
+               if ('loading' in HTMLImageElement.prototype) {
+                 const images = document.querySelectorAll('img[loading="lazy"]');
+                 images.forEach(img => {
+                   img.src = img.dataset.src;
+                 });
+               }
+               
+               // Préchargement des ressources critiques
+               const preloadLinks = [
+                 { rel: 'preload', href: '/products/rouge.webp', as: 'image' },
+                 { rel: 'preload', href: '/products/blue.webp', as: 'image' },
+               ];
+               
+               preloadLinks.forEach(link => {
+                 const linkEl = document.createElement('link');
+                 Object.assign(linkEl, link);
+                 document.head.appendChild(linkEl);
+               });
+             `,
+           }}
+         />
+       </body>
+     </html>
+   );
 }

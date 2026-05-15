@@ -2,8 +2,14 @@
 
 import { useEffect } from 'react';
 
-export default function MetaPixel() {
+export default function MetaPixelClient() {
   useEffect(() => {
+    // Prevent double initialization
+    if (window.fbq) {
+      console.log('META PIXEL ALREADY INITIALIZED');
+      return;
+    }
+
     // Load Facebook Pixel script
     !(function(f, b, e, v, n, t, s) {
       if (f.fbq) return;
