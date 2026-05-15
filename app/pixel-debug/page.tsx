@@ -1,133 +1,153 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { pageview, event } from '@/lib/facebookPixel';
 
-export default function PixelDebug() {
-  const [fbqAvailable, setFbqAvailable] = useState(false);
-  const [logs, setLogs] = useState<string[]>([]);
+type LogEntry = {
+  time: string;
+  message: string;
+};
 
-  // Check if fbq is available on load
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
-      setFbqAvailable(true);
-      addLog('fbq disponible ✅');
-    } else {
-      setFbqAvailable(false);
-      addLog('fbq non disponible ❌');
-    }
-  }, []);
+export default function PixelDebugPage() {
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [fbqDetected, setFbqDetected] = useState(false);
 
   const addLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
-    console.log(message);
+    setLogs((prev) => [
+      ...prev,
+      { time: new Date().toLocaleTimeString(), message },
+    ]);
   };
 
-  const testPageView = useCallback(() => {
-    if (!fbqAvailable) {
-      addLog('Cannot test PageView: fbq not available');
-      return;
-    }
+  const checkFbq = () => {
+    const detected = typeof window !== 'undefined' && !!window.fbq;
+    setFbqDetected(detected);
+  };
+
+  const handlePageView = () => {
     try {
       pageview();
-      addLog('PageView event sent ✅');
-    } catch (error) {
-      addLog(`Error sending PageView: ${error}`);
+      addLog('✅ PageView fired successfully');
+    } catch (err) {
+      addLog(`❌ PageView error: ${err}`);
     }
-  }, [fbqAvailable]);
+  };
 
-  const testAddToCart = useCallback(() => {
-    if (!fbqAvailable) {
-      addLog('Cannot test AddToCart: fbq not available');
-      return;
-    }
+  const handleAddToCart = () => {
     try {
-      event('AddToCart', {
-        content_name: 'Premium Jacket Test',
-        value: 99.99,
-        currency: 'EUR'
-      });
-      addLog('AddToCart event sent ✅');
-    } catch (error) {
-      addLog(`Error sending AddToCart: ${error}`);
+      event('AddToCart', { content_name: 'Test', value: 100, currency: 'DZD' });
+      addLog('✅ AddToCart event fired successfully');
+    } catch (err) {
+      addLog(`❌ AddToCart error: ${err}`);
     }
-  }, [fbqAvailable]);
+  };
 
-  const testPurchase = useCallback(() => {
-    if (!fbqAvailable) {
-      addLog('Cannot test Purchase: fbq not available');
-      return;
-    }
+  const handlePurchase = () => {
     try {
-      event('Purchase', {
-        value: 199.99,
-        currency: 'EUR'
-      });
-      addLog('Purchase event sent ✅');
-    } catch (error) {
-      addLog(`Error sending Purchase: ${error}`);
+      event('Purchase', { value: 200, currency: 'DZD' });
+      addLog('✅ Purchase event fired successfully');
+    } catch (err) {
+      addLog(`❌ Purchase error: ${err}`);
     }
-  }, [fbqAvailable]);
-
-  // Auto-scroll to bottom of logs when logs change
-  useEffect(() => {
-    const logContainer = document.querySelector('.log-container');
-    if (logContainer) {
-      logContainer.scrollTop = logContainer.scrollHeight;
-    }
-  }, [logs]);
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <h1 className="text-2xl font-bold mb-6">Meta Pixel Debugger</h1>
-      
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Statut du Pixel</h2>
-        <div className="flex items-center space-x-2">
-          <span className="w-2 h-2 rounded" 
-                style={{ backgroundColor: fbqAvailable ? '#10b981' : '#ef4444' }}></span>
-          <span>fbq disponible : {fbqAvailable ? '✅' : '❌'}</span>
-        </div>
-      </div>
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>Meta Pixel Debug</h1>
 
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Tests</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <button
-            onClick={testPageView}
-            disabled={!fbqAvailable}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          >
-            Test PageView
-          </button>
-          <button
-            onClick={testAddToCart}
-            disabled={!fbqAvailable}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          >
-            Test AddToCart
-          </button>
-          <button
-            onClick={testPurchase}
-            disabled={!fbqAvailable}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          >
-            Test Purchase
-          </button>
-        </div>
-      </div>
+      {/* Statut fbq */}
+      <section style={{ marginBottom: '1.5rem' }}>
+        <button
+          onClick={checkFbq}
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#0066cc',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}
+        >
+          🔍 Vérifier fbq
+        </button>
+        <p style={{ marginTop: '0.5rem', fontSize: '1.2rem' }}>
+          fbq détecté :&nbsp;
+          <strong>{fbqDetected ? '✅ Oui' : '❌ Non'}</strong>
+        </p>
+      </section>
 
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Logs en temps réel</h2>
-        <div className="h-96 overflow-auto bg-gray-800 p-4 rounded log-container">
-          <pre className="text-sm font-mono whitespace-pre-wrap">
-            {logs.map((log, index) => (
-              <div key={index}>{log}</div>
-            ))}
-          </pre>
+      {/* Boutons de test */}
+      <section style={{ marginBottom: '2rem' }}>
+        <button
+          onClick={handlePageView}
+          style={{
+            marginRight: '0.75rem',
+            marginBottom: '0.75rem',
+            padding: '0.6rem 1.2rem',
+            background: '#1877f2',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}
+        >
+          📄 Test PageView
+        </button>
+        <button
+          onClick={handleAddToCart}
+          style={{
+            marginRight: '0.75rem',
+            marginBottom: '0.75rem',
+            padding: '0.6rem 1.2rem',
+            background: '#ff6b00',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}
+        >
+          🛒 Test AddToCart
+        </button>
+        <button
+          onClick={handlePurchase}
+          style={{
+            padding: '0.6rem 1.2rem',
+            background: '#42b72a',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}
+        >
+          💳 Test Purchase
+        </button>
+      </section>
+
+      {/* Logs en temps réel */}
+      <section>
+        <h2>Logs</h2>
+        <div
+          style={{
+            background: '#1e1e1e',
+            color: '#d4d4d4',
+            padding: '1rem',
+            borderRadius: '8px',
+            fontFamily: 'monospace',
+            fontSize: '0.9rem',
+            maxHeight: '400px',
+            overflowY: 'auto',
+          }}
+        >
+          {logs.length === 0 && (
+            <p style={{ color: '#888' }}>Aucun log pour le moment.</p>
+          )}
+          {logs.map((entry, index) => (
+            <p key={index} style={{ margin: '0.25rem 0', color: '#fff' }}>
+              [{entry.time}] {entry.message}
+            </p>
+          ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
