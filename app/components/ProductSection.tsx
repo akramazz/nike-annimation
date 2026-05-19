@@ -413,7 +413,7 @@ export default function ProductSection() {
                     const qty = parseInt((fd.get("qty") as string) || "1", 10);
                     if (!selectedSize) { return; }
                     for (let i = 0; i < qty; i++) {
-                      addItem({ id: selectedProduct._id || selectedProduct.id || 0, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
+                      addItem({ id: selectedProduct.id || 0, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
                     }
                     setIsAdded(true);
                     setTimeout(() => setIsAdded(false), 2000);

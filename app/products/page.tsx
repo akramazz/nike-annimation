@@ -476,7 +476,7 @@ export default function ProductsPage() {
                    
                     <div className="flex gap-2">
                       <motion.button
-                        onClick={() => addItem({ id: product._id || product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSizes[product._id] || 'Unique' })}
+                        onClick={() => addItem({ id: product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSizes[product._id] || 'Unique' })}
                         className="flex-1 py-2 bg-white text-black text-xs sm:text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-1 sm:gap-2"
                       >
                         <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -497,7 +497,7 @@ export default function ProductsPage() {
                         const qty = parseInt((fd.get("qty") as string) || "1", 10);
                         const size = selectedSizes[product._id] || product.sizes?.[0] || "Unique";
                         for (let i = 0; i < qty; i++) {
-                          addItem({ id: product._id || product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size });
+                          addItem({ id: product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size });
                         }
                         (e.target as HTMLFormElement).reset();
                       }}
