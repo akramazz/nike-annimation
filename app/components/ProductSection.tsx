@@ -200,6 +200,11 @@ function ProductCard({
             {product.stock} en stock
           </span>
         </div>
+        <div className="flex flex-wrap gap-3">
+          <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">Livraison gratuite</span>
+          <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">Retour 30 jours</span>
+          <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">Garantie 2 ans</span>
+        </div>
         <div className="flex items-center justify-between pt-2">
           <span className="text-2xl font-bold text-white">€{product.price}</span>
           <motion.button ref={buttonRef} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleButtonClick} disabled={isAdded} className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full border border-white/20 transition-all duration-300 disabled:opacity-50 flex items-center space-x-2">
@@ -225,6 +230,45 @@ function ProductCard({
             <span className="text-white font-medium">{selectedSize}</span>
           </div>
         )}
+        <form
+          onSubmit={(e) => {
+            e.stopPropagation();
+            const formData = new FormData(e.target as HTMLFormElement);
+            const qty = parseInt((formData.get("qty") as string) || "1", 10);
+            if (!selectedSize) { setShowSizeSelector(true); return; }
+            const productId = product.id || 0;
+            for (let i = 0; i < qty; i++) {
+              addItem({ id: productId, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSize });
+            }
+            setIsAdded(true);
+            setTimeout(() => setIsAdded(false), 2000);
+            (e.target as HTMLFormElement).reset();
+          }}
+          className="mt-3 p-3 rounded-xl bg-white/5 border border-white/10 space-y-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-white/60 text-xs font-medium mb-1">Commander ce produit</p>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              name="qty"
+              min="1"
+              max={product.stock}
+              defaultValue="1"
+              placeholder="Qté"
+              className="w-16 px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-white/50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 py-1.5 bg-white text-black font-bold text-sm rounded-lg hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-1"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Commander
+            </motion.button>
+          </div>
+        </form>
       </div>
     </motion.div>
   );
@@ -361,10 +405,44 @@ export default function ProductSection() {
                     <span>{isAdded ? "Ajouté !" : "Ajouter au panier"}</span>
                     <ShoppingBag className="h-5 w-5" />
                   </motion.button>
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => router.push(`/products/${selectedProduct._id}`)} className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-colors duration-300 border border-white/20">
-                    Voir le produit
-                  </motion.button>
                 </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target as HTMLFormElement);
+                    const qty = parseInt((fd.get("qty") as string) || "1", 10);
+                    if (!selectedSize) { return; }
+                    for (let i = 0; i < qty; i++) {
+                      addItem({ id: selectedProduct._id || selectedProduct.id || 0, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
+                    }
+                    setIsAdded(true);
+                    setTimeout(() => setIsAdded(false), 2000);
+                    (e.target as HTMLFormElement).reset();
+                  }}
+                  className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3"
+                >
+                  <p className="text-white/60 text-sm font-bold">Commander maintenant</p>
+                  <div className="flex gap-3">
+                    <input
+                      type="number"
+                      name="qty"
+                      min="1"
+                      max={selectedProduct.stock}
+                      defaultValue="1"
+                      placeholder="Quantité"
+                      className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/50 text-sm [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      disabled={!selectedSize}
+                      className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <ShoppingBag className="h-5 w-5" />
+                      <span>Commander</span>
+                    </motion.button>
+                  </div>
+                </form>
               </div>
               <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
                 <div className="relative w-full h-full">

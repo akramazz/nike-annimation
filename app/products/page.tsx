@@ -473,15 +473,15 @@ export default function ProductsPage() {
                         </span>
                       </div>
                     )}
-                    
+                   
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => handleAddToCart(product)}
+                      <motion.button
+                        onClick={() => addItem({ id: product._id || product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSizes[product._id] || 'Unique' })}
                         className="flex-1 py-2 bg-white text-black text-xs sm:text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-1 sm:gap-2"
                       >
                         <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span>Ajouter</span>
-                      </button>
+                      </motion.button>
                       <Link
                         href={getProductLink(product)}
                         className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors flex items-center justify-center"
@@ -489,6 +489,41 @@ export default function ProductsPage() {
                         <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Link>
                     </div>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const fd = new FormData(e.target as HTMLFormElement);
+                        const qty = parseInt((fd.get("qty") as string) || "1", 10);
+                        const size = selectedSizes[product._id] || product.sizes?.[0] || "Unique";
+                        for (let i = 0; i < qty; i++) {
+                          addItem({ id: product._id || product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size });
+                        }
+                        (e.target as HTMLFormElement).reset();
+                      }}
+                      className="mt-2 p-2 rounded-lg bg-white/5 border border-white/10 space-y-1"
+                    >
+                      <p className="text-white/50 text-[10px] font-medium">Commander</p>
+                      <div className="flex gap-1">
+                        <input
+                          type="number"
+                          name="qty"
+                          min="1"
+                          max={product.stock}
+                          defaultValue="1"
+                          placeholder="Qté"
+                          className="flex-1 min-w-0 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-xs focus:outline-none focus:border-white/50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <motion.button
+                          type="submit"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="px-3 py-1 bg-white text-black font-bold text-xs rounded-lg hover:bg-white/90 transition-colors"
+                        >
+                          OK
+                        </motion.button>
+                      </div>
+                    </form>
                   </div>
                 </motion.div>
               ))}
