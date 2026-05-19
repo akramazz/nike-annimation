@@ -87,15 +87,14 @@ export default function JacketsPage() {
           ) : (
             <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
-                <motion.div
-                  key={product._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  onMouseEnter={() => setHoveredProduct(product._id)}
-                  onMouseLeave={() => setHoveredProduct(null)}
-                  className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 cursor-pointer"
-                >
-                  <Link href={`/products/${product._id}`}>
+                <Link href={`/products/${product._id}`} key={product._id} className="contents">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onMouseEnter={() => setHoveredProduct(product._id)}
+                    onMouseLeave={() => setHoveredProduct(null)}
+                    className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 cursor-pointer"
+                  >
                     <div className="relative h-48 sm:h-64 overflow-hidden">
                       <img
                         src={product.image}
@@ -133,8 +132,8 @@ export default function JacketsPage() {
                         </span>
                       </div>
                     </div>
-                  </Link>
-                </motion.div>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           )}

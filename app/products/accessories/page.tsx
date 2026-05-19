@@ -40,6 +40,7 @@ const staticAccessories: Product[] = [
 ];
 
 export default function AccessoriesPage() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,11 @@ export default function AccessoriesPage() {
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
   const { addItem } = useCart();
+
+  const handleProductClick = (product: Product) => {
+    const productId = product.id ?? product._id;
+    router.push(`/products/accessories/${productId}`);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -170,16 +176,19 @@ export default function AccessoriesPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product, index) => (
-              <motion.div
-                key={product._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300"
-              >
-                <div className="relative h-40 sm:h-48 overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {products.map((product, index) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onMouseEnter={() => setHoveredProduct(product._id)}
+                  onMouseLeave={() => setHoveredProduct(null)}
+                  onClick={() => handleProductClick(product)}
+                  className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="relative h-40 sm:h-48 overflow-hidden">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -190,9 +199,9 @@ export default function AccessoriesPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   
                   <div className="absolute top-2 right-2 flex flex-col gap-2">
-                    <button
-                      onClick={() => handleLike(product)}
-                      className={`p-2 rounded-full backdrop-blur-xl transition-colors ${
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleLike(product); }}
+                        className={`p-2 rounded-full backdrop-blur-xl transition-colors ${
                         isLiked[product.id?.toString() || product._id] 
                           ? "bg-red-500/20 text-red-400" 
                           : "bg-white/10 text-white hover:bg-white/20"
@@ -221,7 +230,7 @@ export default function AccessoriesPage() {
                       {product.sizes.map((size) => (
                         <button
                           key={size}
-                          onClick={() => handleSizeSelect(product._id, size)}
+                          onClick={(e) => { e.stopPropagation(); handleSizeSelect(product._id, size); }}
                           className={`px-2 py-1 text-xs rounded border transition-colors ${
                             selectedSizes[product._id] === size
                               ? "bg-white text-black border-white"
@@ -239,7 +248,7 @@ export default function AccessoriesPage() {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleAddToCart(product)}
+                      onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }}
                       className="flex-1 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-2"
                     >
                       <ShoppingBag className="h-4 w-4" />
@@ -247,6 +256,7 @@ export default function AccessoriesPage() {
                     </button>
                     <Link
                       href={`/products/accessories/${product.id}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
                     >
                       <Eye className="h-4 w-4" />

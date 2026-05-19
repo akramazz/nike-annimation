@@ -7,8 +7,8 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { useCart } from "../context/CartContext";
-import Link from "next/link";
-import { ShoppingBag, Heart, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingBag, Heart, Eye, Link as LinkIcon } from "lucide-react";
 
 interface Product {
   _id: string;
@@ -212,6 +212,7 @@ const fallbackJackets: Product[] = [
 ];
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -224,6 +225,10 @@ export default function ProductsPage() {
   const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [showSizeError, setShowSizeError] = useState<Record<string, boolean>>({});
+
+  const handleProductClick = (product: Product) => {
+    router.push(`/products/${product._id}`);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -383,7 +388,8 @@ export default function ProductsPage() {
                   transition={{ delay: index * 0.05 }}
                   onMouseEnter={() => setHoveredProduct(product._id)}
                   onMouseLeave={() => setHoveredProduct(null)}
-                  className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300"
+                  onClick={() => handleProductClick(product)}
+                  className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
                     <Image
@@ -405,7 +411,7 @@ export default function ProductsPage() {
                     
                     <div className="absolute top-2 right-2 flex flex-col gap-1 sm:gap-2">
                       <button
-                        onClick={() => handleLike(product)}
+                        onClick={(e) => { e.stopPropagation(); handleLike(product); }}
                         className={`p-1.5 sm:p-2 rounded-full backdrop-blur-xl transition-colors ${
                           isLiked[product._id] 
                             ? "bg-red-500/20 text-red-400" 
@@ -476,7 +482,7 @@ export default function ProductsPage() {
                    
                     <div className="flex gap-2">
                       <motion.button
-                        onClick={() => addItem({ id: product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSizes[product._id] || 'Unique' })}
+                        onClick={(e) => { e.stopPropagation(); addItem({ id: product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSizes[product._id] || 'Unique' }); }}
                         className="flex-1 py-2 bg-white text-black text-xs sm:text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-1 sm:gap-2"
                       >
                         <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -490,8 +496,9 @@ export default function ProductsPage() {
                       </Link>
                     </div>
 
-                    <form
-                      onSubmit={(e) => {
+                      <form
+                        onSubmit={(e) => {
+                          e.stopPropagation();
                         e.preventDefault();
                         const fd = new FormData(e.target as HTMLFormElement);
                         const qty = parseInt((fd.get("qty") as string) || "1", 10);

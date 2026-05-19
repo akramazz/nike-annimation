@@ -34,7 +34,7 @@ function ProductCard({
 }: {
   product: Product;
   isSelected: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   index: number;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
