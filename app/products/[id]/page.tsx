@@ -21,6 +21,11 @@ import {
   Twitter,
   Facebook,
   Linkedin,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Loader,
 } from "lucide-react";
 
 interface Product {
@@ -49,10 +54,21 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
-  const [likes, setLikes] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [showShareMenu, setShowShareMenu] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [productLikes, setProductLikes] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderError, setOrderError] = useState("");
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formAddress, setFormAddress] = useState("");
+  const [formCity, setFormCity] = useState("");
+  const [formPostal, setFormPostal] = useState("");
+  const [formCountry, setFormCountry] = useState("");
   const productRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -71,9 +87,9 @@ export default function ProductDetailPage() {
           setProduct(foundProduct ?? null);
 
           if (foundProduct) {
-            if (foundProduct.likes) setLikes(foundProduct.likes);
+            if (foundProduct.likes) setProductLikes(foundProduct.likes);
             const savedIsLiked = localStorage.getItem(`product_liked_${foundProduct._id}`);
-            if (savedIsLiked) setIsLiked(savedIsLiked === "true");
+            if (savedIsLiked) setLiked(savedIsLiked === "true");
           }
         }
       } catch {
@@ -171,10 +187,88 @@ export default function ProductDetailPage() {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  // Commande directe (sans passer par le panier)
+  const handleDirectOrder = async () => {
+    if (!product) return;
+
+    setOrderError("");
+
+    if (!selectedSize) {
+      setOrderError("Veuillez sélectionner une taille");
+      return;
+    }
+
+    if (!formName.trim() || !formEmail.trim() || !formPhone.trim()) {
+      setOrderError("Veuillez remplir toutes les informations obligatoires");
+      return;
+    }
+
+    if (!formAddress.trim() || !formCity.trim() || !formPostal.trim() || !formCountry.trim()) {
+      setOrderError("Veuillez remplir l'adresse de livraison complète");
+      return;
+    }
+
+    setOrderSubmitting(true);
+
+    try {
+      const unitPrice = product.onSale && product.salePrice ? product.salePrice : product.price;
+      const total = unitPrice * quantity;
+
+      const orderData = {
+        customerName: formName.trim(),
+        email: formEmail.trim(),
+        phone: formPhone.trim(),
+        address: formAddress.trim(),
+        city: formCity.trim(),
+        postalCode: formPostal.trim(),
+        country: formCountry.trim(),
+        items: [
+          {
+            productId: product._id,
+            name: product.name,
+            price: unitPrice,
+            quantity,
+            color: product.color,
+            size: selectedSize,
+            image: product.image,
+          },
+        ],
+        total,
+      };
+
+      const response = await fetch(apiUrl("/api/orders"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setOrderSuccess(true);
+        // Track Purchase event
+        if (typeof window !== "undefined" && window.fbq) {
+          window.fbq("track", "Purchase", {
+            content_name: product.name,
+            content_type: "product",
+            value: total,
+            currency: "EUR",
+          });
+        }
+      } else {
+        setOrderError(typeof data.error === "string" ? data.error : "La commande a échoué. Réessayez.");
+      }
+    } catch {
+      setOrderError("Erreur réseau. Réessayez dans un instant.");
+    }
+
+    setOrderSubmitting(false);
+  };
+
   // Handle Like
   const handleLike = async () => {
     if (!product) return;
-    
+
     if (typeof window !== "undefined") {
       const btn = document.querySelector(".like-btn");
       if (btn) {
@@ -193,7 +287,7 @@ export default function ProductDetailPage() {
       }
     }
 
-    const action = isLiked ? "unlike" : "like";
+    const action = liked ? "unlike" : "like";
     try {
       const res = await fetch(apiUrl("/api/products/likes"), {
         method: "PUT",
@@ -202,8 +296,8 @@ export default function ProductDetailPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setLikes(data.likes);
-        setIsLiked(action === "like");
+        setProductLikes(data.likes);
+        setLiked(action === "like");
       }
     } catch { /* ignore */ }
   };
@@ -212,13 +306,13 @@ export default function ProductDetailPage() {
   const handleShare = (platform: string) => {
     const url = window.location.href;
     const text = `Découvrez ${product?.name} - ${product?.description}`;
-    
+
     let shareUrl = "";
     switch (platform) {
       case "copy":
         navigator.clipboard.writeText(url);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
         break;
       case "twitter":
         shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
@@ -229,12 +323,12 @@ export default function ProductDetailPage() {
         window.open(shareUrl, "_blank");
         break;
       case "linkedin":
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        shareUrl = `https://www.linkeding/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
         window.open(shareUrl, "_blank");
         break;
     }
-    
-    setShowShareMenu(false);
+
+    setShareOpen(false);
   };
 
   // Animation GSAP au hover du bouton
@@ -363,25 +457,25 @@ export default function ProductDetailPage() {
                   whileTap={{ scale: 0.9 }}
                   onClick={handleLike}
                   className={`like-btn p-3 backdrop-blur-xl rounded-full transition-colors ${
-                    isLiked
+                    liked
                       ? "bg-red-500/20 text-red-400"
                       : "bg-white/10 text-white hover:bg-white/20"
                   }`}
                 >
-                  <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+                  <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
                 </motion.button>
                 <div className="relative">
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => setShowShareMenu(!showShareMenu)}
+                    onClick={() => setShareOpen(!shareOpen)}
                     className="p-3 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-colors"
                   >
                     <Share2 className="h-5 w-5" />
                   </motion.button>
-                  
+
                   {/* Share Menu */}
-                  {showShareMenu && (
+                  {shareOpen && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -391,12 +485,12 @@ export default function ProductDetailPage() {
                         onClick={() => handleShare("copy")}
                         className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
                       >
-                        {copySuccess ? (
+                        {copied ? (
                           <Check className="h-4 w-4 text-green-400" />
                         ) : (
                           <Copy className="h-4 w-4" />
                         )}
-                        <span>{copySuccess ? "Copié!" : "Copier le lien"}</span>
+                        <span>{copied ? "Copié!" : "Copier le lien"}</span>
                       </button>
                       <button
                         onClick={() => handleShare("twitter")}
@@ -426,8 +520,8 @@ export default function ProductDetailPage() {
               
               {/* Likes Counter */}
               <div className="absolute bottom-4 left-4 flex items-center space-x-2 px-3 py-2 bg-white/10 backdrop-blur-xl rounded-full">
-                <Heart className={`h-4 w-4 ${isLiked ? "text-red-400 fill-red-400" : "text-white/60"}`} />
-                <span className="text-sm font-medium">{likes}</span>
+                <Heart className={`h-4 w-4 ${liked ? "text-red-400 fill-red-400" : "text-white/60"}`} />
+                <span className="text-sm font-medium">{productLikes}</span>
               </div>
             </div>
 
@@ -551,7 +645,168 @@ export default function ProductDetailPage() {
                   <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" />
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </motion.button>
+
+                {/* Commande directe */}
+                {!isAdded && quantity > 0 && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowOrderForm(!showOrderForm)}
+                    className="w-full py-3 sm:py-4 border-2 border-white/40 text-white font-bold rounded-full hover:bg-white/10 transition-all duration-300 flex items-center justify-center space-x-2"
+                  >
+                    <span className="text-sm sm:text-base">Commander maintenant</span>
+                  </motion.button>
+                )}
               </div>
+
+              {/* Formulaire de commande directe */}
+              {showOrderForm && !isAdded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-6 overflow-hidden"
+                >
+                  {/* Récapitulatif rapide */}
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center space-x-4">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-contain p-2"
+                        unoptimized={
+                          product.image.startsWith("http://") ||
+                          product.image.startsWith("https://")
+                        }
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold truncate">{product.name}</h3>
+                      <p className="text-white/60 text-sm">{product.color} • Taille: {selectedSize || "—"}</p>
+                      <p className="text-white/60 text-sm">Quantité: {quantity}</p>
+                    </div>
+                    <p className="font-bold whitespace-nowrap">
+                      €{((product.onSale && product.salePrice ? product.salePrice : product.price) * quantity).toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* Informations personnelles */}
+                  <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+                    <h2 className="text-lg font-bold mb-4">Informations personnelles</h2>
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                        <input
+                          type="text"
+                          value={formName}
+                          onChange={(e) => setFormName(e.target.value)}
+                          placeholder="Nom complet"
+                          required
+                          className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                        />
+                      </div>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                        <input
+                          type="email"
+                          value={formEmail}
+                          onChange={(e) => setFormEmail(e.target.value)}
+                          placeholder="Email"
+                          required
+                          className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                        />
+                      </div>
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40" />
+                        <input
+                          type="tel"
+                          value={formPhone}
+                          onChange={(e) => setFormPhone(e.target.value)}
+                          placeholder="Téléphone"
+                          required
+                          className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Adresse de livraison */}
+                  <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+                    <h2 className="text-lg font-bold mb-4">Adresse de livraison</h2>
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <MapPin className="absolute left-4 top-4 h-5 w-5 text-white/40" />
+                        <textarea
+                          value={formAddress}
+                          onChange={(e) => setFormAddress(e.target.value)}
+                          placeholder="Adresse"
+                          required
+                          rows={2}
+                          className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all resize-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={formCity}
+                            onChange={(e) => setFormCity(e.target.value)}
+                            placeholder="Ville"
+                            required
+                            className="w-full pl-4 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                          />
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={formPostal}
+                            onChange={(e) => setFormPostal(e.target.value)}
+                            placeholder="Code postal"
+                            required
+                            className="w-full pl-4 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                          />
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formCountry}
+                          onChange={(e) => setFormCountry(e.target.value)}
+                          placeholder="Pays"
+                          required
+                          className="w-full pl-4 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {orderError && (
+                    <p className="text-red-400 text-sm text-center" role="alert">{orderError}</p>
+                  )}
+
+                  {/* Bouton de soumission */}
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleDirectOrder}
+                    disabled={orderSubmitting || orderSuccess}
+                    className="submit-btn w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group flex items-center justify-center space-x-2"
+                  >
+                    <span className="relative z-10">
+                      {orderSuccess
+                        ? "Commande envoyée !"
+                        : orderSubmitting
+                        ? "Envoi en cours..."
+                        : `Confirmer la commande • €${((product.onSale && product.salePrice ? product.salePrice : product.price) * quantity).toFixed(2)}`
+                      }
+                    </span>
+                    {orderSubmitting && <Loader className="h-5 w-5 animate-spin relative z-10" />}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  </motion.button>
+                </motion.div>
+              )}
 
               {/* Avantages */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/10">
