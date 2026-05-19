@@ -94,7 +94,7 @@ export default function AboutPage() {
           </h1>
 
           <p ref={subtitleRef} className="text-lg sm:text-xl md:text-2xl text-white/80 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Découvrez l'histoire et les valeurs qui font de PREMIUM une marque unique dans l'univers de la mode haut de gamme.
+            Découvrez l'histoire et les valeurs qui font de DripBazzarDZ une marque unique dans l'univers de la mode urbaine et haut de gamme.
           </p>
 
           <motion.div ref={statsRef} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.8 }} className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">

@@ -323,7 +323,7 @@ export default function ProductsPage() {
   const categories = [
     { id: "all", name: "Tous" },
     { id: "Accessoires", name: "Accessoires" },
-    { id: "Premium", name: "Premium" },
+    { id: "Premium", name: "DripBazzarDZ" },
     { id: "Luxury", name: "Luxury" },
     { id: "Classic", name: "Classic" },
   ];

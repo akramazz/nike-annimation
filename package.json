@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Ultra Premium E-Commerce Website with Next.js 16, Tailwind CSS, Framer Motion, MongoDB Atlas",
-  "author": "PREMIUM",
+  "author": "DripBazzarDZ",
   "license": "MIT",
   "scripts": {
     "dev": "next dev --turbopack",

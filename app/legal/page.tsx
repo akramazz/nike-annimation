@@ -42,10 +42,10 @@ export default function LegalPage() {
   ];
 
   const companyInfo = {
-    name: "PREMIUM",
-    address: "123 Rue de la Mode, 75001 Paris, France",
-    phone: "+33 1 23 45 67 89",
-    email: "contact@premium.com",
+    name: "DripBazzarDZ",
+    address: "123 Rue de la Mode, 16000 Alger, Algérie",
+    phone: "+213 555 123 456",
+    email: "contact@dripbazzardz.com",
     siret: "123 456 789 00001",
     tva: "FR12345678901",
     capital: "50 000 €",

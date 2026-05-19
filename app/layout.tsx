@@ -8,19 +8,20 @@ const appUrlRaw =
 const appUrl = appUrlRaw.replace(/\/$/, "");
 
 export const metadata: Metadata = {
-  title: "PREMIUM - Collection Exclusive de Vestes Haut de Gamme",
+  title: "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme",
   description:
-    "Découvrez notre collection exclusive de vestes premium, alliant style, confort et qualité exceptionnelle. Design ultra moderne avec animations 3D interactives.",
+    "Découvrez DripBazzarDZ, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
   keywords: [
+    "DripBazzarDZ",
+    "mode urbaine algérie",
     "vestes premium",
-    "mode haut de gamme",
-    "collection exclusive",
-    "vestes luxe",
-    "fashion premium",
+    "accessoires mode",
+    "fashion dz",
+    "boutique mode alger",
   ],
-  authors: [{ name: "PREMIUM" }],
-  creator: "PREMIUM",
-  publisher: "PREMIUM",
+  authors: [{ name: "DripBazzarDZ" }],
+  creator: "DripBazzarDZ",
+  publisher: "DripBazzarDZ",
   formatDetection: {
     email: false,
     address: false,
@@ -28,17 +29,17 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL(appUrl),
   openGraph: {
-    title: "PREMIUM - Collection Exclusive de Vestes Haut de Gamme",
+    title: "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme",
     description:
-      "Découvrez notre collection exclusive de vestes premium, alliant style, confort et qualité exceptionnelle.",
+      "Découvrez DripBazzarDZ, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
     url: appUrl,
-    siteName: "PREMIUM",
+    siteName: "DripBazzarDZ",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "PREMIUM - Collection Exclusive",
+        alt: "DripBazzarDZ - Mode Urbaine Premium",
       },
     ],
     locale: "fr_FR",
@@ -46,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PREMIUM - Collection Exclusive de Vestes Haut de Gamme",
+    title: "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme",
     description:
-      "Découvrez notre collection exclusive de vestes premium, alliant style, confort et qualité exceptionnelle.",
+      "Découvrez DripBazzarDZ, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
     images: ["/twitter-image.jpg"],
   },
   robots: {

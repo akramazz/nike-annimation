@@ -296,9 +296,11 @@ export default function AccessoryDetailPage() {
               <span className="text-sm sm:text-base">Retour</span>
             </button>
             <div className="flex items-center space-x-2">
-              <span className="text-white font-bold text-lg sm:text-xl">PREMIUM</span>
+              <div className="relative w-8 h-8 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
+                <Image src="/logo.png" alt="DripBazzarDZ" fill className="object-cover" />
+              </div>
+              <span className="text-white font-bold text-lg sm:text-xl">DripBazzarDZ</span>
             </div>
-            <div className="w-12 sm:w-20" />
           </div>
         </div>
       </header>

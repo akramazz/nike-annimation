@@ -1,7 +1,7 @@
 {
-  "name": "PREMIUM E-Commerce",
-  "short_name": "PREMIUM",
-  "description": "Premium E-Commerce Website - Vestes et Accessoires",
+  "name": "DripBazzarDZ",
+  "short_name": "DripBazzarDZ",
+  "description": "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme en Algérie",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
@@ -11,6 +11,11 @@
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png"
     }
   ]
 }

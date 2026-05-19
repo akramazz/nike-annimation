@@ -108,7 +108,7 @@ export default function SupportPage() {
                 </div>
                 <div>
                   <p className="text-white/60 text-sm">Email</p>
-                  <p className="text-white font-medium">support@premium.com</p>
+                  <p className="text-white font-medium">support@dripbazzardz.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">

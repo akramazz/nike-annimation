@@ -6,6 +6,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import gsap from "gsap";
 import Cart from "./Cart";
 import Link from "next/link";
+import Image from "next/image";
 
 interface NavItem {
   name: string;
@@ -105,10 +106,10 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <div ref={logoRef} className="flex items-center">
             <Link href="/" className="flex items-center">
-              <svg className="h-8 w-auto text-white" viewBox="0 0 69 32" fill="currentColor">
-                <path d="M68.56 4.58c-.2-.2-.5-.3-.8-.2-3.2 1.1-6.5 2.3-9.7 3.4-7.2 2.5-14.4 5-21.6 7.5-4.6 1.6-9.2 3.2-13.8 4.8-2.3.8-4.6 1.6-6.9 2.4-1.2.4-2.3.8-3.5 1.2-.6.2-1.1.4-1.7.6-.3.1-.5.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.6.1-.9.1-.3 0-.6 0-.9-.1-.3-.1-.6-.2-.8-.4-.3-.2-.5-.4-.7-.7-.2-.3-.3-.6-.3-.9 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1.3.1.6.2.8.3.1 0 .2.1.3.1.1 0 .2 0 .3.1.3.1.5.2.8.3.6.2 1.1.4 1.7.6 1.2.4 2.3.8 3.5 1.2 2.3.8 4.6 1.6 6.9 2.4 4.6 1.6 9.2 3.2 13.8 4.8 7.2 2.5 14.4 5 21.6 7.5 3.2 1.1 6.5 2.3 9.7 3.4.3.1.6.1.9 0 .3-.1.6-.3.8-.5.2-.2.3-.5.3-.8 0-.3 0-.6-.1-.9-.1-.3-.2-.6-.4-.8-.2-.3-.4-.5-.7-.7-.3-.2-.6-.3-.9-.3-.3 0-.6 0-.9.1-.3.1-.6.2-.8.3-.1 0-.2.1-.3.1-.1 0-.2 0-.3.1-.3.1-.5.2-.8.3-.6.2-1.1.4-1.7.6-1.2.4-2.3.8-3.5 1.2-2.3.8-4.6 1.6-6.9 2.4-4.6 1.6-9.2 3.2-13.8 4.8-7.2 2.5-14.4 5-21.6 7.5-3.2 1.1-6.5 2.3-9.7 3.4-.3.1-.6.1-.9 0-.3-.1-.6-.3-.8-.5-.2-.2-.3-.5-.3-.8 0-.3 0-.6.1-.9.1-.3.2-.6.4-.8.2-.3.4-.5.7-.7.3-.2.6-.3.9-.3.3 0 .6 0 .9.1z" />
-              </svg>
-              <span className="ml-2 text-white font-bold text-xl hidden sm:block">PREMIUM</span>
+              <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
+                <Image src="/logo.png" alt="DripBazzarDZ" fill className="object-cover" />
+              </div>
+              <span className="ml-2 text-white font-bold text-xl hidden sm:block">DripBazzarDZ</span>
             </Link>
           </div>
 

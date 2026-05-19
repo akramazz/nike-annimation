@@ -41,7 +41,7 @@ export default function FAQPage() {
     },
     {
       question: "Comment contacter le service client ?",
-      answer: "Vous pouvez nous contacter par email à support@premium.com, par téléphone au +33 1 23 45 67 89 (du lundi au vendredi, 9h-18h) ou via le formulaire de contact."
+      answer: "Vous pouvez nous contacter par email à contact@dripbazzardz.com, par téléphone au +213 555 123 456 (du lundi au vendredi, 9h-18h) ou via le formulaire de contact."
     },
     {
       question: "Proposez-vous des tailles grandes ?",

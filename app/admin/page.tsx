@@ -919,7 +919,7 @@ export default function AdminDashboard() {
                     <option value="Nouveautés">Nouveautés</option>
                     <option value="Promotions">Promotions</option>
                     <option value="Classic">Classic</option>
-                    <option value="Premium">Premium</option>
+                    <option value="Premium">DripBazzarDZ</option>
                     <option value="Luxury">Luxury</option>
                   </select>
                   <textarea

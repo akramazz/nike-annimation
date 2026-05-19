@@ -28,7 +28,7 @@ export default function CommitmentsPage() {
     },
     {
       icon: Star,
-      title: "Service Premium",
+      title: "Service DripBazzarDZ",
       description: "Notre équipe est dédiée à vous offrir un service personnalisé qui dépasse vos attentes.",
       details: ["Conseils personnalisés", "Suivi de commande", "Programme fidélité"]
     },

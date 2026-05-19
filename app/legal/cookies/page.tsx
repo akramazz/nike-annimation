@@ -101,7 +101,7 @@ export default function CookiesPage() {
 
           <div className="mt-12 p-6 bg-white/5 rounded-2xl border border-white/10">
             <p className="text-white/70 text-sm text-center">
-              Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à cookies@premium.com
+              Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à contact@dripbazzardz.com
             </p>
           </div>
         </div>

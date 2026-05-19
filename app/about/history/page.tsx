@@ -14,11 +14,11 @@ export default function HistoryPage() {
   }, []);
 
   const timeline = [
-    { year: "2018", title: "La Création", description: " PREMIUM voit le jour avec une vision simple : créer des vestes qui allient élégance et performance." },
-    { year: "2019", title: "Première Collection", description: "Lancement de notre première collection de vestes Premium qui rencontre un succès immédiat." },
+    { year: "2018", title: "La Création", description: " DripBazzarDZ voit le jour avec une vision simple : créer des vestes qui allient élégance et performance." },
+    { year: "2019", title: "Première Collection", description: "Lancement de notre première collection de vestes DripBazzarDZ qui rencontre un succès immédiat." },
     { year: "2020", title: "Expansion Internationale", description: "Nous expandons nos activités à travers l'Europe et atteignons 10 000 clients." },
     { year: "2021", title: "Certification Qualité", description: "Obtention de la certification ISO 9001 pour notre système de gestion de qualité." },
-    { year: "2022", title: "Durabilité", description: "Lancement de notre ligne Eco-Premium avec des matériaux 100% recyclés." },
+    { year: "2022", title: "Durabilité", description: "Lancement de notre ligne Eco-DripBazzarDZ avec des matériaux 100% recyclés." },
     { year: "2024", title: "50K+ Clients", description: "Nous célébrons nos 50 000 clients satisfaits à travers le monde." },
     { year: "2026", title: "Expansion Mondiale", description: "Nous étendons notre présence à l'échelle mondiale avec de nouveaux marchés." }
   ];
@@ -37,7 +37,7 @@ export default function HistoryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">Notre Histoire</h1>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto">Découvrez comment PREMIUM est devenue une référence dans l'univers du vêtement premium.</p>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">Découvrez comment DripBazzarDZ est devenue une référence dans l'univers du vêtement urbain haut de gamme.</p>
           </motion.div>
 
           <div className="relative mb-16">

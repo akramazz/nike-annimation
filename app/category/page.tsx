@@ -89,11 +89,11 @@ export default function CategoryPage() {
 
    // Catégories disponibles
    const categories = [
-     { id: "all", name: "Tous" },
-     { id: "Premium", name: "Premium" },
-     { id: "Luxury", name: "Luxury" },
-     { id: "Classic", name: "Classic" },
-   ];
+      { id: "all", name: "Tous" },
+      { id: "Premium", name: "DripBazzarDZ" },
+      { id: "Luxury", name: "Luxury" },
+      { id: "Classic", name: "Classic" },
+    ];
 
   const filteredProducts =
     selectedCategory === "all"

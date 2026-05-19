@@ -311,7 +311,7 @@ export default function ProductSection() {
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <motion.h2 ref={titleRef} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">Collection Premium</motion.h2>
+          <motion.h2 ref={titleRef} className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">Collection DripBazzarDZ</motion.h2>
           <motion.p ref={subtitleRef} className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto">Découvrez notre sélection exclusive de vestes haut de gamme.</motion.p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
