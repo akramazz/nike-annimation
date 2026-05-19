@@ -101,7 +101,7 @@ export default function QuickOrderForm({
   }, []);
 
   const updateField = (field: keyof OrderFormFields) => (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const value = e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
