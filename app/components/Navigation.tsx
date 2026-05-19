@@ -105,11 +105,9 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <div ref={logoRef} className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-white/10 border-2 border-white/20 flex items-center justify-center">
-                <svg className="w-6 h-6 md:w-7 md:h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
+               <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-white/10 border-2 border-white/20 flex items-center justify-center">
+                  <img src="/logo.png" alt="logo" className="w-full h-full object-cover" />
+                </div>
               <span className="ml-2 text-white font-bold text-xl md:text-2xl hidden sm:block">DripBazzarDZ</span>
             </Link>
           </div>
