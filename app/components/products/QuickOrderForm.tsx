@@ -206,27 +206,39 @@ export default function QuickOrderForm({
   if (orderStatus === "success") {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`rounded-2xl backdrop-blur-xl bg-green-500/10 border border-green-500/30 p-4 sm:p-6 text-center space-y-3 ${
-          compact ? "p-4" : ""
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`rounded-3xl backdrop-blur-xl bg-green-500/10 border border-green-500/30 p-6 sm:p-10 text-center space-y-5 ${
+          compact ? "p-5" : ""
         }`}
         role="alert"
         aria-live="polite"
       >
-        <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-400 mx-auto" />
-        <h3 className="text-lg sm:text-xl font-bold text-green-400">
-          Commande envoyée !
+        <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+          <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-green-400" />
+        </div>
+        <h3 className="text-2xl sm:text-3xl font-extrabold text-green-400">
+          Commande confirmée !
         </h3>
-        <p className="text-white/70 text-sm">
-          Nous vous confirmons votre commande <strong>{orderNumber}</strong>.
+        <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-md mx-auto">
+          Merci pour votre commande. Vous recevrez un email de confirmation
+          sous peu.
         </p>
-        <button
-          onClick={handleReset}
-          className="px-6 py-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all text-sm"
-        >
-          Commander à nouveau
-        </button>
+        <div className="pt-2 space-y-3">
+          <a
+            href="/"
+            className="inline-block px-8 py-3 sm:py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 text-sm sm:text-base"
+          >
+            Retour à l&#39;accueil
+          </a>
+          <button
+            onClick={handleReset}
+            className="block w-full px-8 py-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all text-sm"
+          >
+            Commander à nouveau
+          </button>
+        </div>
       </motion.div>
     );
   }

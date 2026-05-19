@@ -177,6 +177,14 @@ export default function AccessoryDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderError, setOrderError] = useState("");
+  const [formName, setFormName] = useState("");
+  const [formFirstName, setFormFirstName] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formAddress, setFormAddress] = useState("");
+  const [formWilaya, setFormWilaya] = useState("");
 
   useEffect(() => {
     const productId = String(params.id);
@@ -259,6 +267,66 @@ export default function AccessoryDetailPage() {
     setShowShareMenu(false);
   };
 
+  // Commande directe
+  const handleDirectOrder = async () => {
+    if (!product) return;
+    setOrderError("");
+
+    if (!selectedSize && product.sizes && product.sizes.length > 0) {
+      setOrderError("Veuillez sélectionner une taille");
+      return;
+    }
+    if (!formName.trim() || !formFirstName.trim() || !formPhone.trim()) {
+      setOrderError("Veuillez remplir toutes les informations obligatoires");
+      return;
+    }
+    if (!formAddress.trim() || !formWilaya.trim()) {
+      setOrderError("Veuillez remplir l'adresse de livraison complète");
+      return;
+    }
+
+    setOrderSubmitting(true);
+    try {
+      const orderData = {
+        customerName: `${formFirstName} ${formName}`.trim(),
+        email: "",
+        phone: formPhone.trim(),
+        address: formAddress.trim(),
+        city: formWilaya.trim(),
+        postalCode: "",
+        country: "Algérie",
+        items: [
+          {
+            productId: product._id || product.id,
+            name: product.name,
+            price: product.price,
+            quantity,
+            color: product.category,
+            size: selectedSize || product.sizes?.[0] || "Unique",
+            image: product.image,
+          },
+        ],
+        total: product.price * quantity,
+      };
+
+      const res = await fetch(apiUrl("/api/orders"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setOrderSuccess(true);
+      } else {
+        setOrderError(data.error || "La commande a échoué");
+      }
+    } catch {
+      setOrderError("Erreur réseau. Réessayez.");
+    }
+    setOrderSubmitting(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -279,6 +347,53 @@ export default function AccessoryDetailPage() {
             Retour aux accessoires
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // ── Success View ───────────────────────────────────────────────────────────
+  if (orderSuccess) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+          className="max-w-md w-full p-8 sm:p-10 rounded-3xl backdrop-blur-xl bg-green-500/10 border border-green-500/30 text-center space-y-5"
+        >
+          <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+            <Check className="h-8 w-8 sm:h-10 sm:w-10 text-green-400" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-green-400">
+            Commande confirmée !
+          </h2>
+          <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+            Merci pour votre commande. Vous recevrez un email de confirmation
+            sous peu.
+          </p>
+          <div className="pt-2 space-y-3">
+            <button
+              onClick={() => {
+                setOrderSuccess(false);
+                setOrderError("");
+                setFormName("");
+                setFormFirstName("");
+                setFormPhone("");
+                setFormAddress("");
+                setFormWilaya("");
+              }}
+              className="block w-full px-8 py-3 sm:py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all text-sm sm:text-base"
+            >
+              Commander à nouveau
+            </button>
+            <a
+              href="/"
+              className="block w-full px-8 py-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all text-sm"
+            >
+              Retour à l&#39;accueil
+            </a>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -389,97 +504,103 @@ export default function AccessoryDetailPage() {
             </div>
 
             <div className="space-y-4 sm:space-y-6">
-              <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                  {product.name}
-                </h1>
-                <p className="text-white/60 text-base sm:text-lg mt-2">{product.category}</p>
+              {/* Produit + prix (mini vue comme [id] moderne) */}
+              <div className="flex items-start gap-4">
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
+                  <Image src={product.image} alt={product.name} fill className="object-contain p-2" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-bold text-lg sm:text-xl truncate">{product.name}</h2>
+                  <p className="text-white/60 text-sm">{product.category}</p>
+                  <p className="text-2xl sm:text-3xl font-bold mt-1">€{product.price.toFixed(2)}</p>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl sm:text-4xl font-bold text-white">€{product.price.toFixed(2)}</span>
-              </div>
+              <p className="text-white/70 text-base leading-relaxed">{product.description}</p>
 
-              <p className="text-white/70 text-base sm:text-lg leading-relaxed">
-                {product.description}
-              </p>
-
+              {/* Taille */}
               {product.sizes && product.sizes.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Taille</h3>
-                  <div className="flex flex-wrap gap-3">
+                  <h3 className="text-base font-semibold mb-2 sm:mb-3">Taille</h3>
+                  <div className="flex flex-wrap gap-2">
                     {product.sizes.map((size) => (
-                      <motion.button
-                        key={size}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                          selectedSize === size
-                            ? "bg-white text-black"
-                            : "bg-white/10 text-white hover:bg-white/20"
-                        }`}
-                      >
-                        {size}
-                      </motion.button>
+                      <motion.button key={size} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setSelectedSize(size)} className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-300 ${selectedSize === size ? "bg-white text-black" : "bg-white/10 text-white hover:bg-white/20"}`}>{size}</motion.button>
                     ))}
                   </div>
-                  {!selectedSize && (
-                    <p className="text-white/60 text-sm mt-2">Veuillez sélectionner une taille</p>
-                  )}
+                  {!selectedSize && <p className="text-white/60 text-sm mt-2">Veuillez sélectionner une taille</p>}
                 </div>
               )}
 
+              {/* Quantité */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Quantité</h3>
-                <div className="flex items-center space-x-4">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-xl font-bold"
-                  >
-                    <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </motion.button>
+                <h3 className="text-base font-semibold mb-2 sm:mb-3">Quantité</h3>
+                <div className="flex items-center gap-3">
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-xl font-bold">−</motion.button>
                   <span className="text-2xl font-bold w-8 text-center">{quantity}</span>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center text-xl font-bold"
-                  >
-                    <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </motion.button>
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-xl font-bold">+</motion.button>
                 </div>
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCart}
-                disabled={isAdded}
-                className="w-full py-3 sm:py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 flex items-center justify-center space-x-2"
-              >
+              {/* Ajouter au panier */}
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleAddToCart} disabled={isAdded} className="w-full py-3 sm:py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                 <ShoppingBag className="h-5 w-5" />
-                <span className="text-sm sm:text-base">{isAdded ? "Ajouté !" : "Ajouter au panier"}</span>
+                <span>{isAdded ? "Ajouté !" : "Ajouter au panier"}</span>
               </motion.button>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/10">
-                <div className="flex items-center space-x-3">
+              {/* ─── Formulaire commande directe ─── */}
+              <div className="space-y-4">
+                <h3 className="text-base font-semibold">Commande rapide</h3>
+
+                {/* Récap */}
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
+                    <Image src={product.image} alt={product.name} fill className="object-contain p-1" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm truncate">{product.name}</p>
+                    <p className="text-white/60 text-xs">Qté: {quantity} · Total: €{(product.price * quantity).toFixed(2)}</p>
+                  </div>
+                </div>
+
+                {/* Champs */}
+                <div className="grid grid-cols-2 gap-3">
+                  <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="Nom *" className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-white/30" />
+                  <input type="text" value={formFirstName} onChange={(e) => setFormFirstName(e.target.value)} placeholder="Prénom *" className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-white/30" />
+                </div>
+                <input type="tel" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} placeholder="Téléphone *" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-white/30" />
+                <input type="text" value={formAddress} onChange={(e) => setFormAddress(e.target.value)} placeholder="Adresse *" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-white/30" />
+                <input type="text" value={formWilaya} onChange={(e) => setFormWilaya(e.target.value)} placeholder="Wilaya *" className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/40 focus:outline-none focus:border-white/30" />
+
+                {orderError && <p className="text-red-400 text-sm text-center" role="alert">{orderError}</p>}
+
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleDirectOrder} disabled={orderSubmitting || orderSuccess} className="w-full py-3 sm:py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                  {orderSubmitting ? (
+                    <span className="flex items-center gap-2"><Loader className="h-5 w-5 animate-spin" /> Envoi en cours...</span>
+                  ) : orderSuccess ? (
+                    <span className="flex items-center gap-2"><Check className="h-5 w-5" /> Commande envoyée !</span>
+                  ) : (
+                    <span>Commander maintenant · €{(product.price * quantity).toFixed(2)}</span>
+                  )}
+                </motion.button>
+              </div>
+
+              {/* Avantages */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/10">
+                <div className="flex items-center gap-3">
                   <Truck className="h-6 w-6 text-green-400" />
                   <div>
                     <p className="font-medium text-sm">Livraison gratuite</p>
                     <p className="text-white/60 text-xs">2-3 jours ouvrés</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <Shield className="h-6 w-6 text-blue-400" />
                   <div>
                     <p className="font-medium text-sm">Garantie 2 ans</p>
                     <p className="text-white/60 text-xs">Satisfait ou remboursé</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <RefreshCw className="h-6 w-6 text-purple-400" />
                   <div>
                     <p className="font-medium text-sm">Retour gratuit</p>
