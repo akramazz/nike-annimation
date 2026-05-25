@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -202,23 +202,40 @@ const accessoriesData: Product[] = [
 // Fallback jackets data - used when MongoDB is not available
 const fallbackJackets: Product[] = [
   { _id: "j-1", id: 101, name: "Veste Rouge", color: "Rouge", price: 69.99, stock: 25, image: "/products/rouge.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Élégance audacieuse", type: "jacket", likes: 45 },
+
   { _id: "j-2", id: 102, name: "Veste Gris", color: "Gris", price: 220.99, stock: 15, image: "/products/gris.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Sophistication absolue", type: "jacket", likes: 32 },
+
   { _id: "j-3", id: 103, name: "Veste Bleue", color: "Bleu", price: 59.99, stock: 30, image: "/products/blue.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Style moderne", type: "jacket", likes: 28 },
+
   { _id: "j-4", id: 104, name: "Veste Marron", color: "Marron", price: 33.99, stock: 40, image: "/products/maron.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Chaleur naturelle", type: "jacket", likes: 19 },
+
   { _id: "j-5", id: 105, name: "Veste Beige", color: "Beige", price: 59.99, stock: 20, image: "/products/beage.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Minimalisme élégant", type: "jacket", likes: 41 },
+
   { _id: "j-6", id: 106, name: "Veste Noire", color: "Noir", price: 59.99, stock: 35, image: "/products/noir.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Intemporelle", type: "jacket", likes: 67 },
+
   { _id: "j-7", id: 107, name: "Veste Verte", color: "Vert", price: 88.99, stock: 18, image: "/products/vert.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Fraîcheur originale", type: "jacket", likes: 23 },
+
   { _id: "j-8", id: 108, name: "Veste Pistache", color: "Pistache", price: 69.99, stock: 22, image: "/products/pistache.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Couleur vibrante", type: "jacket", likes: 36 },
-  { _id: "j-1", id: 101, name: "Veste Rouge", color: "Rouge", price: 69.99, stock: 25, image: "/products/akgeria-ceuor.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Élégance audacieuse", type: "jacket", likes: 45 },
-  { _id: "j-2", id: 102, name: "Veste Gris", color: "Gris", price: 220.99, stock: 15, image: "/products/alg16vert.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Sophistication absolue", type: "jacket", likes: 32 },
-  { _id: "j-3", id: 103, name: "Veste Bleue", color: "Bleu", price: 59.99, stock: 30, image: "/products/algerrose.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Style moderne", type: "jacket", likes: 28 },
-  { _id: "j-4", id: 104, name: "Veste Marron", color: "Marron", price: 33.99, stock: 40, image: "/products/algersoliel.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Chaleur naturelle", type: "jacket", likes: 19 },
-  { _id: "j-5", id: 105, name: "Veste Beige", color: "Beige", price: 59.99, stock: 20, image: "/products/anime-sezare.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Minimalisme élégant", type: "jacket", likes: 41 },
-  { _id: "j-6", id: 106, name: "Veste Noire", color: "Noir", price: 59.99, stock: 35, image: "/products/casbah.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Intemporelle", type: "jacket", likes: 67 },
-  { _id: "j-7", id: 107, name: "Veste Verte", color: "Vert", price: 88.99, stock: 18, image: "/products/marvel.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Fraîcheur originale", type: "jacket", likes: 23 },
-  { _id: "j-8", id: 108, name: "Veste Pistache", color: "Pistache", price: 69.99, stock: 22, image: "/products/sekiro.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Couleur vibrante", type: "jacket", likes: 36 },
-  { _id: "j-7", id: 107, name: "Veste Verte", color: "Vert", price: 88.99, stock: 18, image: "/products/vert.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Fraîcheur originale", type: "jacket", likes: 23 },
-  { _id: "j-8", id: 108, name: "Veste Pistache", color: "Pistache", price: 69.99, stock: 22, image: "/products/pistache.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Couleur vibrante", type: "jacket", likes: 36 },
+
+  { _id: "j-9", id: 109, name: "Algeria Cœur", color: "Noir", price: 79.99, stock: 20, image: "/products/akgeria-ceuor.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Design Algeria édition limitée", type: "jacket", likes: 15 },
+
+  { _id: "j-10", id: 110, name: "Alg16 Vert", color: "Vert", price: 84.99, stock: 18, image: "/products/alg16vert.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Collection streetwear Algérie", type: "jacket", likes: 21 },
+
+  { _id: "j-11", id: 111, name: "Alger Rose", color: "Rose", price: 74.99, stock: 25, image: "/products/algerrose.webp", category: "Luxury", sizes: ["XS","S","M","L","XL"], description: "Style urbain premium", type: "jacket", likes: 19 },
+
+  { _id: "j-12", id: 112, name: "Alger Soleil", color: "Orange", price: 89.99, stock: 12, image: "/products/algersoliel.webp", category: "Luxury", sizes: ["XS","S","M","L","XL"], description: "Édition soleil streetwear", type: "jacket", likes: 26 },
+
+  { _id: "j-13", id: 113, name: "Anime Sezare", color: "Noir", price: 99.99, stock: 10, image: "/products/anime-sezare.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Inspiration anime moderne", type: "jacket", likes: 41 },
+
+  { _id: "j-14", id: 114, name: "Casbah", color: "Beige", price: 69.99, stock: 20, image: "/products/casbah.webp", category: "Classic", sizes: ["XS","S","M","L","XL"], description: "Inspiré de la Casbah d’Alger", type: "jacket", likes: 33 },
+
+  { _id: "j-15", id: 115, name: "Free Palestine", color: "Noir", price: 79.99, stock: 30, image: "/products/freepalastine.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Design engagé premium", type: "jacket", likes: 58 },
+
+  { _id: "j-16", id: 116, name: "Marvel Edition", color: "Rouge", price: 109.99, stock: 14, image: "/products/marvel.webp", category: "Luxury", sizes: ["XS","S","M","L","XL"], description: "Collection inspirée comics", type: "jacket", likes: 64 },
+
+  { _id: "j-17", id: 117, name: "Oran Street", color: "Orange", price: 72.99, stock: 17, image: "/products/oran.webp", category: "Classic", sizes: ["XS","S","M","L","XL"], description: "Style inspiré d’Oran", type: "jacket", likes: 22 },
+
+  { _id: "j-18", id: 118, name: "Sekiro", color: "Noir", price: 119.99, stock: 9, image: "/products/sekiro.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Design gaming japonais", type: "jacket", likes: 77 },
 ];
 
 export default function ProductsPage() {
