@@ -99,17 +99,19 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <Image
-          src={currentImage}
-          alt={product.name}
-          fill
-          className={`object-contain p-6 sm:p-8 transition-transform duration-700 ${
-            bgZoom ? "scale-155" : "hover:scale-105"
-          }`}
-          sizes="(max-width: 768px) 100vw, 50vw"
-          onLoadingComplete={() => setIsLoading(false)}
-          unoptimized={isExternal}
-        />
+          <Image
+            src={currentImage}
+            alt={product.name}
+            fill
+            className={`object-contain p-6 sm:p-8 transition-transform duration-700 ${
+              bgZoom ? "scale-155" : "hover:scale-105"
+            }`}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            onLoadingComplete={() => setIsLoading(false)}
+            // Donne une chance aux images /public de charger sans problème.
+            // (Next/Image gère déjà /public, mais le flag unoptimized peut casser certains cas)
+            unoptimized={false}
+          />
 
         {/* Zoom Badge */}
         <div className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-xl rounded-full">
@@ -216,7 +218,8 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 alt={`${product.name} en plein écran`}
                 fill
                 className="object-contain"
-                unoptimized={isExternal}
+                // Même raison que ci-dessus.
+                unoptimized={false}
                 priority
               />
             </div>
