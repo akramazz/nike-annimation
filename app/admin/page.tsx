@@ -78,6 +78,28 @@ export default function AdminDashboard() {
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginSubmitting, setLoginSubmitting] = useState(false);
+  const [availableImages, setAvailableImages] = useState<string[]>([]);
+  const [imagePreview, setImagePreview] = useState<string>("/products/default.webp");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(apiUrl("/api/products/images"), {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (!cancelled && data.success && Array.isArray(data.images)) {
+          setAvailableImages(data.images);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -935,8 +957,44 @@ export default function AdminDashboard() {
                     name="image"
                     placeholder="Image (URL ou chemin, ex. /products/noir.webp)"
                     defaultValue={editingItem?.image}
+                    onChange={(e) => {
+                      if (editingItem) {
+                        setEditingItem({ ...editingItem, image: e.target.value });
+                      }
+                      setImagePreview(getProductImage(e.target.value));
+                    }}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
                   />
+                  <select
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    value={getProductImage(editingItem?.image)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (editingItem) {
+                        setEditingItem({ ...editingItem, image: value });
+                      }
+                      setImagePreview(value);
+                    }}
+                  >
+                    <option value="">-- Choisir une image --</option>
+                    {availableImages.map((img) => (
+                      <option key={img} value={`/products/${img}`}>
+                        {img}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 border border-white/20">
+                      <img
+                        src={imagePreview}
+                        alt="Aperçu image"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className="text-white/70 text-sm">
+                      {availableImages.length} image(s) disponible(s)
+                    </span>
+                  </div>
                   <input
                     name="sizes"
                     placeholder={`Tailles séparées par des virgules (défaut: ${DEFAULT_SIZES.join(",")})`}
