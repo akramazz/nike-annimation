@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES } from "@/lib/product-normalize";
+import { getProductImage } from "@/lib/image-utils";
 import {
   Package,
   ShoppingCart,
@@ -837,9 +838,7 @@ export default function AdminDashboard() {
                   const imageInput = String(formData.get("image") ?? "").trim();
                   const color = String(formData.get("color") ?? "").trim();
                   const normalizedImage = imageInput
-                    ? (imageInput.startsWith("/products/")
-                        ? imageInput
-                        : `/products/${imageInput.replace(/^\/+/, "")}`)
+                    ? getProductImage(imageInput)
                     : `/products/${color.toLowerCase().replace(/\s+/g, "-")}.webp`;
                   const productData = {
                     name: formData.get("name"),
@@ -973,7 +972,7 @@ export default function AdminDashboard() {
                   <div className="space-y-4 max-h-60 overflow-y-auto">
                     {editingItem.items?.map((item: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                        <img src={item.image || "/products/default.webp"} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
+                        <ProductImage src={item.image || "/products/default.webp"} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
                         <div className="flex-1">
                           <p className="font-medium">{item.name}</p>
                           <p className="text-white/60 text-sm">Taille: {item.size} | Qté: {item.quantity}</p>

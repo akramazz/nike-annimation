@@ -9,7 +9,6 @@ import { normalizeProductImage } from "@/lib/product-normalize";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
-import Image from "next/image";
 export default function CheckoutPage() {
   const { items, total, clearCart, isHydrated } = useCart();
   const router = useRouter();
@@ -224,7 +223,7 @@ export default function CheckoutPage() {
             </motion.button>
             <div className="flex items-center space-x-2">
               <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
-                <Image src="/logo.png" alt="DripBazzarDZ" width={32} height={32} className="object-cover rounded-full" />
+                <img src="/logo.png" alt="DripBazzarDZ" className="w-9 h-9 object-cover rounded-full" />
               </div>
               <span className="text-white font-bold text-xl">DripBazzarDZ</span>
             </div>

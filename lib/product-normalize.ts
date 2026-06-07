@@ -1,5 +1,5 @@
 export const DEFAULT_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-export { normalizeProductImage } from "./image-normalize";
+export { getProductImage as normalizeProductImage } from "./image-utils";
 
 export function normalizeProduct<T extends { id?: number; name?: string; color?: string; image?: string; price?: number; stock?: number; description?: string; category?: string; sizes?: string[] }>(data: T) {
   return {
@@ -16,3 +16,5 @@ export function normalizeProduct<T extends { id?: number; name?: string; color?:
 }
 
 export type ProductRecord = ReturnType<typeof normalizeProduct>;
+
+export { getProductImage, DEFAULT_PRODUCT_IMAGE } from "./image-utils";

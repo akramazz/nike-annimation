@@ -1,30 +1,24 @@
 "use client";
 
 import { useCallback } from "react";
-import { normalizeProductImage } from "@/lib/image-normalize";
+import ProductImage from "@/app/components/products/ProductImage";
+import { getProductImage } from "@/lib/image-utils";
 
-export default function ProductImg({
-  src,
-  alt,
-  className,
-  onError,
-  ...rest
-}: React.ImgHTMLAttributes<HTMLImageElement>) {
-  const fallback = "/products/default.webp";
-  const base = normalizeProductImage(typeof src === "string" ? src : undefined);
+interface ProductImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  src?: string | null | undefined;
+  alt?: string;
+}
+
+export default function ProductImg({ src, alt, className, onError, ...rest }: ProductImgProps) {
+  const resolved = getProductImage(src);
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-      (e.target as HTMLImageElement).src = fallback;
+      (e.target as HTMLImageElement).src = "/products/default.webp";
       onError?.(e);
     },
     [onError],
   );
-
-  const resolved = (() => {
-    if (base.startsWith("http://") || base.startsWith("https://")) return base;
-    return base.toLowerCase();
-  })();
 
   return (
     <img

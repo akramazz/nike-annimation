@@ -1,5 +1,5 @@
 import { apiUrl } from "@/lib/api-client";
-import { normalizeProductImage } from "@/lib/product-normalize";
+import { getProductImage } from "@/lib/image-utils";
 
 export interface UnifiedProduct {
   _id: string;
@@ -41,7 +41,7 @@ export async function getProduct(id: string): Promise<UnifiedProduct | null> {
       (p: UnifiedProduct) => p._id === id || String(p.id) === id,
     );
 
-    const normalized = found ? { ...found, image: normalizeProductImage(found.image) } : undefined;
+    const normalized = found ? { ...found, image: getProductImage(found.image) } : undefined;
 
     fetchCache.set(id, normalized ?? null);
     return normalized ?? null;
@@ -65,7 +65,7 @@ export async function getAllProducts(
     if (data.success && Array.isArray(data.products)) {
       return (data.products as UnifiedProduct[]).map((p) => ({
         ...p,
-        image: normalizeProductImage(p.image),
+        image: getProductImage(p.image),
       }));
     }
     return [];
