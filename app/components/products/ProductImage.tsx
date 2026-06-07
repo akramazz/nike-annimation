@@ -12,7 +12,7 @@ function toLowerIfRelative(src: string): string {
 export default function ProductImage(props: React.ComponentProps<typeof Image>) {
   const { src, alt, onError, ...rest } = props;
   const fallback = "/products/default.webp";
-  const normalizedBase = normalizeProductImage(src);
+  const normalizedBase = normalizeProductImage(typeof src === "string" ? src : undefined);
   const [failed, setFailed] = useState(false);
 
   const handleError = useCallback(

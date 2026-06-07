@@ -17,16 +17,20 @@ export function normalizeProductImage(raw?: string | null): string {
   }
 
   if (path.startsWith("/products/")) {
+    if (!path.includes(".")) path = path.replace(/\/?$/, ".webp");
     return path;
   }
 
   if (path.startsWith("products/")) {
-    return `/${path}`;
+    const p = `/${path}`;
+    if (!p.includes(".")) return p.replace(/\/?$/, ".webp");
+    return p;
   }
 
   const filename = path.startsWith("/") ? path.slice(1) : path;
+  const final = filename.includes(".") ? filename : `${filename}.webp`;
 
-  return `/products/${filename}`;
+  return `/products/${final}`;
 }
 
 export function publicProductImageExists(filename: string): boolean {

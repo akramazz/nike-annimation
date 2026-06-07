@@ -48,7 +48,7 @@ export default async function ProductDetailPage({
 }: {
   params: { id: string };
 }) {
-  let product: ReturnType<typeof getProduct>;
+  let product: UnifiedProduct | null = null;
 
   try {
     product = await getProduct(params.id);

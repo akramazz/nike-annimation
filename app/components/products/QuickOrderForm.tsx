@@ -17,7 +17,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import ProductImage from "@/components/products/ProductImage";
+import ProductImage from "@/app/components/products/ProductImage";
 import { normalizeProductImage } from "@/lib/product-normalize";
 
 // ── Algeria wilayas ──────────────────────────────────────────────────────────

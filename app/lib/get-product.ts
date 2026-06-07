@@ -1,5 +1,5 @@
 import { apiUrl } from "@/lib/api-client";
-import { normalizeProductImage } from "./product-normalize";
+import { normalizeProductImage } from "@/lib/product-normalize";
 
 export interface UnifiedProduct {
   _id: string;

@@ -11,7 +11,7 @@ export default function ProductImg({
   ...rest
 }: React.ImgHTMLAttributes<HTMLImageElement>) {
   const fallback = "/products/default.webp";
-  const base = normalizeProductImage(src);
+  const base = normalizeProductImage(typeof src === "string" ? src : undefined);
 
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
