@@ -42,10 +42,15 @@ export async function POST(request: NextRequest) {
       ? body.sizes.slice(0, 10).map((s: string) => String(s).slice(0, 8))
       : ["XS", "S", "M", "L", "XL", "XXL"];
 
+    const image = String(body.image || "").slice(0, 500);
+    const normalizedImage = image
+      ? (image.startsWith("/products/") ? image : `/products/${image.replace(/^\/+/, "")}`)
+      : `/products/default.webp`;
+
     const product = await Product.create({
       name,
       color: String(body.color || "").slice(0, 80) || "Default",
-      image: String(body.image || "").slice(0, 500) || `/products/default.webp`,
+      image: normalizedImage,
       price: Number(body.price) || 0,
       stock: Number(body.stock) || 0,
       description: String(body.description || "").slice(0, 2000),
@@ -88,12 +93,17 @@ export async function PUT(request: NextRequest) {
       ? body.sizes.slice(0, 10).map((s: string) => String(s).slice(0, 8))
       : existing.sizes;
 
+    const rawImage = String(body.image || existing.image).slice(0, 500);
+    const image = rawImage
+      ? (rawImage.startsWith("/products/") ? rawImage : `/products/${rawImage.replace(/^\/+/, "")}`)
+      : existing.image;
+
     const updated = await Product.findByIdAndUpdate(
       id,
       {
         name: String(body.name || existing.name).slice(0, 120),
         color: String(body.color || existing.color).slice(0, 80),
-        image: String(body.image || existing.image).slice(0, 500),
+        image,
         price: Number(body.price) || existing.price,
         stock: Number(body.stock) || existing.stock,
         description: String(body.description || existing.description).slice(0, 2000),

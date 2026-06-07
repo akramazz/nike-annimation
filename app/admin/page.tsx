@@ -836,6 +836,11 @@ export default function AdminDashboard() {
                     .filter(Boolean);
                   const imageInput = String(formData.get("image") ?? "").trim();
                   const color = String(formData.get("color") ?? "").trim();
+                  const normalizedImage = imageInput
+                    ? (imageInput.startsWith("/products/")
+                        ? imageInput
+                        : `/products/${imageInput.replace(/^\/+/, "")}`)
+                    : `/products/${color.toLowerCase().replace(/\s+/g, "-")}.webp`;
                   const productData = {
                     name: formData.get("name"),
                     color,
@@ -843,9 +848,7 @@ export default function AdminDashboard() {
                     stock: parseInt(formData.get("stock") as string, 10),
                     category: formData.get("category"),
                     description: formData.get("description"),
-                    image:
-                      imageInput ||
-                      `/products/${color.toLowerCase().replace(/\s+/g, "-")}.webp`,
+                    image: normalizedImage,
                     ...(sizes.length > 0 ? { sizes } : {}),
                   };
 
