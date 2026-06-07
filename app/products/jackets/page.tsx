@@ -7,6 +7,7 @@ import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import Link from "next/link";
+import ProductImg from "@/components/products/ProductImg";
 
 interface Product {
   _id: string;
@@ -96,7 +97,7 @@ export default function JacketsPage() {
                     className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 cursor-pointer"
                   >
                     <div className="relative h-48 sm:h-64 overflow-hidden">
-                      <img
+                      <ProductImg
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

@@ -1,11 +1,12 @@
 export const DEFAULT_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+export { normalizeProductImage } from "./image-normalize";
 
 export function normalizeProduct<T extends { id?: number; name?: string; color?: string; image?: string; price?: number; stock?: number; description?: string; category?: string; sizes?: string[] }>(data: T) {
   return {
     id: data.id ?? 0,
     name: String(data.name ?? "").slice(0, 120),
     color: String(data.color ?? "").slice(0, 80),
-    image: String(data.image ?? "/products/default.webp").slice(0, 500),
+    image: normalizeProductImage(data.image),
     price: Math.max(0, Number(data.price ?? 0)),
     stock: Math.max(0, Math.floor(Number(data.stock ?? 0))),
     description: String(data.description ?? "").slice(0, 2000),

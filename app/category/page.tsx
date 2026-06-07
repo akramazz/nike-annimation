@@ -8,7 +8,7 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import CategoryScene from "../components/CategoryScene";
 import { apiUrl } from "@/lib/api-client";
-import { DEFAULT_SIZES } from "@/lib/product-normalize";
+import { DEFAULT_SIZES, normalizeProductImage } from "@/lib/product-normalize";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 
@@ -212,7 +212,7 @@ export default function CategoryPage() {
         id: Number(selectedProduct._id) || selectedProduct.id!,
         name: selectedProduct.name,
         price: selectedProduct.price,
-        image: selectedProduct.image,
+        image: normalizeProductImage(selectedProduct.image),
         color: selectedProduct.color,
         size: selectedSize,
       },
@@ -353,6 +353,7 @@ export default function CategoryPage() {
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "/products/default.webp"; }}
                       />
                       
                       {/* Overlay avec effet de brillance */}
@@ -479,6 +480,7 @@ export default function CategoryPage() {
                     src={selectedProduct.image}
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = "/products/default.webp"; }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   

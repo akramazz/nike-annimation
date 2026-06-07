@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import AddToCartButton from "./AddToCartButton";
 import ProductBenefits from "./ProductBenefits";
 import CategoryBadge from "./CategoryBadge";
+import { normalizeProductImage } from "@/lib/product-normalize";
 
 export interface UnifiedProduct {
   _id: string;
@@ -92,7 +93,7 @@ export default function ProductInfo({ product, initialSize = null }: ProductInfo
         productId={product._id}
         productName={product.name}
         productPrice={currentPrice}
-        productImage={product.image}
+        productImage={normalizeProductImage(product.image)}
         productColor={product.color}
         selectedSize={selectedSize || product.sizes[0] || "Unique"}
         quantity={quantity}

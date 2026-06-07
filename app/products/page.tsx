@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import ProductImg from "../components/products/ProductImg";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { apiUrl } from "@/lib/api-client";
+import { normalizeProductImage } from "@/lib/product-normalize";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, Heart, Eye, Link as LinkIcon } from "lucide-react";
@@ -419,12 +420,10 @@ export default function ProductsPage() {
                   className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
-                    <Image
+                    <ProductImg
                       src={product.image}
                       alt={product.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 px-2 sm:px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
@@ -509,7 +508,7 @@ export default function ProductsPage() {
                    
                     <div className="flex gap-2">
                       <motion.button
-                        onClick={(e) => { e.stopPropagation(); addItem({ id: product.id || 1, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSizes[product._id] || 'Unique' }); }}
+                        onClick={(e) => { e.stopPropagation(); addItem({ id: product.id || 1, name: product.name, price: product.price, image: normalizeProductImage(product.image), color: product.color, size: selectedSizes[product._id] || 'Unique' }); }}
                         className="flex-1 py-2 bg-white text-black text-xs sm:text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-1 sm:gap-2"
                       >
                         <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4" />

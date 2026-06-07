@@ -7,7 +7,6 @@ import {
   type FormEvent,
   type ChangeEvent,
 } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -18,6 +17,8 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
+import ProductImage from "@/components/products/ProductImage";
+import { normalizeProductImage } from "@/lib/product-normalize";
 
 // ── Algeria wilayas ──────────────────────────────────────────────────────────
 const ALGERIAN_WILAYAS = [
@@ -147,27 +148,27 @@ export default function QuickOrderForm({
         const numericId =
           typeof productId === "string" ? Number(productId) || 0 : productId;
 
-        const orderData = {
-          customerName: `${form.firstName} ${form.name}`.trim(),
-          email: form.email || "no-reply@order.local",
-          phone: form.phone,
-          address: form.address,
-          city: form.wilaya,
-          postalCode: "",
-          country: "Algérie",
-          items: [
-            {
-              productId: productId,
-              name: productName,
-              price: productPrice,
-              quantity,
-              color: productColor || "",
-              size: selectedSize,
-              image: productImage,
-            },
-          ],
-          total: totalAmount,
-        };
+      const orderData = {
+        customerName: `${form.firstName} ${form.name}`.trim(),
+        email: form.email || "no-reply@order.local",
+        phone: form.phone,
+        address: form.address,
+        city: form.wilaya,
+        postalCode: "",
+        country: "Algérie",
+        items: [
+          {
+            productId: productId,
+            name: productName,
+            price: productPrice,
+            quantity,
+            color: productColor || "",
+            size: selectedSize,
+            image: normalizeProductImage(productImage),
+          },
+        ],
+        total: totalAmount,
+      };
 
         const res = await fetch(apiUrl("/api/orders"), {
           method: "POST",
@@ -254,15 +255,11 @@ export default function QuickOrderForm({
       {!compact && (
         <div className="flex items-center gap-3 pb-4 border-b border-white/10 mb-4">
           <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
-            <Image
+            <ProductImage
               src={productImage}
               alt={productName}
               fill
               className="object-contain p-1.5"
-              unoptimized={
-                productImage.startsWith("http://") ||
-                productImage.startsWith("https://")
-              }
             />
           </div>
           <div className="flex-1 min-w-0">

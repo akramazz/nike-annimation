@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ShoppingBag, Eye, Heart, Share2, Check, Copy, Twitter, Facebook, Linkedin } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ProductImage from "./products/ProductImage";
+import { normalizeProductImage } from "@/lib/product-normalize";
 
 interface Product {
   _id?: string;
@@ -99,7 +100,7 @@ function ProductCard({
       setShowSizeSelector(true);
       return;
     }
-    addItem({ id: productId, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSize });
+    addItem({ id: productId, name: product.name, price: product.price, image: normalizeProductImage(product.image), color: product.color, size: selectedSize });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -153,7 +154,7 @@ function ProductCard({
       )}
 
       <div className="relative w-full aspect-square mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10">
-        <Image src={product.image} alt={product.name} fill className="object-contain p-4" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" unoptimized={product.image.startsWith("http://") || product.image.startsWith("https://")} />
+        <ProductImage src={product.image} alt={product.name} fill className="object-contain p-4" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
         <div className="absolute top-4 right-4 flex flex-col space-y-2">
@@ -238,7 +239,7 @@ function ProductCard({
             if (!selectedSize) { setShowSizeSelector(true); return; }
             const productId = product.id || 0;
             for (let i = 0; i < qty; i++) {
-              addItem({ id: productId, name: product.name, price: product.price, image: product.image, color: product.color, size: selectedSize });
+              addItem({ id: productId, name: product.name, price: product.price, image: normalizeProductImage(product.image), color: product.color, size: selectedSize });
             }
             setIsAdded(true);
             setTimeout(() => setIsAdded(false), 2000);
@@ -322,7 +323,7 @@ export default function ProductSection() {
     if (!selectedProduct) return;
     if (!selectedSize) { alert("Veuillez sélectionner une taille"); return; }
     const productId = selectedProduct.id || 0;
-    addItem({ id: productId, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
+    addItem({ id: productId, name: selectedProduct.name, price: selectedProduct.price, image: normalizeProductImage(selectedProduct.image), color: selectedProduct.color, size: selectedSize });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
@@ -413,7 +414,7 @@ export default function ProductSection() {
                     const qty = parseInt((fd.get("qty") as string) || "1", 10);
                     if (!selectedSize) { return; }
                     for (let i = 0; i < qty; i++) {
-                      addItem({ id: selectedProduct.id || 0, name: selectedProduct.name, price: selectedProduct.price, image: selectedProduct.image, color: selectedProduct.color, size: selectedSize });
+                      addItem({ id: selectedProduct.id || 0, name: selectedProduct.name, price: selectedProduct.price, image: normalizeProductImage(selectedProduct.image), color: selectedProduct.color, size: selectedSize });
                     }
                     setIsAdded(true);
                     setTimeout(() => setIsAdded(false), 2000);
@@ -446,7 +447,7 @@ export default function ProductSection() {
               </div>
               <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
                 <div className="relative w-full h-full">
-                  <Image src={selectedProduct.image} alt={selectedProduct.name} fill className="object-contain p-4 sm:p-8" sizes="(max-width: 768px) 100vw, 50vw" unoptimized={selectedProduct.image.startsWith("http://") || selectedProduct.image.startsWith("https://")} />
+                  <ProductImage src={selectedProduct.image} alt={selectedProduct.name} fill className="object-contain p-4 sm:p-8" sizes="(max-width: 768px) 100vw, 50vw" />
                 </div>
               </div>
             </div>

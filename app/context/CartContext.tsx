@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { normalizeProductImage } from "@/lib/product-normalize";
 export interface CartItem {
   id: number;
   name: string;
@@ -37,20 +38,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem("cart");
-      if (savedCart) {
-        const parsed = JSON.parse(savedCart) as CartItem[];
-        if (Array.isArray(parsed)) {
-          setItems(parsed);
-        }
-      }
-    } catch {
-      /* ignore corrupt cart */
-    }
-    setIsHydrated(true);
-  }, []);
+   useEffect(() => {
+     try {
+       const savedCart = localStorage.getItem("cart");
+       if (savedCart) {
+         const parsed = JSON.parse(savedCart) as CartItem[];
+         if (Array.isArray(parsed)) {
+           setItems(parsed.map((item) => ({ ...item, image: normalizeProductImage(item.image) })));
+         }
+       }
+     } catch {
+       /* ignore corrupt cart */
+     }
+     setIsHydrated(true);
+   }, []);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -62,23 +63,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, isHydrated]);
 
    const addItem = (item: Omit<CartItem, "quantity">, quantity = 1) => {
-     const qty = Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(quantity)));
-     setItems((prev) => {
-       const existing = prev.find(
-         (i) => i.id === item.id && i.size === item.size,
-       );
-       if (existing) {
-         return prev.map((i) =>
-           i.id === item.id && i.size === item.size
-             ? {
-                 ...i,
-                 quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
-               }
-             : i,
-         );
-       }
-       return [...prev, { ...item, quantity: qty }];
-     });
+      const qty = Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(quantity)));
+      const normalizedItem = { ...item, image: normalizeProductImage(item.image) };
+      setItems((prev) => {
+        const existing = prev.find(
+          (i) => i.id === normalizedItem.id && i.size === normalizedItem.size,
+        );
+        if (existing) {
+          return prev.map((i) =>
+            i.id === normalizedItem.id && i.size === normalizedItem.size
+              ? {
+                  ...i,
+                  quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
+                  image: normalizeProductImage(i.image),
+                }
+              : i,
+          );
+        }
+        return [...prev, { ...normalizedItem, quantity: qty }];
+      });
      
      // Track AddToCart event
      if (typeof window !== 'undefined' && window.fbq) {

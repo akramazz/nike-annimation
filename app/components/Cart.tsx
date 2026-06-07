@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, CreditCard } from "lucide-react";
 import { useCart } from "../context/CartContext";
-import Image from "next/image";
+import ProductImage from "./products/ProductImage";
 import { useRouter } from "next/navigation";
 
 export default function Cart() {
@@ -129,15 +129,11 @@ export default function Cart() {
                       className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10"
                     >
                       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
-                        <Image
+                        <ProductImage
                           src={item.image}
                           alt={item.name}
                           fill
                           className="object-cover"
-                          unoptimized={
-                            item.image.startsWith("http://") ||
-                            item.image.startsWith("https://")
-                          }
                         />
                       </div>
 

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import ProductImage from "@/components/products/ProductImage";
+import ProductImg from "@/components/products/ProductImg";
 import { useCart } from "../../../context/CartContext";
 import {
   ArrowLeft,
@@ -424,7 +425,7 @@ export default function AccessoryDetailPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10">
-              <Image
+              <ProductImage
                 src={product.image}
                 alt={product.name}
                 fill
@@ -507,7 +508,7 @@ export default function AccessoryDetailPage() {
               {/* Produit + prix (mini vue comme [id] moderne) */}
               <div className="flex items-start gap-4">
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
-                  <Image src={product.image} alt={product.name} fill className="object-contain p-2" />
+                  <ProductImage src={product.image} alt={product.name} fill className="object-contain p-2" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="font-bold text-lg sm:text-xl truncate">{product.name}</h2>
@@ -554,7 +555,7 @@ export default function AccessoryDetailPage() {
                 {/* Récap */}
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
-                    <Image src={product.image} alt={product.name} fill className="object-contain p-1" />
+                    <ProductImage src={product.image} alt={product.name} fill className="object-contain p-1" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm truncate">{product.name}</p>

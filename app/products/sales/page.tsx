@@ -6,6 +6,7 @@ import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { Tag, Flame } from "lucide-react";
+import ProductImg from "../../components/products/ProductImg";
 
 interface Product {
   _id: string;
@@ -103,7 +104,7 @@ export default function SalesPage() {
                       <div className="absolute top-4 right-4 z-10 px-3 py-1 bg-red-500/20 backdrop-blur-xl rounded-full text-red-400 text-xs font-medium border border-red-500/30">
                         -{Math.round((discount / originalPrice) * 100)}%
                       </div>
-                      <img
+                      <ProductImg
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

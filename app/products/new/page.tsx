@@ -6,6 +6,7 @@ import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { Sparkles } from "lucide-react";
+import ProductImg from "../../components/products/ProductImg";
 
 interface Product {
   _id: string;
@@ -92,11 +93,11 @@ export default function NewProductsPage() {
                       <Sparkles className="h-3 w-3" />
                       Nouveau
                     </div>
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                      <ProductImg
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   </div>
                   <div className="p-5">

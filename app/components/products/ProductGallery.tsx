@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, X, ZoomIn } from "lucide-react";
+import ProductImage from "@/app/components/products/ProductImage";
 
 interface Product {
   _id: string;
@@ -99,7 +99,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-          <Image
+          <ProductImage
             src={currentImage}
             alt={product.name}
             fill
@@ -108,9 +108,6 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             }`}
             sizes="(max-width: 768px) 100vw, 50vw"
             onLoadingComplete={() => setIsLoading(false)}
-            // Donne une chance aux images /public de charger sans problème.
-            // (Next/Image gère déjà /public, mais le flag unoptimized peut casser certains cas)
-            unoptimized={false}
           />
 
         {/* Zoom Badge */}
@@ -213,13 +210,11 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             </button>
 
             <div className="relative w-[90vw] h-[90vh] max-w-5xl">
-              <Image
+              <ProductImage
                 src={currentImage}
                 alt={`${product.name} en plein écran`}
                 fill
                 className="object-contain"
-                // Même raison que ci-dessus.
-                unoptimized={false}
                 priority
               />
             </div>

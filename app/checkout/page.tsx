@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import ProductImage from "../components/products/ProductImage";
+import { normalizeProductImage } from "@/lib/product-normalize";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
@@ -121,7 +122,7 @@ export default function CheckoutPage() {
         quantity: item.quantity,
         color: item.color,
         size: item.size,
-        image: item.image,
+        image: normalizeProductImage(item.image),
       })),
       total,
     };
@@ -374,16 +375,12 @@ export default function CheckoutPage() {
                       className="flex items-center space-x-4"
                     >
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-contain p-2"
-                          unoptimized={
-                            item.image.startsWith("http://") ||
-                            item.image.startsWith("https://")
-                          }
-                        />
+                      <ProductImage
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-contain p-2"
+                      />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium">{item.name}</h3>

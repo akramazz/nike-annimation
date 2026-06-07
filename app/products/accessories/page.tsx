@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import ProductImg from "@/components/products/ProductImg";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { useCart } from "../../context/CartContext";
@@ -189,12 +189,10 @@ export default function AccessoriesPage() {
                   className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
-                  <Image
+                  <ProductImg
                     src={product.image}
                     alt={product.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   

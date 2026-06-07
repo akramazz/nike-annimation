@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ShoppingBag, Check, Loader } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { apiUrl } from "@/lib/api-client";
+import { normalizeProductImage } from "@/lib/product-normalize";
 
 interface AddToCartButtonProps {
   productId: string | number | undefined;
@@ -75,7 +75,7 @@ export default function AddToCartButton({
         id: numericId,
         name: productName,
         price: productPrice,
-        image: productImage,
+        image: normalizeProductImage(productImage),
         color: productColor ?? "",
         size: selectedSize,
       },
