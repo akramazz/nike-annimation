@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES } from "@/lib/product-normalize";
 import { getProductImage } from "@/lib/image-utils";
+import ProductImage from "@/app/components/products/ProductImage";
 import {
   Package,
   ShoppingCart,
@@ -696,8 +697,8 @@ export default function AdminDashboard() {
                       >
                         <td className="p-4">
                           <div className="flex -space-x-2">
-                            {order.items?.slice(0, 3).map((item: any, idx: number) => (
-                              <img
+                             {order.items?.slice(0, 3).map((item: any, idx: number) => (
+                              <ProductImage
                                 key={idx}
                                 src={item.image || "/products/default.webp"}
                                 alt={item.name}
@@ -859,9 +860,9 @@ export default function AdminDashboard() {
                     .filter(Boolean);
                   const imageInput = String(formData.get("image") ?? "").trim();
                   const color = String(formData.get("color") ?? "").trim();
-                  const normalizedImage = imageInput
-                    ? getProductImage(imageInput)
-                    : `/products/${color.toLowerCase().replace(/\s+/g, "-")}.webp`;
+                  const normalizedImage = getProductImage(
+                    imageInput || color || undefined,
+                  );
                   const productData = {
                     name: formData.get("name"),
                     color,

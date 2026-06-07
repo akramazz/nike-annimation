@@ -31,5 +31,6 @@ export function getProductImage(input?: string | null): string {
   }
 
   const filename = path.startsWith("/") ? path.slice(1) : path;
-  return `/products/${filename}`;
+  const final = filename.includes(".") ? filename : `${filename}.webp`;
+  return `/products/${final}`;
 }

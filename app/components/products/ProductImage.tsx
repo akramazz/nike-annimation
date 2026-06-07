@@ -6,17 +6,16 @@ import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
 interface ProductImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src?: string | null | undefined;
   alt?: string;
-  width?: number;
-  height?: number;
 }
 
 export default function ProductImage({
   src: rawSrc,
   alt = "",
-  width,
-  height,
   className,
   onError,
+  width,
+  height,
+  style,
   ...rest
 }: ProductImageProps) {
   const resolved = getProductImage(rawSrc);
@@ -32,11 +31,9 @@ export default function ProductImage({
 
   const finalSrc = failed ? DEFAULT_PRODUCT_IMAGE : resolved;
 
-  const style: React.CSSProperties = {};
-  if (typeof width === "number" && typeof height === "number") {
-    style.width = `${width}px`;
-    style.height = `${height}px`;
-  }
+  const mergedStyle: React.CSSProperties = { ...style };
+  if (typeof width === "number") mergedStyle.width = `${width}px`;
+  if (typeof height === "number") mergedStyle.height = `${height}px`;
 
   const imgClassName = [
     "product-image",
@@ -50,7 +47,7 @@ export default function ProductImage({
       src={finalSrc}
       alt={alt}
       className={imgClassName || undefined}
-      style={Object.keys(style).length > 0 ? style : undefined}
+      style={Object.keys(mergedStyle).length > 0 ? mergedStyle : undefined}
       {...rest}
       onError={handleError}
     />
