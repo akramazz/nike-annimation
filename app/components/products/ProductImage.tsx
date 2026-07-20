@@ -1,24 +1,37 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  type ImgHTMLAttributes,
+  type CSSProperties,
+  type SyntheticEvent,
+} from "react";
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
 
-interface ProductImageProps extends Omit<
-  React.ImgHTMLAttributes<HTMLImageElement>,
-  "src"
-> {
-  src?: string | null | undefined;
+export interface ProductImageProps
+  extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
+  src?: string | null;
   alt?: string;
-  /** Comme next/image : remplit le parent `relative` */
+  /** Remplit le parent `position: relative` (équivalent next/image fill) */
   fill?: boolean;
+  /** Ignoré (compat next/image) */
   sizes?: string;
+  /** Ignoré (compat next/image) */
+  priority?: boolean;
+  /** Callback quand l'image a chargé (compat next/image) */
   onLoadingComplete?: () => void;
 }
 
+/**
+ * Affiche une image produit de façon fiable avec <img>.
+ * Gère fill, fallback default.webp, et reset d'erreur au changement de src.
+ */
 export default function ProductImage({
   src: rawSrc,
   alt = "",
-  className,
+  className = "",
   onError,
   onLoad,
   width,
@@ -26,22 +39,33 @@ export default function ProductImage({
   style,
   fill = false,
   sizes: _sizes,
+  priority: _priority,
   onLoadingComplete,
   ...rest
 }: ProductImageProps) {
   const resolved = getProductImage(rawSrc);
   const [failed, setFailed] = useState(false);
 
+  useEffect(() => {
+    setFailed(false);
+  }, [resolved]);
+
   const handleError = useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    (e: SyntheticEvent<HTMLImageElement, Event>) => {
+      const img = e.currentTarget;
+      // Évite une boucle infinie si default.webp manque aussi
+      if (img.src.endsWith(DEFAULT_PRODUCT_IMAGE) || failed) {
+        onError?.(e);
+        return;
+      }
       setFailed(true);
       onError?.(e);
     },
-    [onError],
+    [failed, onError],
   );
 
   const handleLoad = useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    (e: SyntheticEvent<HTMLImageElement, Event>) => {
       onLoadingComplete?.();
       onLoad?.(e);
     },
@@ -50,8 +74,13 @@ export default function ProductImage({
 
   const finalSrc = failed ? DEFAULT_PRODUCT_IMAGE : resolved;
 
-  const mergedStyle: React.CSSProperties = { ...style };
-  if (!fill) {
+  const mergedStyle: CSSProperties = { ...(style || {}) };
+  if (fill) {
+    mergedStyle.position = "absolute";
+    mergedStyle.inset = 0;
+    mergedStyle.width = "100%";
+    mergedStyle.height = "100%";
+  } else {
     if (typeof width === "number") mergedStyle.width = `${width}px`;
     if (typeof height === "number") mergedStyle.height = `${height}px`;
   }
@@ -59,7 +88,7 @@ export default function ProductImage({
   const imgClassName = [
     "product-image",
     fill ? "absolute inset-0 h-full w-full" : "",
-    typeof className === "string" ? className : "",
+    className,
   ]
     .filter(Boolean)
     .join(" ");
@@ -70,9 +99,11 @@ export default function ProductImage({
       src={finalSrc}
       alt={alt}
       className={imgClassName || undefined}
-      style={Object.keys(mergedStyle).length > 0 ? mergedStyle : undefined}
-      width={fill ? undefined : width}
-      height={fill ? undefined : height}
+      style={mergedStyle}
+      width={fill ? undefined : typeof width === "number" ? width : undefined}
+      height={fill ? undefined : typeof height === "number" ? height : undefined}
+      loading="eager"
+      decoding="async"
       {...rest}
       onError={handleError}
       onLoad={handleLoad}

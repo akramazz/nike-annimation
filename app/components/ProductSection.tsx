@@ -154,7 +154,13 @@ function ProductCard({
       )}
 
       <div className="relative w-full aspect-square mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10">
-        <ProductImage src={product.image} alt={product.name} fill className="object-contain p-4" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+        <ProductImage
+          key={normalizeProductImage(product.image)}
+          src={product.image}
+          alt={product.name}
+          fill
+          className="object-contain p-4"
+        />
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
         <div className="absolute top-4 right-4 flex flex-col space-y-2">
@@ -447,7 +453,13 @@ export default function ProductSection() {
               </div>
               <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
                 <div className="relative w-full h-full">
-                  <ProductImage src={selectedProduct.image} alt={selectedProduct.name} fill className="object-contain p-4 sm:p-8" sizes="(max-width: 768px) 100vw, 50vw" />
+                  <ProductImage
+                    key={normalizeProductImage(selectedProduct.image)}
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    fill
+                    className="object-contain p-4 sm:p-8"
+                  />
                 </div>
               </div>
             </div>

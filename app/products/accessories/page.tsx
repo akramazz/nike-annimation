@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import ProductImg from "@/components/products/ProductImg";
+import ProductImg from "@/app/components/products/ProductImg";
 import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { useCart } from "../../context/CartContext";

@@ -122,8 +122,8 @@ const nextConfig = {
     return config;
   },
 
-  // Configuration pour le output
-  output: "standalone",
+  // Configuration pour le output (évite standalone qui omet public/ si mal déployé)
+  // output: "standalone",
 
   // Configuration pour le trailing slash
   trailingSlash: false,

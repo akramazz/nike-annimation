@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import CategoryScene from "../components/CategoryScene";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES, normalizeProductImage } from "@/lib/product-normalize";
+import ProductImage from "@/app/components/products/ProductImage";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 
@@ -349,11 +350,10 @@ export default function CategoryPage() {
                     {/* Image du produit avec effet 3D */}
                     <div className="relative h-64 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
-                      <img
+                      <ProductImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        onError={(e) => { (e.target as HTMLImageElement).src = "/products/default.webp"; }}
                       />
                       
                       {/* Overlay avec effet de brillance */}
@@ -476,11 +476,10 @@ export default function CategoryPage() {
               <div className="grid md:grid-cols-2 gap-8 p-8">
                 {/* Image du produit */}
                 <div className="relative h-80 md:h-full rounded-2xl overflow-hidden">
-                  <img
+                  <ProductImage
                     src={selectedProduct.image}
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = "/products/default.webp"; }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   

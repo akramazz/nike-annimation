@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import ProductImage from "@/components/products/ProductImage";
-import ProductImg from "@/components/products/ProductImg";
+import ProductImage from "@/app/components/products/ProductImage";
+import ProductImg from "@/app/components/products/ProductImg";
 import { useCart } from "../../../context/CartContext";
 import {
   ArrowLeft,

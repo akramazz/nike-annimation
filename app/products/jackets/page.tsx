@@ -7,7 +7,7 @@ import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import Link from "next/link";
-import ProductImg from "@/components/products/ProductImg";
+import ProductImg from "@/app/components/products/ProductImg";
 
 interface Product {
   _id: string;

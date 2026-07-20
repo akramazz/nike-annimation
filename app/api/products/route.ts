@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import dns from "dns";
 import connectDB from "@/utils/mongodb";
 import Product from "@/models/Product";
 import { isAdminRequest } from "@/lib/admin-auth";
 import { getProductImage } from "@/lib/image-utils";
+
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +17,16 @@ export async function GET() {
       ...p,
       id: index + 1,
       _id: p._id.toString(),
+      image: getProductImage(p.image as string | undefined),
       createdAt: p.createdAt?.toISOString(),
       updatedAt: p.updatedAt?.toISOString(),
     }));
     return NextResponse.json({ success: true, products: plainProducts });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch products";
+    console.error("GET /api/products:", message);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch products" },
+      { success: false, error: message },
       { status: 500 }
     );
   }
