@@ -82,11 +82,35 @@ export default function AdminDashboard() {
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string>(DEFAULT_PRODUCT_IMAGE);
   const [imagePreview, setImagePreview] = useState<string>(DEFAULT_PRODUCT_IMAGE);
+  const [publishingImages, setPublishingImages] = useState(false);
 
   const setProductImageChoice = (value: string) => {
     const normalized = getProductImage(value || undefined);
     setSelectedImage(normalized);
     setImagePreview(normalized);
+  };
+
+  const publishAllImages = async () => {
+    setPublishingImages(true);
+    try {
+      const res = await fetch(apiUrl("/api/products/publish-images"), {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        await fetchData();
+        alert(
+          `Publié : ${data.created} créé(s), ${data.updated} mis à jour (${data.total} produit(s) au total).`,
+        );
+      } else {
+        alert(data.error || "Échec de la publication des images.");
+      }
+    } catch {
+      alert("Erreur réseau lors de la publication.");
+    } finally {
+      setPublishingImages(false);
+    }
   };
 
   useEffect(() => {
@@ -539,20 +563,37 @@ export default function AdminDashboard() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
                 <h1 className="text-3xl font-bold">Gestion des produits</h1>
-                <button
-                  onClick={() => {
-                    setModalType("product");
-                    setEditingItem(null);
-                    setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
-                    setShowModal(true);
-                  }}
-                  className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
-                >
-                  <Plus className="h-5 w-5" />
-                  <span>Ajouter un produit</span>
-                </button>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={publishAllImages}
+                    disabled={publishingImages}
+                    className="flex items-center space-x-2 px-6 py-3 bg-white/10 border border-white/20 text-white font-bold rounded-full hover:bg-white/20 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      className={`h-5 w-5 ${publishingImages ? "animate-spin" : ""}`}
+                    />
+                    <span>
+                      {publishingImages
+                        ? "Publication..."
+                        : "Publier toutes les images"}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setModalType("product");
+                      setEditingItem(null);
+                      setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
+                      setShowModal(true);
+                    }}
+                    className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
+                  >
+                    <Plus className="h-5 w-5" />
+                    <span>Ajouter un produit</span>
+                  </button>
+                </div>
               </div>
 
               {/* Search */}
