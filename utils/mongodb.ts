@@ -1,4 +1,8 @@
 import mongoose, { Mongoose } from "mongoose";
+import dns from "dns";
+
+// Contourne querySrv ECONNREFUSED (Node DNS Windows / certains FAI)
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 let MONGODB_URI: string;
 

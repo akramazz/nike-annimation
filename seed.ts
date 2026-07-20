@@ -1,9 +1,13 @@
 import "dotenv/config";
+import dns from "dns";
 import connectDB from "./utils/mongodb";
 import Product from "./models/Product";
 import Order from "./models/Order";
 import Message from "./models/Message";
 import { PRODUCT_CATALOG } from "./lib/product-catalog";
+
+// Windows / certains réseaux: Node échoue sur querySrv Atlas sans DNS public
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const seedOrders = [
   {
