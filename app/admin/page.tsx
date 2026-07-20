@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES } from "@/lib/product-normalize";
-import { getProductImage } from "@/lib/image-utils";
+import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
 import ProductImage from "@/app/components/products/ProductImage";
 import {
   Package,
@@ -80,7 +80,14 @@ export default function AdminDashboard() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginSubmitting, setLoginSubmitting] = useState(false);
   const [availableImages, setAvailableImages] = useState<string[]>([]);
-  const [imagePreview, setImagePreview] = useState<string>("/products/default.webp");
+  const [selectedImage, setSelectedImage] = useState<string>(DEFAULT_PRODUCT_IMAGE);
+  const [imagePreview, setImagePreview] = useState<string>(DEFAULT_PRODUCT_IMAGE);
+
+  const setProductImageChoice = (value: string) => {
+    const normalized = getProductImage(value || undefined);
+    setSelectedImage(normalized);
+    setImagePreview(normalized);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -90,7 +97,7 @@ export default function AdminDashboard() {
           credentials: "include",
         });
         const data = await res.json();
-        if (!cancelled && data.success && Array.isArray(data.images)) {
+        if (!cancelled && Array.isArray(data.images)) {
           setAvailableImages(data.images);
         }
       } catch {
@@ -538,6 +545,7 @@ export default function AdminDashboard() {
                   onClick={() => {
                     setModalType("product");
                     setEditingItem(null);
+                    setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
                     setShowModal(true);
                   }}
                   className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
@@ -628,6 +636,9 @@ export default function AdminDashboard() {
                                 onClick={() => {
                                   setEditingItem(product);
                                   setModalType("product");
+                                  setProductImageChoice(
+                                    product.image || DEFAULT_PRODUCT_IMAGE,
+                                  );
                                   setShowModal(true);
                                 }}
                                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -858,10 +869,9 @@ export default function AdminDashboard() {
                     .split(",")
                     .map((s) => s.trim())
                     .filter(Boolean);
-                  const imageInput = String(formData.get("image") ?? "").trim();
                   const color = String(formData.get("color") ?? "").trim();
                   const normalizedImage = getProductImage(
-                    imageInput || color || undefined,
+                    selectedImage || undefined,
                   );
                   const productData = {
                     name: formData.get("name"),
@@ -956,25 +966,30 @@ export default function AdminDashboard() {
                   />
                   <input
                     name="image"
-                    placeholder="Image (URL ou chemin, ex. /products/noir.webp)"
-                    defaultValue={editingItem?.image}
+                    placeholder="Image (URL ou chemin, ex. /products/algersoliel.webp)"
+                    value={selectedImage}
                     onChange={(e) => {
-                      if (editingItem) {
-                        setEditingItem({ ...editingItem, image: e.target.value });
-                      }
-                      setImagePreview(getProductImage(e.target.value));
+                      const value = e.target.value;
+                      setSelectedImage(value);
+                      setImagePreview(getProductImage(value || undefined));
                     }}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
                   />
                   <select
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    value={getProductImage(editingItem?.image)}
+                    value={
+                      availableImages.some(
+                        (img) => `/products/${img}` === selectedImage,
+                      )
+                        ? selectedImage
+                        : ""
+                    }
                     onChange={(e) => {
                       const value = e.target.value;
-                      if (editingItem) {
-                        setEditingItem({ ...editingItem, image: value });
+                      if (value) {
+                        setSelectedImage(value);
+                        setImagePreview(value);
                       }
-                      setImagePreview(value);
                     }}
                   >
                     <option value="">-- Choisir une image --</option>
