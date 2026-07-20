@@ -7,6 +7,9 @@ import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES } from "@/lib/product-normalize";
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
 import ProductImage from "@/app/components/products/ProductImage";
+import ProductImageManager, {
+  type AdminProductImage,
+} from "@/app/admin/components/ProductImageManager";
 import {
   Package,
   ShoppingCart,
@@ -21,6 +24,7 @@ import {
   X,
   Search,
   RefreshCw,
+  ImageIcon,
 } from "lucide-react";
 
 interface Product {
@@ -34,6 +38,7 @@ interface Product {
   description: string;
   image?: string;
   sizes?: string[];
+  published?: boolean;
 }
 
 interface Order {
@@ -82,7 +87,7 @@ export default function AdminDashboard() {
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string>(DEFAULT_PRODUCT_IMAGE);
   const [imagePreview, setImagePreview] = useState<string>(DEFAULT_PRODUCT_IMAGE);
-  const [publishingImages, setPublishingImages] = useState(false);
+  const [productPublished, setProductPublished] = useState(true);
 
   const setProductImageChoice = (value: string) => {
     const normalized = getProductImage(value || undefined);
@@ -90,54 +95,29 @@ export default function AdminDashboard() {
     setImagePreview(normalized);
   };
 
-  const publishAllImages = async () => {
-    setPublishingImages(true);
+  const handleAdminImagesChange = useCallback((images: AdminProductImage[]) => {
+    setAvailableImages(images.map((img) => img.filename));
+  }, []);
+
+  const refreshAvailableImages = useCallback(async () => {
     try {
-      const res = await fetch(apiUrl("/api/products/publish-images"), {
-        method: "POST",
+      const res = await fetch(apiUrl("/api/products/images"), {
         credentials: "include",
       });
       const data = await res.json();
-      if (res.ok && data.success) {
-        await fetchData();
-        alert(
-          `Publié : ${data.created} créé(s), ${data.updated} mis à jour (${data.total} produit(s) au total).`,
-        );
-      } else {
-        alert(data.error || "Échec de la publication des images.");
+      if (res.ok && data.success && Array.isArray(data.images)) {
+        handleAdminImagesChange(data.images);
       }
     } catch {
-      alert("Erreur réseau lors de la publication.");
-    } finally {
-      setPublishingImages(false);
+      /* ignore */
     }
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(apiUrl("/api/products/images"), {
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (!cancelled && Array.isArray(data.images)) {
-          setAvailableImages(data.images);
-        }
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [handleAdminImagesChange]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [productsRes, ordersRes, messagesRes] = await Promise.all([
-        fetch(apiUrl("/api/products"), { credentials: "include" }),
+        fetch(apiUrl("/api/products?includeUnpublished=1"), { credentials: "include" }),
         fetch(apiUrl("/api/orders"), { credentials: "include" }),
         fetch(apiUrl("/api/messages"), { credentials: "include" }),
       ]);
@@ -174,6 +154,7 @@ export default function AdminDashboard() {
           setAuthenticated(Boolean(data.authenticated));
           if (!data.authRequired || data.authenticated) {
             await fetchData();
+            await refreshAvailableImages();
           }
         }
       } catch {
@@ -185,7 +166,7 @@ export default function AdminDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [fetchData]);
+  }, [fetchData, refreshAvailableImages]);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +190,7 @@ export default function AdminDashboard() {
       setLoginPassword("");
       setAuthenticated(true);
       await fetchData();
+      await refreshAvailableImages();
     } catch {
       setLoginError("Erreur réseau.");
     }
@@ -438,6 +420,7 @@ export default function AdminDashboard() {
             {[
               { id: "dashboard", label: "Tableau de bord", icon: TrendingUp },
               { id: "products", label: "Produits", icon: Package },
+              { id: "images", label: "Images", icon: ImageIcon },
               { id: "orders", label: "Commandes", icon: ShoppingCart },
               { id: "messages", label: "Messages", icon: MessageSquare },
             ].map((tab) => (
@@ -565,35 +548,19 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
                 <h1 className="text-3xl font-bold">Gestion des produits</h1>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={publishAllImages}
-                    disabled={publishingImages}
-                    className="flex items-center space-x-2 px-6 py-3 bg-white/10 border border-white/20 text-white font-bold rounded-full hover:bg-white/20 transition-colors disabled:opacity-50"
-                  >
-                    <RefreshCw
-                      className={`h-5 w-5 ${publishingImages ? "animate-spin" : ""}`}
-                    />
-                    <span>
-                      {publishingImages
-                        ? "Publication..."
-                        : "Publier toutes les images"}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setModalType("product");
-                      setEditingItem(null);
-                      setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
-                      setShowModal(true);
-                    }}
-                    className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span>Ajouter un produit</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setModalType("product");
+                    setEditingItem(null);
+                    setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
+                    setProductPublished(true);
+                    setShowModal(true);
+                  }}
+                  className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Ajouter un produit</span>
+                </button>
               </div>
 
               {/* Search */}
@@ -629,6 +596,9 @@ export default function AdminDashboard() {
                         Catégorie
                       </th>
                       <th className="text-left p-4 font-medium text-white/60">
+                        Statut
+                      </th>
+                      <th className="text-left p-4 font-medium text-white/60">
                         Actions
                       </th>
                     </tr>
@@ -645,8 +615,12 @@ export default function AdminDashboard() {
                         >
                           <td className="p-4">
                             <div className="flex items-center space-x-3">
-                              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                                <Package className="h-6 w-6 text-white/60" />
+                              <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/10">
+                                <ProductImage
+                                  src={product.image || DEFAULT_PRODUCT_IMAGE}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
                               </div>
                               <span className="font-medium">
                                 {product.name}
@@ -672,6 +646,17 @@ export default function AdminDashboard() {
                             {product.category}
                           </td>
                           <td className="p-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm ${
+                                product.published !== false
+                                  ? "bg-green-500/20 text-green-400"
+                                  : "bg-yellow-500/20 text-yellow-400"
+                              }`}
+                            >
+                              {product.published !== false ? "En ligne" : "Brouillon"}
+                            </span>
+                          </td>
+                          <td className="p-4">
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => {
@@ -680,6 +665,7 @@ export default function AdminDashboard() {
                                   setProductImageChoice(
                                     product.image || DEFAULT_PRODUCT_IMAGE,
                                   );
+                                  setProductPublished(product.published !== false);
                                   setShowModal(true);
                                 }}
                                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -699,6 +685,20 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </motion.div>
+          )}
+
+          {/* Images Tab */}
+          {activeTab === "images" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <ProductImageManager
+                onPublished={fetchData}
+                onImagesChange={handleAdminImagesChange}
+              />
             </motion.div>
           )}
 
@@ -922,6 +922,7 @@ export default function AdminDashboard() {
                     category: formData.get("category"),
                     description: formData.get("description"),
                     image: normalizedImage,
+                    published: productPublished,
                     ...(sizes.length > 0 ? { sizes } : {}),
                   };
 
@@ -1052,6 +1053,17 @@ export default function AdminDashboard() {
                       {availableImages.length} image(s) disponible(s)
                     </span>
                   </div>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={productPublished}
+                      onChange={(e) => setProductPublished(e.target.checked)}
+                      className="w-4 h-4 rounded"
+                    />
+                    <span className="text-white/80 text-sm">
+                      Visible sur le site (publié)
+                    </span>
+                  </label>
                   <input
                     name="sizes"
                     placeholder={`Tailles séparées par des virgules (défaut: ${DEFAULT_SIZES.join(",")})`}

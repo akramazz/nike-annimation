@@ -1,59 +1,35 @@
 /**
- * Publie un produit pour chaque fichier dans public/products (sauf default.*).
+ * Publie les produits sur le site à partir des images dans public/products.
  * Usage: npx dotenv -e .env.local -- npx tsx scripts/publish-all-images.ts
+ *
+ * Options:
+ *   --all        Synchronise aussi les produits existants (écrase le catalogue)
+ *   --file=xxx   Publie une image spécifique
  */
 import dns from "dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 import "dotenv/config";
-import { readdir } from "fs/promises";
-import { join } from "path";
 import connectDB from "../utils/mongodb";
-import Product from "../models/Product";
-import { catalogFromFilename } from "../lib/product-catalog";
+import { publishProductsFromImages } from "../lib/product-images";
 
 async function main() {
   await connectDB();
 
-  const dir = join(process.cwd(), "public", "products");
-  const files = await readdir(dir);
-  const allowed = new Set([".webp", ".png", ".jpg", ".jpeg"]);
+  const args = process.argv.slice(2);
+  const updateExisting = args.includes("--all");
+  const fileArg = args.find((a) => a.startsWith("--file="));
+  const filenames = fileArg ? [fileArg.split("=")[1]] : undefined;
 
-  const images = files.filter((file) => {
-    const lower = file.toLowerCase();
-    if (lower.startsWith("default.")) return false;
-    const ext = lower.slice(lower.lastIndexOf("."));
-    return allowed.has(ext);
+  const result = await publishProductsFromImages({
+    filenames,
+    updateExisting,
+    markPublished: true,
   });
 
-  let created = 0;
-  let updated = 0;
-
-  for (const file of images) {
-    const data = catalogFromFilename(file);
-    // Chemins normalisés en minuscules (comme getProductImage)
-    data.image = `/products/${file.toLowerCase()}`;
-
-    const existing = await Product.findOne({ image: data.image });
-    if (existing) {
-      existing.name = data.name;
-      existing.color = data.color;
-      existing.price = data.price;
-      existing.stock = data.stock;
-      existing.description = data.description;
-      existing.category = data.category;
-      existing.sizes = data.sizes;
-      await existing.save();
-      updated += 1;
-    } else {
-      await Product.create(data);
-      created += 1;
-    }
-    console.log(`✓ ${data.name} -> ${data.image}`);
-  }
-
-  const total = await Product.countDocuments();
-  console.log(`\nDone: ${created} created, ${updated} updated, ${total} total`);
+  console.log(
+    `Terminé : ${result.created} créé(s), ${result.updated} mis à jour, ${result.skipped} ignoré(s), ${result.published} visible(s) sur le site (${result.total} total).`,
+  );
   process.exit(0);
 }
 

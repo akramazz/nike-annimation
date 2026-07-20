@@ -13,6 +13,7 @@ export interface IProduct extends Document {
   salePrice: number;
   salePercent: number;
   likes: number;
+  published: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,7 @@ const ProductSchema = new Schema<IProduct>(
     salePrice: { type: Number, default: 0, min: 0 },
     salePercent: { type: Number, default: 0, min: 0, max: 100 },
     likes: { type: Number, default: 0, min: 0 },
+    published: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

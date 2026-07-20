@@ -9,15 +9,21 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    const products = await Product.find({}).sort({ _id: 1 }).lean();
+    const includeUnpublished =
+      isAdminRequest(request) &&
+      new URL(request.url).searchParams.get("includeUnpublished") === "1";
+
+    const filter = includeUnpublished ? {} : { published: { $ne: false } };
+    const products = await Product.find(filter).sort({ _id: 1 }).lean();
     const plainProducts = products.map((p, index) => ({
       ...p,
       id: index + 1,
       _id: p._id.toString(),
       image: getProductImage(p.image as string | undefined),
+      published: p.published !== false,
       createdAt: p.createdAt?.toISOString(),
       updatedAt: p.updatedAt?.toISOString(),
     }));
@@ -60,6 +66,7 @@ export async function POST(request: NextRequest) {
       description: String(body.description || "").slice(0, 2000),
       category: String(body.category || "Classic").slice(0, 80),
       sizes,
+      published: body.published !== false,
     });
 
     const plain = {
@@ -112,6 +119,7 @@ export async function PUT(request: NextRequest) {
         description: String(body.description || existing.description).slice(0, 2000),
         category: String(body.category || existing.category).slice(0, 80),
         sizes,
+        ...(typeof body.published === "boolean" ? { published: body.published } : {}),
       },
       { new: true }
     ).lean();
