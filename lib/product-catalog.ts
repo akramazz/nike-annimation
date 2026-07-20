@@ -69,10 +69,30 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
   {
     name: "Veste Beige",
     color: "Beige",
+    image: "/products/beage.webp",
+    price: 59.99,
+    stock: 20,
+    description: "Minimalisme sophistiqué",
+    category: "Premium",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
+    name: "Veste Beige 2",
+    color: "Beige",
     image: "/products/beage2.webp",
     price: 59.99,
     stock: 22,
     description: "Minimalisme sophistiqué",
+    category: "Classic",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
+    name: "Veste Bleue",
+    color: "Bleu",
+    image: "/products/blue.webp",
+    price: 59.99,
+    stock: 30,
+    description: "Style moderne et dynamique",
     category: "Classic",
     sizes: [...DEFAULT_SIZES],
   },
@@ -97,6 +117,26 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     sizes: [...DEFAULT_SIZES],
   },
   {
+    name: "Veste Gris",
+    color: "Gris",
+    image: "/products/gris.webp",
+    price: 220.99,
+    stock: 15,
+    description: "Sophistication et confort absolu",
+    category: "Luxury",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
+    name: "Veste Marron",
+    color: "Marron",
+    image: "/products/maron.webp",
+    price: 33.99,
+    stock: 40,
+    description: "Chaleur et élégance naturelle",
+    category: "Classic",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
     name: "Marvel Edition",
     color: "Rouge",
     image: "/products/marvel.webp",
@@ -104,6 +144,36 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     stock: 14,
     description: "Collection inspirée comics",
     category: "Luxury",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
+    name: "Veste Noire",
+    color: "Noir",
+    image: "/products/noir.webp",
+    price: 59.99,
+    stock: 35,
+    description: "Intemporelle et raffinée",
+    category: "Classic",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
+    name: "Veste Pistache",
+    color: "Pistache",
+    image: "/products/pistache.webp",
+    price: 69.99,
+    stock: 22,
+    description: "Couleur vive et esprit jeune",
+    category: "Premium",
+    sizes: [...DEFAULT_SIZES],
+  },
+  {
+    name: "Veste Rouge",
+    color: "Rouge",
+    image: "/products/rouge.webp",
+    price: 69.99,
+    stock: 25,
+    description: "Élégance audacieuse pour un style unique",
+    category: "Premium",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -116,6 +186,16 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     category: "Premium",
     sizes: [...DEFAULT_SIZES],
   },
+  {
+    name: "Veste Verte",
+    color: "Vert",
+    image: "/products/vert.webp",
+    price: 88.99,
+    stock: 18,
+    description: "Fraîcheur et originalité",
+    category: "Premium",
+    sizes: [...DEFAULT_SIZES],
+  },
 ];
 
 /** Génère un produit par défaut à partir d’un nom de fichier inconnu. */
@@ -123,7 +203,7 @@ export function catalogFromFilename(filename: string): CatalogProduct {
   const known = PRODUCT_CATALOG.find(
     (p) => p.image === `/products/${filename.toLowerCase()}`,
   );
-  if (known) return known;
+  if (known) return { ...known, sizes: [...known.sizes] };
 
   const base = filename.replace(/\.[^.]+$/, "");
   const label = base
@@ -134,7 +214,7 @@ export function catalogFromFilename(filename: string): CatalogProduct {
   return {
     name: label || "Produit",
     color: "Multicolore",
-    image: `/products/${filename}`,
+    image: `/products/${filename.toLowerCase()}`,
     price: 69.99,
     stock: 20,
     description: `${label} — collection DripBazzarDZ`,

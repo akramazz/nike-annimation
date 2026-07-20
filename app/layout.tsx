@@ -166,29 +166,23 @@ fbq('track','PageView');
            <main id="main-content">{children}</main>
          </CartProvider>
 
-         {/* Scripts de performance (chargés de manière asynchrone) */}
+         {/* Préchargement léger — ne pas toucher aux src des images lazy */}
          <script
            dangerouslySetInnerHTML={{
              __html: `
-               // Optimisation des performances
-               if ('loading' in HTMLImageElement.prototype) {
-                 const images = document.querySelectorAll('img[loading="lazy"]');
-                 images.forEach(img => {
-                   img.src = img.dataset.src;
+               (function () {
+                 var preloadLinks = [
+                   { rel: 'preload', href: '/products/algersoliel.webp', as: 'image' },
+                   { rel: 'preload', href: '/products/alg16vert.webp', as: 'image' },
+                 ];
+                 preloadLinks.forEach(function (link) {
+                   var linkEl = document.createElement('link');
+                   linkEl.rel = link.rel;
+                   linkEl.href = link.href;
+                   linkEl.as = link.as;
+                   document.head.appendChild(linkEl);
                  });
-               }
-               
-               // Préchargement des ressources critiques
-               const preloadLinks = [
-                 { rel: 'preload', href: '/products/rouge.webp', as: 'image' },
-                 { rel: 'preload', href: '/products/blue.webp', as: 'image' },
-               ];
-               
-               preloadLinks.forEach(link => {
-                 const linkEl = document.createElement('link');
-                 Object.assign(linkEl, link);
-                 document.head.appendChild(linkEl);
-               });
+               })();
              `,
            }}
          />
