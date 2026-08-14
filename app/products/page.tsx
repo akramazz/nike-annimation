@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import ProductImg from "../components/products/ProductImg";
@@ -10,6 +9,8 @@ import { normalizeProductImage } from "@/lib/product-normalize";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, Heart, Eye, Link as LinkIcon } from "lucide-react";
+import Link from "next/link";
+import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
 
 interface Product {
   _id: string;
@@ -29,176 +30,11 @@ interface Product {
   type?: "jacket" | "accessory";
 }
 
-const accessoriesData: Product[] = [
-  {
-    _id: "acc-1",
-    id: 1,
-    name: "Casquette Noir",
-    color: "Accessoires",
-    description: "Casquette premium en coton avec logo brodé",
-    price: 49.99,
-    stock: 50,
-    image: "/products/casquette.webp",
-    category: "Accessoires",
-    sizes: ["S/M", "L/XL"],
-    likes: 12,
-    type: "accessory"
-  },
-  {
-    _id: "acc-2",
-    id: 2,
-    name: "Casquette Noire",
-    color: "Accessoires",
-    description: "Casquette anatomique avec strap arrière",
-    price: 39.99,
-    stock: 45,
-    image: "/products/casquettenoire.png",
-    category: "Accessoires",
-    sizes: ["S/M", "L/XL"],
-    likes: 8,
-    type: "accessory"
-  },
-  {
-    _id: "acc-3",
-    id: 3,
-    name: "Écharpe Rouge",
-    color: "Accessoires",
-    description: "Écharpe en laine premium rouge élégante",
-    price: 89.99,
-    stock: 30,
-    image: "/products/chalrouge.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 25,
-    type: "accessory"
-  },
-  {
-    _id: "acc-4",
-    id: 4,
-    name: "Écharpe Vert",
-    color: "Accessoires",
-    description: "Écharpe超 douce en cachemire",
-    price: 129.99,
-    stock: 25,
-    image: "/products/chal.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 18,
-    type: "accessory"
-  },
-  {
-    _id: "acc-5",
-    id: 5,
-    name: "Ceinture Beige",
-    color: "Accessoires",
-    description: "Ceinture cuir avec boucle argentée",
-    price: 79.99,
-    stock: 40,
-    image: "/products/sinture.webp",
-    category: "Accessoires",
-    sizes: ["S", "M", "L", "XL"],
-    likes: 15,
-    type: "accessory"
-  },
-  {
-    _id: "acc-6",
-    id: 6,
-    name: "Casque Audio",
-    color: "Accessoires",
-    description: "Casque premium sans fil avec réduction de bruit",
-    price: 199.99,
-    stock: 20,
-    image: "/products/cascadia.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 32,
-    type: "accessory"
-  },
-  {
-    _id: "acc-7",
-    id: 7,
-    name: "Bob Noir",
-    color: "Accessoires",
-    description: "Bob léger pour l'été",
-    price: 29.99,
-    stock: 60,
-    image: "/products/bobnoir.webp",
-    category: "Accessoires",
-    sizes: ["S/M", "L/XL"],
-    likes: 5,
-    type: "accessory"
-  },
-  {
-    _id: "acc-8",
-    id: 8,
-    name: "Sac Voyage",
-    color: "Accessoires",
-    description: "Sac weekend en toile premium",
-    price: 149.99,
-    stock: 15,
-    image: "/products/tavares.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 22,
-    type: "accessory"
-  },
-  {
-    _id: "acc-9",
-    id: 9,
-    name: "Lunettes Soleil",
-    color: "Accessoires",
-    description: "Lunettes premium avec Protection UV400",
-    price: 159.99,
-    stock: 35,
-    image: "/products/facebeage.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 45,
-    type: "accessory"
-  },
-  {
-    _id: "acc-10",
-    id: 10,
-    name: "Montre Classic",
-    color: "Accessoires",
-    description: "Montre automatique avec bracelet cuir",
-    price: 299.99,
-    stock: 10,
-    image: "/products/vertface.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 67,
-    type: "accessory"
-  },
-  {
-    _id: "acc-11",
-    id: 11,
-    name: "Montre Sport",
-    color: "Accessoires",
-    description: "Montre connectée avec GPS",
-    price: 399.99,
-    stock: 8,
-    image: "/products/orangeface.webp",
-    category: "Accessoires",
-    sizes: ["Unique"],
-    likes: 89,
-    type: "accessory"
-  },
-  {
-    _id: "acc-12",
-    id: 12,
-    name: "Bracelet Cuir",
-    color: "Accessoires",
-    description: "Bracelet tressé premium",
-    price: 34.99,
-    stock: 55,
-    image: "/products/milangeface.webp",
-    category: "Accessoires",
-    sizes: ["S", "M", "L"],
-    likes: 11,
-    type: "accessory"
-  },
-];
+const accessoriesData: Product[] = STATIC_ACCESSORIES.map((acc) => ({
+  ...acc,
+  color: "Accessoires",
+  type: "accessory" as const,
+}));
 
 // Fallback jackets data - used when MongoDB is not available
 const fallbackJackets: Product[] = [
@@ -255,7 +91,7 @@ export default function ProductsPage() {
   const [showSizeError, setShowSizeError] = useState<Record<string, boolean>>({});
 
   const handleProductClick = (product: Product) => {
-    router.push(`/products/${product._id}`);
+    router.push(`/products/${product.id ?? product._id}`);
   };
 
   useEffect(() => {
@@ -347,10 +183,7 @@ export default function ProductsPage() {
   };
 
   const getProductLink = (product: Product) => {
-    if (product.type === "accessory") {
-      return `/products/accessories/${product.id}`;
-    }
-    return `/products/${product._id}`;
+    return `/products/${product.id ?? product._id}`;
   };
 
   const categories = [

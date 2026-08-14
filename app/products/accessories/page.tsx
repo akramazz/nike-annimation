@@ -10,6 +10,7 @@ import { apiUrl } from "@/lib/api-client";
 import { ShoppingBag, Heart, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
 
 interface Product {
   _id: string;
@@ -25,20 +26,11 @@ interface Product {
 }
 
 // Static accessories data as fallback
-const staticAccessories: Product[] = [
-  { _id: "acc-1", id: 1, name: "Casquette Noir", color: "Accessoires", description: "Casquette premium en coton", price: 49.99, image: "/products/casquette.webp", category: "Accessoires", sizes: ["S/M", "L/XL"], likes: 12 },
-  { _id: "acc-2", id: 2, name: "Casquette Noire", color: "Accessoires", description: "Casquette anatomique", price: 39.99, image: "/products/casquettenoire.png", category: "Accessoires", sizes: ["S/M", "L/XL"], likes: 8 },
-  { _id: "acc-3", id: 3, name: "Écharpe Rouge", color: "Accessoires", description: "Écharpe en laine premium", price: 89.99, image: "/products/chalrouge.webp", category: "Accessoires", sizes: ["Unique"], likes: 25 },
-  { _id: "acc-4", id: 4, name: "Écharpe Vert", color: "Accessoires", description: "Écharpe超 douce", price: 129.99, image: "/products/chal.webp", category: "Accessoires", sizes: ["Unique"], likes: 18 },
-  { _id: "acc-5", id: 5, name: "Ceinture Beige", color: "Accessoires", description: "Ceinture cuir", price: 79.99, image: "/products/sinture.webp", category: "Accessoires", sizes: ["S", "M", "L", "XL"], likes: 15 },
-  { _id: "acc-6", id: 6, name: "Casque Audio", color: "Accessoires", description: "Casque premium", price: 199.99, image: "/products/cascadia.webp", category: "Accessoires", sizes: ["Unique"], likes: 32 },
-  { _id: "acc-7", id: 7, name: "Bob Noir", color: "Accessoires", description: "Bob léger", price: 29.99, image: "/products/bobnoir.webp", category: "Accessoires", sizes: ["S/M", "L/XL"], likes: 5 },
-  { _id: "acc-8", id: 8, name: "Sac Voyage", color: "Accessoires", description: "Sac weekend", price: 149.99, image: "/products/tavares.webp", category: "Accessoires", sizes: ["Unique"], likes: 22 },
-  { _id: "acc-9", id: 9, name: "Lunettes Soleil", color: "Accessoires", description: "Lunettes UV400", price: 159.99, image: "/products/facebeage.webp", category: "Accessoires", sizes: ["Unique"], likes: 45 },
-  { _id: "acc-10", id: 10, name: "Montre Classic", color: "Accessoires", description: "Montre automatique", price: 299.99, image: "/products/vertface.webp", category: "Accessoires", sizes: ["Unique"], likes: 67 },
-  { _id: "acc-11", id: 11, name: "Montre Sport", color: "Accessoires", description: "Montre connectée", price: 399.99, image: "/products/orangeface.webp", category: "Accessoires", sizes: ["Unique"], likes: 89 },
-  { _id: "acc-12", id: 12, name: "Bracelet Cuir", color: "Accessoires", description: "Bracelet tressé", price: 34.99, image: "/products/milangeface.webp", category: "Accessoires", sizes: ["S", "M", "L"], likes: 11 },
-];
+const staticAccessories: Product[] = STATIC_ACCESSORIES.map((acc) => ({
+  ...acc,
+  color: acc.category,
+  type: "accessory" as const,
+}));
 
 export default function AccessoriesPage() {
   const router = useRouter();
@@ -54,7 +46,7 @@ export default function AccessoriesPage() {
 
   const handleProductClick = (product: Product) => {
     const productId = product.id ?? product._id;
-    router.push(`/products/accessories/${productId}`);
+    router.push(`/products/${productId}`);
   };
 
   useEffect(() => {
@@ -251,11 +243,11 @@ export default function AccessoriesPage() {
                       <ShoppingBag className="h-4 w-4" />
                       <span>Ajouter</span>
                     </button>
-                    <Link
-                      href={`/products/accessories/${product.id}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
-                    >
+                      <Link
+                        href={`/products/${product.id ?? product._id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                      >
                       <Eye className="h-4 w-4" />
                     </Link>
                   </div>

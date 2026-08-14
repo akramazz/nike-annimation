@@ -107,7 +107,8 @@ function ProductCard({
 
   const handleShare = (platform: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/products/${product.id}`;
+    const productId = product.id || product._id || 0;
+    const url = `${window.location.origin}/products/${productId}`;
     const text = `Découvrez ${product.name}`;
     let shareUrl = "";
     switch (platform) {
@@ -164,7 +165,7 @@ function ProductCard({
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
         <div className="absolute top-4 right-4 flex flex-col space-y-2">
-          <motion.button ref={viewButtonRef} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={(e) => { e.stopPropagation(); router.push(`/products/${product._id}`); }} className="p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <motion.button ref={viewButtonRef} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={(e) => { e.stopPropagation(); router.push(`/products/${product._id || product.id}`); }} className="p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Eye className="h-5 w-5" />
           </motion.button>
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleLike} className={`p-2 backdrop-blur-xl rounded-full transition-colors ${isLiked ? "bg-red-500/20 text-red-400" : "bg-white/10 text-white hover:bg-white/20"}`}>

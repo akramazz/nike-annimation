@@ -1,5 +1,7 @@
 import { apiUrl } from "@/lib/api-client";
 import { getProductImage } from "@/lib/image-utils";
+import { PRODUCT_CATALOG, catalogFromFilename } from "@/lib/product-catalog";
+import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
 
 export interface UnifiedProduct {
   _id: string;
@@ -21,9 +23,60 @@ export interface UnifiedProduct {
 /** Simple client-side cache so subsequent fetches in the same request don't re-query. */
 const fetchCache = new Map<string, UnifiedProduct | null>();
 
+function toUnified(p: {
+  _id?: string;
+  id?: number;
+  name: string;
+  color?: string;
+  image: string;
+  price: number;
+  stock: number;
+  description: string;
+  category: string;
+  sizes?: string[];
+  onSale?: boolean;
+  salePrice?: number;
+  salePercent?: number;
+  likes?: number;
+}): UnifiedProduct {
+  return {
+    _id: String(p._id || p.id || Math.random().toString(36).slice(2)),
+    id: p.id,
+    name: String(p.name ?? "").slice(0, 120),
+    color: String(p.color ?? "").slice(0, 80) || undefined,
+    image: getProductImage(p.image),
+    price: Math.max(0, Number(p.price ?? 0)),
+    stock: Math.max(0, Math.floor(Number(p.stock ?? 0))),
+    description: String(p.description ?? "").slice(0, 2000),
+    category: String(p.category ?? "Classic").slice(0, 80),
+    sizes: Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ["XS", "S", "M", "L", "XL", "XXL"],
+    onSale: p.onSale,
+    salePrice: p.salePrice,
+    salePercent: p.salePercent,
+    likes: p.likes,
+  };
+}
+
+function normalizeCatalogProduct(p: {
+  name: string;
+  color: string;
+  image: string;
+  price: number;
+  stock: number;
+  description: string;
+  category: string;
+  sizes: string[];
+}): UnifiedProduct {
+  return toUnified({
+    ...p,
+    _id: `catalog-${p.image.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}`,
+    likes: 0,
+  });
+}
+
 /**
  * Fetch a single product from MongoDB by _id or legacy numeric id.
- * Returns null if the product cannot be found.
+ * Falls back to static catalog/accessories data when not found in DB.
  */
 export async function getProduct(id: string): Promise<UnifiedProduct | null> {
   if (fetchCache.has(id)) return fetchCache.get(id) ?? null;
@@ -32,22 +85,56 @@ export async function getProduct(id: string): Promise<UnifiedProduct | null> {
     const res = await fetch(apiUrl("/api/products"), { next: { revalidate: 300 } });
     const data = await res.json();
 
-    if (!data.success || !Array.isArray(data.products)) {
-      fetchCache.set(id, null);
-      return null;
+    if (data.success && Array.isArray(data.products)) {
+      const found: UnifiedProduct | undefined = data.products.find(
+        (p: UnifiedProduct) => p._id === id || String(p.id) === id,
+      );
+
+      if (found) {
+        const normalized = { ...found, image: getProductImage(found.image) };
+        fetchCache.set(id, normalized);
+        return normalized;
+      }
     }
-
-    const found: UnifiedProduct | undefined = data.products.find(
-      (p: UnifiedProduct) => p._id === id || String(p.id) === id,
-    );
-
-    const normalized = found ? { ...found, image: getProductImage(found.image) } : undefined;
-
-    fetchCache.set(id, normalized ?? null);
-    return normalized ?? null;
   } catch {
-    return null;
+    /* network error — fall through to static fallbacks */
   }
+
+  const trimmedId = String(id).trim();
+
+  const staticAccessories = STATIC_ACCESSORIES;
+  if (staticAccessories) {
+    const foundAcc = staticAccessories.find(
+      (p) => String(p._id) === trimmedId || String(p.id) === trimmedId,
+    );
+    if (foundAcc) {
+      const normalized = toUnified(foundAcc);
+      fetchCache.set(id, normalized);
+      return normalized;
+    }
+  }
+
+  const catalogEntry = PRODUCT_CATALOG.find((p) => p.image.toLowerCase() === trimmedId.toLowerCase());
+  if (catalogEntry) {
+    const normalized = normalizeCatalogProduct(catalogEntry);
+    fetchCache.set(id, normalized);
+    return normalized;
+  }
+
+  const filenameGuess = trimmedId.startsWith("/products/")
+    ? trimmedId.slice("/products/".length)
+    : trimmedId.startsWith("products/")
+      ? trimmedId.slice("products/".length)
+      : trimmedId;
+  if (filenameGuess && !filenameGuess.includes("/")) {
+    const generated = catalogFromFilename(filenameGuess);
+    const normalized = normalizeCatalogProduct(generated);
+    fetchCache.set(id, normalized);
+    return normalized;
+  }
+
+  fetchCache.set(id, null);
+  return null;
 }
 
 /**
