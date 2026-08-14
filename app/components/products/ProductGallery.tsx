@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ZoomIn } from "lucide-react";
 import ProductImage from "@/app/components/products/ProductImage";
@@ -34,6 +34,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
   const [isZoomed, setIsZoomed] = useState(false);
   const [bgZoom, setBgZoom] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const thumbnailScrollRef = useRef<HTMLDivElement>(null);
 
   const imageList = (() => {
     const main = getProductImage(product.image);
@@ -65,6 +66,25 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isZoomed]);
+
+  useEffect(() => {
+    const container = thumbnailScrollRef.current;
+    if (!container) return;
+    const activeThumb = container.querySelector(`[data-thumb-index="${selectedImageIndex}"]`);
+    if (activeThumb) {
+      activeThumb.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [selectedImageIndex]);
+
+  const scrollThumbnails = useCallback((direction: "left" | "right") => {
+    const container = thumbnailScrollRef.current;
+    if (!container) return;
+    const amount = 180;
+    container.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  }, []);
 
   const handleZoomToggle = useCallback(() => {
     if (bgZoom) {
@@ -129,19 +149,43 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       </div>
 
       {imageList.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {imageList.map((img, idx) => (
-            <button
-              key={`${img}-${idx}`}
-              type="button"
-              onClick={() => setSelectedImageIndex(idx)}
-              className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                selectedImageIndex === idx ? "border-white" : "border-white/20"
-              }`}
-            >
-              <img src={img} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
+        <div className="relative flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => scrollThumbnails("left")}
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors flex-shrink-0"
+            aria-label="Images précédentes"
+          >
+            ‹
+          </button>
+
+          <div
+            ref={thumbnailScrollRef}
+            className="flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          >
+            {imageList.map((img, idx) => (
+              <button
+                key={`${img}-${idx}`}
+                type="button"
+                data-thumb-index={idx}
+                onClick={() => setSelectedImageIndex(idx)}
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all snap-center flex-shrink-0 ${
+                  selectedImageIndex === idx ? "border-white" : "border-white/20"
+                }`}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollThumbnails("right")}
+            className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors flex-shrink-0"
+            aria-label="Images suivantes"
+          >
+            ›
+          </button>
         </div>
       )}
 
