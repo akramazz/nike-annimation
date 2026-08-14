@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import ProductImage from "@/app/components/products/ProductImage";
-import ProductImg from "@/app/components/products/ProductImg";
 import { useCart } from "../../../context/CartContext";
 import {
   ArrowLeft,
@@ -19,9 +19,9 @@ import {
   Twitter,
   Facebook,
   Linkedin,
-  Minus,
-  Plus,
+  Loader,
 } from "lucide-react";
+import Link from "next/link";
 
 function apiUrl(path: string): string {
   const base = process.env.NEXT_PUBLIC_API_URL?.trim();
@@ -359,7 +359,7 @@ export default function AccessoryDetailPage() {
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, ease: "back.out(1.7)" }}
+          transition={{ duration: 0.5, ease: "back.out(1.7)" as unknown as import("framer-motion").Easing }}
           className="max-w-md w-full p-8 sm:p-10 rounded-3xl backdrop-blur-xl bg-green-500/10 border border-green-500/30 text-center space-y-5"
         >
           <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
@@ -387,12 +387,12 @@ export default function AccessoryDetailPage() {
             >
               Commander à nouveau
             </button>
-            <a
+            <Link
               href="/"
               className="block w-full px-8 py-3 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all text-sm"
             >
               Retour à l&#39;accueil
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>

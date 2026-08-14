@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import ProductGallery from "@/app/components/products/ProductGallery";
 import ProductInfo from "@/app/components/products/ProductInfo";
 import QuickOrderForm from "@/app/components/products/QuickOrderForm";
-import { getProduct } from "@/app/lib/get-product";
+import { getProduct, UnifiedProduct } from "@/app/lib/get-product";
 
 // ─── Metadata ───────────────────────────────────────────────────────────────
 export async function generateMetadata({

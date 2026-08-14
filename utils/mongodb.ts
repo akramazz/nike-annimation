@@ -23,7 +23,7 @@ async function connectDB(): Promise<Mongoose> {
     }
   }
 
-  let cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+  const cached: MongooseCache = global.mongoose || { conn: null, promise: null };
 
   if (!global.mongoose) {
     global.mongoose = cached;

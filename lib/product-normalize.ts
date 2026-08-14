@@ -1,4 +1,5 @@
 export const DEFAULT_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+import { getProductImage as normalizeProductImage } from "./image-utils";
 export { getProductImage as normalizeProductImage } from "./image-utils";
 
 export function normalizeProduct<T extends { id?: number; name?: string; color?: string; image?: string; price?: number; stock?: number; description?: string; category?: string; sizes?: string[] }>(data: T) {

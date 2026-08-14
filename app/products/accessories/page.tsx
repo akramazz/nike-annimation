@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import ProductImg from "@/app/components/products/ProductImg";
 import Navigation from "../../components/Navigation";
@@ -9,6 +9,7 @@ import { useCart } from "../../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ShoppingBag, Heart, Eye } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Product {
   _id: string;
@@ -183,8 +184,6 @@ export default function AccessoriesPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onMouseEnter={() => setHoveredProduct(product._id)}
-                  onMouseLeave={() => setHoveredProduct(null)}
                   onClick={() => handleProductClick(product)}
                   className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
                 >

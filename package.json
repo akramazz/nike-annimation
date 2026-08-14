@@ -9,7 +9,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
     "seed": "dotenv -e .env.local -- tsx seed.ts"
   },
@@ -32,6 +32,8 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "autoprefixer": "^10.4.19",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.1",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6",
     "tsx": "^4.19.2",
