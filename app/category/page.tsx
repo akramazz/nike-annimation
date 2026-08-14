@@ -9,7 +9,9 @@ import Footer from "../components/Footer";
 import CategoryScene from "../components/CategoryScene";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES, normalizeProductImage } from "@/lib/product-normalize";
+import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import ProductImage from "@/app/components/products/ProductImage";
+import { formatPriceDA } from "@/lib/price-utils";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 
@@ -88,18 +90,16 @@ export default function CategoryPage() {
     };
   }, []);
 
-   // Catégories disponibles
    const categories = [
       { id: "all", name: "Tous" },
-      { id: "Premium", name: "DripBazzarDZ" },
-      { id: "Luxury", name: "Luxury" },
-      { id: "Classic", name: "Classic" },
+      { id: PRODUCT_CATEGORIES.SWEAT, name: PRODUCT_CATEGORIES.SWEAT },
+      { id: PRODUCT_CATEGORIES.T_SHIRT, name: PRODUCT_CATEGORIES.T_SHIRT },
     ];
 
-  const filteredProducts =
-    selectedCategory === "all"
-      ? products
-      : products.filter((product) => product.category === selectedCategory);
+   const filteredProducts =
+     selectedCategory === "all"
+       ? products
+       : products.filter((product) => normalizeCategory(product.category) === selectedCategory);
 
   // Animation GSAP au chargement de la page
   useEffect(() => {
@@ -360,9 +360,9 @@ export default function CategoryPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       
                       {/* Badge de catégorie */}
-                      <div className="absolute top-4 left-4 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
-                        {product.category}
-                      </div>
+                       <div className="absolute top-4 left-4 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
+                         {normalizeCategory(product.category)}
+                       </div>
 
                       {/* Icône 3D interactive */}
                       <motion.div
@@ -379,7 +379,7 @@ export default function CategoryPage() {
                       {/* Prix */}
                       <div className="absolute bottom-4 left-4 right-4">
                         <div className="text-2xl font-bold text-white mb-1">
-                          {product.price.toFixed(2)} €
+                          {formatPriceDA(product.price)}
                         </div>
                         <div className="text-white/60 text-sm">
                           {product.stock} en stock
@@ -484,9 +484,9 @@ export default function CategoryPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   
                   {/* Badge de catégorie */}
-                  <div className="absolute top-4 left-4 px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-sm font-medium border border-white/20">
-                    {selectedProduct.category}
-                  </div>
+                   <div className="absolute top-4 left-4 px-4 py-2 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-sm font-medium border border-white/20">
+                     {normalizeCategory(selectedProduct.category)}
+                   </div>
                 </div>
 
                 {/* Informations du produit */}
@@ -503,7 +503,7 @@ export default function CategoryPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-white/60">Prix</span>
                       <span className="text-3xl font-bold text-white">
-                        {selectedProduct.price.toFixed(2)} €
+                        {formatPriceDA(selectedProduct.price)}
                       </span>
                     </div>
 

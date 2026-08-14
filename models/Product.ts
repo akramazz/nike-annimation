@@ -14,6 +14,7 @@ export interface IProduct extends Document {
   salePercent: number;
   likes: number;
   published: boolean;
+  images?: Array<{ url: string; isMain?: boolean }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,7 @@ const ProductSchema = new Schema<IProduct>(
     salePercent: { type: Number, default: 0, min: 0, max: 100 },
     likes: { type: Number, default: 0, min: 0 },
     published: { type: Boolean, default: true },
+    images: [{ url: { type: String, maxlength: 500 }, isMain: { type: Boolean, default: false } }],
   },
   { timestamps: true }
 );

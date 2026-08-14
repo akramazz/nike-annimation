@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import ProductImage from "@/app/components/products/ProductImage";
 import { normalizeProductImage } from "@/lib/product-normalize";
+import { formatPriceDA } from "@/lib/price-utils";
 
 // ── Algeria wilayas ──────────────────────────────────────────────────────────
 const ALGERIAN_WILAYAS = [
@@ -275,7 +276,7 @@ export default function QuickOrderForm({
             </p>
           </div>
           <p className="font-bold text-sm sm:text-base whitespace-nowrap">
-            €{totalAmount.toFixed(2)}
+            {formatPriceDA(totalAmount)}
           </p>
         </div>
       )}
@@ -420,7 +421,7 @@ export default function QuickOrderForm({
           <span>
             {submitting
               ? "Envoi en cours..."
-              : `Commander maintenant · €${totalAmount.toFixed(2)}`}
+              : `Commander maintenant · {formatPriceDA(totalAmount)}`}
           </span>
           {submitting && <Loader className="h-5 w-5 animate-spin" />}
           <div

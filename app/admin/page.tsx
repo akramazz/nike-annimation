@@ -6,6 +6,8 @@ import gsap from "gsap";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES } from "@/lib/product-normalize";
 import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import ProductImage from "@/app/components/products/ProductImage";
 import ProductImageManager, {
   type AdminProductImage,
@@ -39,6 +41,7 @@ interface Product {
   image?: string;
   sizes?: string[];
   published?: boolean;
+  images?: Array<{ url: string; isMain?: boolean }>;
 }
 
 interface Order {
@@ -88,6 +91,23 @@ export default function AdminDashboard() {
   const [selectedImage, setSelectedImage] = useState<string>(DEFAULT_PRODUCT_IMAGE);
   const [imagePreview, setImagePreview] = useState<string>(DEFAULT_PRODUCT_IMAGE);
   const [productPublished, setProductPublished] = useState(true);
+  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [additionalImageInput, setAdditionalImageInput] = useState("");
+
+  const addAdditionalImages = () => {
+    const urls = additionalImageInput
+      .split(",")
+      .map((url) => getProductImage(url.trim()))
+      .filter(Boolean);
+    setAdditionalImages((prev) => {
+      const next = [...prev];
+      for (const url of urls) {
+        if (!next.includes(url)) next.push(url);
+      }
+      return next;
+    });
+    setAdditionalImageInput("");
+  };
 
   const setProductImageChoice = (value: string) => {
     const normalized = getProductImage(value || undefined);
@@ -112,6 +132,21 @@ export default function AdminDashboard() {
       /* ignore */
     }
   }, [handleAdminImagesChange]);
+
+  useEffect(() => {
+    if (editingItem && modalType === "product") {
+      const imgs = Array.isArray((editingItem as any)?.images)
+        ? ((editingItem as any).images as Array<{ url: string }>)
+            .map((img) => getProductImage(img.url))
+            .filter(Boolean)
+        : [];
+      setAdditionalImages(imgs);
+      setAdditionalImageInput(imgs.join(", "));
+    } else {
+      setAdditionalImages([]);
+      setAdditionalImageInput("");
+    }
+  }, [editingItem, modalType]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -232,7 +267,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Revenus",
-      value: `€${orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0).toFixed(2)}`,
+      value: `${formatPriceDA(orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0))}`,
       icon: DollarSign,
       color: "from-orange-500 to-orange-600",
       change: "+15%",
@@ -489,7 +524,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold">
-                            €{Number(order.total || 0).toFixed(2)}
+                            {formatPriceDA(Number(order.total || 0))}
                           </p>
                           <span
                             className={`text-xs px-2 py-1 rounded-full ${
@@ -628,7 +663,7 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="p-4 text-white/80">{product.color}</td>
-                          <td className="p-4 font-bold">€{product.price}</td>
+                          <td className="p-4 font-bold">{formatPriceDA(product.price)}</td>
                           <td className="p-4">
                             <span
                               className={`px-3 py-1 rounded-full text-sm ${
@@ -643,8 +678,8 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="p-4 text-white/80">
-                            {product.category}
-                          </td>
+                             {normalizeCategory(product.category)}
+                           </td>
                           <td className="p-4">
                             <span
                               className={`px-3 py-1 rounded-full text-sm ${
@@ -770,7 +805,7 @@ export default function AdminDashboard() {
                         <td className="p-4">{order.customerName}</td>
                         <td className="p-4 text-white/60">{order.email}</td>
                         <td className="p-4 font-bold">
-                          €{Number(order.total || 0).toFixed(2)}
+                          {formatPriceDA(Number(order.total || 0))}
                         </td>
                         <td className="p-4">
                           <select
@@ -914,17 +949,21 @@ export default function AdminDashboard() {
                   const normalizedImage = getProductImage(
                     selectedImage || undefined,
                   );
-                  const productData = {
-                    name: formData.get("name"),
-                    color,
-                    price: parseFloat(formData.get("price") as string),
-                    stock: parseInt(formData.get("stock") as string, 10),
-                    category: formData.get("category"),
-                    description: formData.get("description"),
-                    image: normalizedImage,
-                    published: productPublished,
-                    ...(sizes.length > 0 ? { sizes } : {}),
-                  };
+                   const productData = {
+                     name: formData.get("name"),
+                     color,
+                     price: parseFloat(formData.get("price") as string),
+                     stock: parseInt(formData.get("stock") as string, 10),
+                     category: formData.get("category"),
+                     description: formData.get("description"),
+                     image: normalizedImage,
+                     published: productPublished,
+                     ...(sizes.length > 0 ? { sizes } : {}),
+                     images: additionalImages
+                       .map((url) => getProductImage(url.trim()))
+                       .filter(Boolean)
+                       .map((url, idx) => ({ url, isMain: idx === 0 })),
+                   };
 
                   const opts = {
                     headers: { "Content-Type": "application/json" },
@@ -987,18 +1026,13 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <select
-                    name="category"
-                    defaultValue={editingItem?.category || "Vestes"}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                  >
-                    <option value="Vestes">Vestes</option>
-                    <option value="Accessoires">Accessoires</option>
-                    <option value="Nouveautés">Nouveautés</option>
-                    <option value="Promotions">Promotions</option>
-                    <option value="Classic">Classic</option>
-                    <option value="Premium">DripBazzarDZ</option>
-                    <option value="Luxury">Luxury</option>
-                  </select>
+                     name="category"
+                     defaultValue={normalizeCategory(editingItem?.category)}
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                   >
+                     <option value={PRODUCT_CATEGORIES.SWEAT}>{PRODUCT_CATEGORIES.SWEAT}</option>
+                     <option value={PRODUCT_CATEGORIES.T_SHIRT}>{PRODUCT_CATEGORIES.T_SHIRT}</option>
+                   </select>
                   <textarea
                     name="description"
                     placeholder="Description"
@@ -1052,8 +1086,47 @@ export default function AdminDashboard() {
                     <span className="text-white/70 text-sm">
                       {availableImages.length} image(s) disponible(s)
                     </span>
-                  </div>
-                  <label className="flex items-center gap-3 cursor-pointer">
+                   </div>
+                   <div className="space-y-2">
+                     <p className="text-white/70 text-xs font-medium">Images supplémentaires (chemins séparés par des virgules)</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="/products/xxx.webp, /products/yyy.webp"
+                          value={additionalImageInput}
+                          onChange={(e) => setAdditionalImageInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addAdditionalImages();
+                            }
+                          }}
+                          className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={addAdditionalImages}
+                          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors"
+                        >
+                          Ajouter
+                        </button>
+                      </div>
+                     <div className="flex flex-wrap gap-2">
+                       {additionalImages.map((img, idx) => (
+                         <div key={idx} className="relative">
+                           <img src={getProductImage(img)} alt="" className="w-16 h-16 object-cover rounded-lg border border-white/20" />
+                           <button
+                             type="button"
+                             onClick={() => setAdditionalImages((prev) => prev.filter((_, i) => i !== idx))}
+                             className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full text-white text-[10px]"
+                           >
+                             ✕
+                           </button>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={productPublished}
@@ -1104,7 +1177,7 @@ export default function AdminDashboard() {
                           <p className="font-medium">{item.name}</p>
                           <p className="text-white/60 text-sm">Taille: {item.size} | Qté: {item.quantity}</p>
                         </div>
-                        <p className="font-bold">€{(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-bold">{formatPriceDA(item.price * item.quantity)}</p>
                       </div>
                     ))}
                   </div>

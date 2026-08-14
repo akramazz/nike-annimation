@@ -279,9 +279,9 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-medium">Email</h3>
-                         <p className="text-white/60">
-                          contact@dripbazzardz.com
-                        </p>
+                      <a href="mailto:azzouzakram357@gmail.com" className="text-white/60 hover:text-white transition-colors">
+                        azzouzakram357@gmail.com
+                      </a>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -290,7 +290,13 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-medium">Téléphone</h3>
-                      <p className="text-white/60">+33 1 23 45 67 89</p>
+                      <a href="tel:+213792259216" className="text-white/60 hover:text-white transition-colors">
+                        +213 792 259 216
+                      </a>
+                      <br />
+                      <a href="tel:+213552815537" className="text-white/60 hover:text-white transition-colors">
+                        +213 552 815 537
+                      </a>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
@@ -300,9 +306,7 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-medium">Adresse</h3>
                       <p className="text-white/60">
-                        123 Avenue des Champs-Élysées
-                        <br />
-                        75008 Paris, France
+                        Alger-Centre, Algérie
                       </p>
                     </div>
                   </div>

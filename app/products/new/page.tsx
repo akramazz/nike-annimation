@@ -7,6 +7,8 @@ import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { Sparkles } from "lucide-react";
 import ProductImg from "../../components/products/ProductImg";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory } from "@/lib/product-categories";
 
 interface Product {
   _id: string;
@@ -104,7 +106,7 @@ export default function NewProductsPage() {
                     <h3 className="text-lg font-bold text-white mb-1">{product.name}</h3>
                     <p className="text-white/60 text-sm mb-3">{product.color}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-white">€{product.price.toFixed(2)}</span>
+                       <span className="text-2xl font-bold text-white">{formatPriceDA(product.price)}</span>
                     </div>
                   </div>
                 </motion.div>

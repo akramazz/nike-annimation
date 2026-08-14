@@ -21,6 +21,8 @@ import {
   Facebook,
   Linkedin,
 } from "lucide-react";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory } from "@/lib/product-categories";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -240,7 +242,7 @@ export default function ProductDetailPage() {
               <div className="relative mt-4 aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/10">
                 <ProductImage src={product.image} alt={product.name} fill className="object-contain p-4" />
                 <div className="absolute top-4 left-4 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-medium">
-                  {product.category}
+                  {normalizeCategory(product.category)}
                 </div>
 
                 <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -318,7 +320,7 @@ export default function ProductDetailPage() {
             <div className="space-y-4 sm:space-y-6">
               <div className="space-y-1">
                 <div className="text-xs font-medium px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 inline-block border border-white/20">
-                  {product.category}
+                  {normalizeCategory(product.category)}
                 </div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-tight text-white">
                   {product.name}
@@ -330,11 +332,11 @@ export default function ProductDetailPage() {
 
               <div className="flex items-center gap-3">
                 <span className="text-3xl md:text-4xl font-extrabold text-white">
-                  €{currentPrice.toFixed(2)}
+                  {formatPriceDA(currentPrice)}
                 </span>
                 {product.onSale && product.salePrice && (
                   <span className="text-white/50 line-through text-lg md:text-xl">
-                    €{product.price.toFixed(2)}
+                    {formatPriceDA(product.price)}
                   </span>
                 )}
                 {product.salePercent && (

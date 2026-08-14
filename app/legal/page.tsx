@@ -43,13 +43,13 @@ export default function LegalPage() {
 
   const companyInfo = {
     name: "DripBazzarDZ",
-    address: "123 Rue de la Mode, 16000 Alger, Algérie",
-    phone: "+213 555 123 456",
-    email: "contact@dripbazzardz.com",
+    address: "Alger-Centre, Algérie",
+    phone: "+213 792 259 216",
+    email: "azzouzakram357@gmail.com",
     siret: "123 456 789 00001",
-    tva: "FR12345678901",
-    capital: "50 000 €",
-    director: "Alexandre Dubois"
+    tva: "DZ12345678901",
+    capital: "50 000 DA",
+    director: "Zakram Azzouz"
   };
 
   return (

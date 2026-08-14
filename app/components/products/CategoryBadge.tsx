@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 
 interface CategoryBadgeProps {
   category: string;
@@ -14,6 +15,8 @@ export default function CategoryBadge({
   const router = useRouter();
 
   const categoryPaths: Record<string, string> = {
+    [PRODUCT_CATEGORIES.SWEAT]: "/products/jackets",
+    [PRODUCT_CATEGORIES.T_SHIRT]: "/products/accessories",
     Accessoires: "/products/accessories",
     Veste: "/products/jackets",
     Vestes: "/products/jackets",
@@ -21,7 +24,7 @@ export default function CategoryBadge({
     Promotions: "/products/sales",
   };
 
-  const path = categoryPaths[category];
+  const path = categoryPaths[category] || categoryPaths[normalizeCategory(category)];
   const isClickable = !!path;
 
   const content = (

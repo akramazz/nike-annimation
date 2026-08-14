@@ -9,6 +9,7 @@ import AddToCartButton from "./AddToCartButton";
 import ProductBenefits from "./ProductBenefits";
 import CategoryBadge from "./CategoryBadge";
 import { normalizeProductImage } from "@/lib/product-normalize";
+import { formatPriceDA } from "@/lib/price-utils";
 
 export interface UnifiedProduct {
   _id: string;
@@ -124,10 +125,10 @@ function PriceDisplay({ product }: { product: UnifiedProduct }) {
           transition={{ duration: 0.6, repeat: 2, repeatDelay: 1.5 }}
           className="text-3xl md:text-4xl font-extrabold"
         >
-          €{product.salePrice.toFixed(2)}
+          {formatPriceDA(product.salePrice)}
         </motion.span>
         <span className="text-white/50 line-through text-lg md:text-xl">
-          €{product.price.toFixed(2)}
+          {formatPriceDA(product.price)}
         </span>
         {product.salePercent && (
           <span className="px-3 py-1 bg-red-500 text-white font-bold text-sm rounded-full">
@@ -140,7 +141,7 @@ function PriceDisplay({ product }: { product: UnifiedProduct }) {
   return (
     <div className="flex items-center gap-3" aria-label={`Prix: ${product.price} euros`}>
       <span className="text-3xl md:text-4xl font-extrabold">
-        €{product.price.toFixed(2)}
+        {formatPriceDA(product.price)}
       </span>
     </div>
   );

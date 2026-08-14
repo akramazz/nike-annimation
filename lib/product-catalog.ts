@@ -1,4 +1,5 @@
 import { DEFAULT_SIZES } from "./product-normalize";
+import { normalizeCategory } from "./product-categories";
 
 export type CatalogProduct = {
   name: string;
@@ -23,7 +24,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 79.99,
     stock: 20,
     description: "Design Algeria édition limitée",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -33,7 +34,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 84.99,
     stock: 18,
     description: "Collection streetwear Algérie",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -43,7 +44,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 74.99,
     stock: 25,
     description: "Style urbain premium",
-    category: "Luxury",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -53,7 +54,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 89.99,
     stock: 12,
     description: "Édition soleil streetwear",
-    category: "Luxury",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -63,7 +64,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 99.99,
     stock: 10,
     description: "Inspiration anime moderne",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -73,7 +74,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 59.99,
     stock: 20,
     description: "Minimalisme sophistiqué",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -83,7 +84,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 59.99,
     stock: 22,
     description: "Minimalisme sophistiqué",
-    category: "Classic",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -93,7 +94,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 59.99,
     stock: 30,
     description: "Style moderne et dynamique",
-    category: "Classic",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -103,7 +104,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 69.99,
     stock: 20,
     description: "Inspiré de la Casbah d’Alger",
-    category: "Classic",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -113,7 +114,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 79.99,
     stock: 30,
     description: "Design engagé premium",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -123,7 +124,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 220.99,
     stock: 15,
     description: "Sophistication et confort absolu",
-    category: "Luxury",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -133,7 +134,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 33.99,
     stock: 40,
     description: "Chaleur et élégance naturelle",
-    category: "Classic",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -143,7 +144,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 109.99,
     stock: 14,
     description: "Collection inspirée comics",
-    category: "Luxury",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -153,7 +154,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 59.99,
     stock: 35,
     description: "Intemporelle et raffinée",
-    category: "Classic",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -163,7 +164,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 69.99,
     stock: 22,
     description: "Couleur vive et esprit jeune",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -173,7 +174,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 69.99,
     stock: 25,
     description: "Élégance audacieuse pour un style unique",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -183,7 +184,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 119.99,
     stock: 9,
     description: "Design gaming japonais",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
   {
@@ -193,7 +194,7 @@ export const PRODUCT_CATALOG: CatalogProduct[] = [
     price: 88.99,
     stock: 18,
     description: "Fraîcheur et originalité",
-    category: "Premium",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   },
 ];
@@ -218,7 +219,7 @@ export function catalogFromFilename(filename: string): CatalogProduct {
     price: 69.99,
     stock: 20,
     description: `${label} — collection DripBazzarDZ`,
-    category: "Classic",
+    category: "Sweat",
     sizes: [...DEFAULT_SIZES],
   };
 }

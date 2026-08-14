@@ -7,10 +7,11 @@ import Navigation from "../../components/Navigation";
 import Footer from "../../components/Footer";
 import { useCart } from "../../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
-import { ShoppingBag, Heart, Eye } from "lucide-react";
-import Link from "next/link";
+import { ShoppingBag, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory } from "@/lib/product-categories";
 
 interface Product {
   _id: string;
@@ -34,10 +35,8 @@ const staticAccessories: Product[] = STATIC_ACCESSORIES.map((acc) => ({
 
 export default function AccessoriesPage() {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [showSizeError, setShowSizeError] = useState<Record<string, boolean>>({});
   const [likes, setLikes] = useState<Record<string, number>>({});
@@ -50,10 +49,6 @@ export default function AccessoriesPage() {
   };
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
     const fetchAccessories = async () => {
       try {
         // Fetch products from MongoDB
@@ -62,9 +57,9 @@ export default function AccessoriesPage() {
         
         if (data.success && Array.isArray(data.products)) {
           // Filter for accessories category or use static data if no DB accessories
-          const accessoriesFromDB = data.products.filter(
-            (p: Product) => p.category === "Accessoires" || p.category === "Accessoires"
-          );
+           const accessoriesFromDB = data.products.filter(
+             (p: Product) => normalizeCategory(p.category) === "T-shirt"
+           );
           
           if (accessoriesFromDB.length > 0) {
             setProducts([...staticAccessories, ...accessoriesFromDB]);
@@ -156,18 +151,18 @@ export default function AccessoriesPage() {
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">
-              Accessoires
-            </h1>
-            <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto">
-              Complétez votre style avec nos accessoires premium.
-            </p>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">
+                T-shirts
+              </h1>
+              <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto">
+                Découvrez notre collection de t-shirts tendance et confortables.
+              </p>
+            </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {products.map((product, index) => (
@@ -211,7 +206,7 @@ export default function AccessoriesPage() {
                   <p className="text-white/60 text-xs sm:text-sm mb-3 line-clamp-2">{product.description}</p>
                   
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-lg sm:text-xl font-bold text-white">€{product.price.toFixed(2)}</span>
+                     <span className="text-lg sm:text-xl font-bold text-white">{formatPriceDA(product.price)}</span>
                   </div>
 
                   {product.sizes && product.sizes.length > 0 && product.sizes[0] !== "Unique" && (
@@ -243,13 +238,6 @@ export default function AccessoriesPage() {
                       <ShoppingBag className="h-4 w-4" />
                       <span>Ajouter</span>
                     </button>
-                      <Link
-                        href={`/products/${product.id ?? product._id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
-                      >
-                      <Eye className="h-4 w-4" />
-                    </Link>
                   </div>
                 </div>
               </motion.div>

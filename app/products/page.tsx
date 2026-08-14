@@ -6,11 +6,12 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { normalizeProductImage } from "@/lib/product-normalize";
+import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, Heart, Eye, Link as LinkIcon } from "lucide-react";
-import Link from "next/link";
+import { ShoppingBag, Heart } from "lucide-react";
 import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
+import { formatPriceDA } from "@/lib/price-utils";
 
 interface Product {
   _id: string;
@@ -32,47 +33,47 @@ interface Product {
 
 const accessoriesData: Product[] = STATIC_ACCESSORIES.map((acc) => ({
   ...acc,
-  color: "Accessoires",
+  color: "T-shirt",
   type: "accessory" as const,
 }));
 
 // Fallback jackets data - used when MongoDB is not available
 const fallbackJackets: Product[] = [
-  { _id: "j-1", id: 101, name: "Veste Rouge", color: "Rouge", price: 69.99, stock: 25, image: "/products/rouge.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Élégance audacieuse", type: "jacket", likes: 45 },
+  { _id: "j-1", id: 101, name: "Veste Rouge", color: "Rouge", price: 69.99, stock: 25, image: "/products/rouge.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Élégance audacieuse", type: "jacket", likes: 45 },
 
-  { _id: "j-2", id: 102, name: "Veste Gris", color: "Gris", price: 220.99, stock: 15, image: "/products/gris.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Sophistication absolue", type: "jacket", likes: 32 },
+  { _id: "j-2", id: 102, name: "Veste Gris", color: "Gris", price: 220.99, stock: 15, image: "/products/gris.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Sophistication absolue", type: "jacket", likes: 32 },
 
-  { _id: "j-3", id: 103, name: "Veste Bleue", color: "Bleu", price: 59.99, stock: 30, image: "/products/blue.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Style moderne", type: "jacket", likes: 28 },
+  { _id: "j-3", id: 103, name: "Veste Bleue", color: "Bleu", price: 59.99, stock: 30, image: "/products/blue.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Style moderne", type: "jacket", likes: 28 },
 
-  { _id: "j-4", id: 104, name: "Veste Marron", color: "Marron", price: 33.99, stock: 40, image: "/products/maron.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Chaleur naturelle", type: "jacket", likes: 19 },
+  { _id: "j-4", id: 104, name: "Veste Marron", color: "Marron", price: 33.99, stock: 40, image: "/products/maron.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Chaleur naturelle", type: "jacket", likes: 19 },
 
-  { _id: "j-5", id: 105, name: "Veste Beige", color: "Beige", price: 59.99, stock: 20, image: "/products/beage.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Minimalisme élégant", type: "jacket", likes: 41 },
+  { _id: "j-5", id: 105, name: "Veste Beige", color: "Beige", price: 59.99, stock: 20, image: "/products/beage.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Minimalisme élégant", type: "jacket", likes: 41 },
 
-  { _id: "j-6", id: 106, name: "Veste Noire", color: "Noir", price: 59.99, stock: 35, image: "/products/noir.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Intemporelle", type: "jacket", likes: 67 },
+  { _id: "j-6", id: 106, name: "Veste Noire", color: "Noir", price: 59.99, stock: 35, image: "/products/noir.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Intemporelle", type: "jacket", likes: 67 },
 
-  { _id: "j-7", id: 107, name: "Veste Verte", color: "Vert", price: 88.99, stock: 18, image: "/products/vert.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Fraîcheur originale", type: "jacket", likes: 23 },
+  { _id: "j-7", id: 107, name: "Veste Verte", color: "Vert", price: 88.99, stock: 18, image: "/products/vert.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Fraîcheur originale", type: "jacket", likes: 23 },
 
-  { _id: "j-8", id: 108, name: "Veste Pistache", color: "Pistache", price: 69.99, stock: 22, image: "/products/pistache.webp", category: "Vestes", sizes: ["XS","S","M","L","XL","XXL"], description: "Couleur vibrante", type: "jacket", likes: 36 },
+  { _id: "j-8", id: 108, name: "Veste Pistache", color: "Pistache", price: 69.99, stock: 22, image: "/products/pistache.webp", category: "Sweat", sizes: ["XS","S","M","L","XL","XXL"], description: "Couleur vibrante", type: "jacket", likes: 36 },
 
-  { _id: "j-9", id: 109, name: "Algeria Cœur", color: "Noir", price: 79.99, stock: 20, image: "/products/akgeria-ceuor.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Design Algeria édition limitée", type: "jacket", likes: 15 },
+  { _id: "j-9", id: 109, name: "Algeria Cœur", color: "Noir", price: 79.99, stock: 20, image: "/products/akgeria-ceuor.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Design Algeria édition limitée", type: "jacket", likes: 15 },
 
-  { _id: "j-10", id: 110, name: "Alg16 Vert", color: "Vert", price: 84.99, stock: 18, image: "/products/alg16vert.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Collection streetwear Algérie", type: "jacket", likes: 21 },
+  { _id: "j-10", id: 110, name: "Alg16 Vert", color: "Vert", price: 84.99, stock: 18, image: "/products/alg16vert.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Collection streetwear Algérie", type: "jacket", likes: 21 },
 
-  { _id: "j-11", id: 111, name: "Alger Rose", color: "Rose", price: 74.99, stock: 25, image: "/products/algerrose.webp", category: "Luxury", sizes: ["XS","S","M","L","XL"], description: "Style urbain premium", type: "jacket", likes: 19 },
+  { _id: "j-11", id: 111, name: "Alger Rose", color: "Rose", price: 74.99, stock: 25, image: "/products/algerrose.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Style urbain premium", type: "jacket", likes: 19 },
 
-  { _id: "j-12", id: 112, name: "Alger Soleil", color: "Orange", price: 89.99, stock: 12, image: "/products/algersoliel.webp", category: "Luxury", sizes: ["XS","S","M","L","XL"], description: "Édition soleil streetwear", type: "jacket", likes: 26 },
+  { _id: "j-12", id: 112, name: "Alger Soleil", color: "Orange", price: 89.99, stock: 12, image: "/products/algersoliel.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Édition soleil streetwear", type: "jacket", likes: 26 },
 
-  { _id: "j-13", id: 113, name: "Anime Sezare", color: "Noir", price: 99.99, stock: 10, image: "/products/anime-sezare.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Inspiration anime moderne", type: "jacket", likes: 41 },
+  { _id: "j-13", id: 113, name: "Anime Sezare", color: "Noir", price: 99.99, stock: 10, image: "/products/anime-sezare.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Inspiration anime moderne", type: "jacket", likes: 41 },
 
-  { _id: "j-14", id: 114, name: "Casbah", color: "Beige", price: 69.99, stock: 20, image: "/products/casbah.webp", category: "Classic", sizes: ["XS","S","M","L","XL"], description: "Inspiré de la Casbah d’Alger", type: "jacket", likes: 33 },
+  { _id: "j-14", id: 114, name: "Casbah", color: "Beige", price: 69.99, stock: 20, image: "/products/casbah.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Inspiré de la Casbah d’Alger", type: "jacket", likes: 33 },
 
-  { _id: "j-15", id: 115, name: "Free Palestine", color: "Noir", price: 79.99, stock: 30, image: "/products/freepalastine.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Design engagé premium", type: "jacket", likes: 58 },
+  { _id: "j-15", id: 115, name: "Free Palestine", color: "Noir", price: 79.99, stock: 30, image: "/products/freepalastine.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Design engagé premium", type: "jacket", likes: 58 },
 
-  { _id: "j-16", id: 116, name: "Marvel Edition", color: "Rouge", price: 109.99, stock: 14, image: "/products/marvel.webp", category: "Luxury", sizes: ["XS","S","M","L","XL"], description: "Collection inspirée comics", type: "jacket", likes: 64 },
+  { _id: "j-16", id: 116, name: "Marvel Edition", color: "Rouge", price: 109.99, stock: 14, image: "/products/marvel.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Collection inspirée comics", type: "jacket", likes: 64 },
 
-  { _id: "j-17", id: 117, name: "Oran Street", color: "Orange", price: 72.99, stock: 17, image: "/products/oran.webp", category: "Classic", sizes: ["XS","S","M","L","XL"], description: "Style inspiré d’Oran", type: "jacket", likes: 22 },
+  { _id: "j-17", id: 117, name: "Oran Street", color: "Orange", price: 72.99, stock: 17, image: "/products/oran.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Style inspiré d’Oran", type: "jacket", likes: 22 },
 
-  { _id: "j-18", id: 118, name: "Sekiro", color: "Noir", price: 119.99, stock: 9, image: "/products/sekiro.webp", category: "Premium", sizes: ["XS","S","M","L","XL"], description: "Design gaming japonais", type: "jacket", likes: 77 },
+  { _id: "j-18", id: 118, name: "Sekiro", color: "Noir", price: 119.99, stock: 9, image: "/products/sekiro.webp", category: "Sweat", sizes: ["XS","S","M","L","XL"], description: "Design gaming japonais", type: "jacket", likes: 77 },
 ];
 
 export default function ProductsPage() {
@@ -182,21 +183,15 @@ export default function ProductsPage() {
     }
   };
 
-  const getProductLink = (product: Product) => {
-    return `/products/${product.id ?? product._id}`;
-  };
-
   const categories = [
     { id: "all", name: "Tous" },
-    { id: "Accessoires", name: "Accessoires" },
-    { id: "Premium", name: "DripBazzarDZ" },
-    { id: "Luxury", name: "Luxury" },
-    { id: "Classic", name: "Classic" },
+    { id: PRODUCT_CATEGORIES.SWEAT, name: PRODUCT_CATEGORIES.SWEAT },
+    { id: PRODUCT_CATEGORIES.T_SHIRT, name: PRODUCT_CATEGORIES.T_SHIRT },
   ];
 
   const filteredProducts = selectedCategory === "all" 
     ? products 
-    : products.filter(p => p.category === selectedCategory);
+    : products.filter(p => normalizeCategory(p.category) === selectedCategory);
 
   return (
     <div className="min-h-screen bg-black">
@@ -259,9 +254,9 @@ export default function ProductsPage() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 px-2 sm:px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
-                      {product.category}
-                    </div>
+                     <div className="absolute top-2 sm:top-3 left-2 sm:left-3 px-2 sm:px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
+                       {normalizeCategory(product.category)}
+                     </div>
                     {product.onSale && product.salePercent && (
                       <div className="absolute top-2 sm:top-3 right-2 sm:right-3 px-2 sm:px-3 py-1 bg-red-500 text-white font-bold text-xs rounded-full">
                         -{product.salePercent}%
@@ -295,11 +290,11 @@ export default function ProductsPage() {
                       <div className="flex flex-col">
                         {product.onSale && product.salePrice ? (
                           <>
-                            <span className="text-base sm:text-lg font-bold text-white">€{product.salePrice.toFixed(2)}</span>
-                            <span className="text-white/40 line-through text-xs">€{product.price.toFixed(2)}</span>
+                            <span className="text-base sm:text-lg font-bold text-white">{formatPriceDA(product.salePrice)}</span>
+                            <span className="text-white/40 line-through text-xs">{formatPriceDA(product.price)}</span>
                           </>
                         ) : (
-                          <span className="text-base sm:text-lg font-bold text-white">€{product.price.toFixed(2)}</span>
+                          <span className="text-base sm:text-lg font-bold text-white">{formatPriceDA(product.price)}</span>
                         )}
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
@@ -347,12 +342,6 @@ export default function ProductsPage() {
                         <ShoppingBag className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span>Ajouter</span>
                       </motion.button>
-                      <Link
-                        href={getProductLink(product)}
-                        className="px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors flex items-center justify-center"
-                      >
-                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </Link>
                     </div>
 
                       <form

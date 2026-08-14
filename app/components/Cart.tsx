@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, CreditCard } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import ProductImage from "./products/ProductImage";
+import { formatPriceDA } from "@/lib/price-utils";
 import { useRouter } from "next/navigation";
 
 export default function Cart() {
@@ -172,7 +173,7 @@ export default function Cart() {
                               <Plus className="h-3 w-3 text-white/70" />
                             </button>
                           </div>
-                          <span className="font-bold text-white">€{(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="font-bold text-white">{formatPriceDA(item.price * item.quantity)}</span>
                         </div>
                       </div>
 
@@ -194,21 +195,21 @@ export default function Cart() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-white/60">Sous-total</span>
-                      <span className="text-white font-medium">€{subtotal.toFixed(2)}</span>
+                      <span className="text-white font-medium">{formatPriceDA(subtotal)}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-white/60">Livraison</span>
                       <span className={shipping === 0 ? "text-green-400" : "text-white/80"}>
-                        {shipping === 0 ? "Gratuite" : `€${shipping.toFixed(2)}`}
+                        {shipping === 0 ? "Gratuite" : formatPriceDA(shipping)}
                       </span>
                     </div>
                     {shipping > 0 && (
-                      <p className="text-xs text-white/40">Livraison gratuite à partir de €100</p>
+                      <p className="text-xs text-white/40">Livraison gratuite à partir de 100 DA</p>
                     )}
                     <div className="h-px bg-white/10" />
                     <div className="flex items-center justify-between">
                       <span className="text-white font-semibold">Total</span>
-                      <span className="text-2xl font-bold text-white">€{grandTotal.toFixed(2)}</span>
+                      <span className="text-2xl font-bold text-white">{formatPriceDA(grandTotal)}</span>
                     </div>
                   </div>
 

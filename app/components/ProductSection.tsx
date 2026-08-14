@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
-import { ShoppingBag, Eye, Heart, Share2, Check, Copy, Twitter, Facebook, Linkedin } from "lucide-react";
+import { ShoppingBag, Heart, Share2, Check, Copy, Twitter, Facebook, Linkedin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProductImage from "./products/ProductImage";
 import { normalizeProductImage } from "@/lib/product-normalize";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 
 interface Product {
   _id?: string;
@@ -40,7 +42,6 @@ function ProductCard({
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const viewButtonRef = useRef<HTMLButtonElement>(null);
   const { addItem } = useCart();
   const router = useRouter();
   const [isAdded, setIsAdded] = useState(false);
@@ -165,9 +166,6 @@ function ProductCard({
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
 
         <div className="absolute top-4 right-4 flex flex-col space-y-2">
-          <motion.button ref={viewButtonRef} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={(e) => { e.stopPropagation(); router.push(`/products/${product._id || product.id}`); }} className="p-2 bg-white/10 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Eye className="h-5 w-5" />
-          </motion.button>
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleLike} className={`p-2 backdrop-blur-xl rounded-full transition-colors ${isLiked ? "bg-red-500/20 text-red-400" : "bg-white/10 text-white hover:bg-white/20"}`}>
             <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
           </motion.button>
@@ -214,7 +212,7 @@ function ProductCard({
           <span className="px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">Garantie 2 ans</span>
         </div>
         <div className="flex items-center justify-between pt-2">
-          <span className="text-2xl font-bold text-white">€{product.price}</span>
+          <span className="text-2xl font-bold text-white">{formatPriceDA(product.price)}</span>
           <motion.button ref={buttonRef} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleButtonClick} disabled={isAdded} className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full border border-white/20 transition-all duration-300 disabled:opacity-50 flex items-center space-x-2">
             <span>{isAdded ? "Ajouté !" : "Acheter"}</span>
             <ShoppingBag className="h-4 w-4" />
@@ -344,15 +342,12 @@ export default function ProductSection() {
   }
 
   const getBackgroundGradient = (category: string) => {
-    switch (category) {
-      case 'Premium': return 'from-indigo-950 via-slate-900 to-black';
-      case 'Luxury': return 'from-amber-950 via-orange-950/50 to-black';
-      case 'Classic': return 'from-slate-950 via-zinc-900 to-black';
-      case 'New': return 'from-violet-950 via-purple-900 to-black';
-      case 'Sale': return 'from-red-950 via-rose-900 to-black';
-      default: return 'from-gray-950 via-slate-900 to-black';
-    }
-  };
+     switch (normalizeCategory(category)) {
+       case PRODUCT_CATEGORIES.SWEAT: return 'from-indigo-950 via-slate-900 to-black';
+       case PRODUCT_CATEGORIES.T_SHIRT: return 'from-amber-950 via-orange-950/50 to-black';
+       default: return 'from-gray-950 via-slate-900 to-black';
+     }
+   };
 
   return (
     <section ref={sectionRef} className="relative min-h-screen py-20 px-4 sm:px-6 lg:px-8">
@@ -379,9 +374,9 @@ export default function ProductSection() {
                 <p className="text-white/70 text-lg">{selectedProduct.description}</p>
                 <div className="flex items-center space-x-4">
                   {selectedProduct.onSale && selectedProduct.salePrice ? (
-                    <>
-                      <span className="text-4xl font-bold text-white">€{selectedProduct.salePrice}</span>
-                      <span className="text-white/50 line-through text-xl">€{selectedProduct.price}</span>
+                      <>
+                        <span className="text-4xl font-bold text-white">{formatPriceDA(selectedProduct.salePrice)}</span>
+                        <span className="text-white/50 line-through text-xl">{formatPriceDA(selectedProduct.price)}</span>
                       {selectedProduct.salePercent && (
                         <span className="px-3 py-1 bg-red-500 text-white font-bold text-sm rounded-full">
                           -{selectedProduct.salePercent}%
@@ -389,7 +384,7 @@ export default function ProductSection() {
                       )}
                     </>
                   ) : (
-                    <span className="text-4xl font-bold text-white">€{selectedProduct.price}</span>
+                    <span className="text-4xl font-bold text-white">{formatPriceDA(selectedProduct.price)}</span>
                   )}
                 </div>
                 <div className="flex items-center space-x-2">

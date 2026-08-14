@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ZoomIn } from "lucide-react";
 import ProductImage from "@/app/components/products/ProductImage";
 import { getProductImage } from "@/lib/image-utils";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory } from "@/lib/product-categories";
 
 interface Product {
   _id: string;
@@ -16,6 +18,7 @@ interface Product {
   description: string;
   category: string;
   image: string;
+  images?: Array<{ url: string; isMain?: boolean }>;
   sizes: string[];
   onSale?: boolean;
   salePrice?: number;
@@ -30,13 +33,29 @@ interface ProductGalleryProps {
 export default function ProductGallery({ product }: ProductGalleryProps) {
   const [isZoomed, setIsZoomed] = useState(false);
   const [bgZoom, setBgZoom] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const currentImage = getProductImage(product.image);
+  const imageList = (() => {
+    const main = getProductImage(product.image);
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      const sorted = product.images
+        .map((img) => getProductImage(img.url))
+        .filter(Boolean);
+      if (!sorted.includes(main)) {
+        sorted.unshift(main);
+      }
+      return sorted;
+    }
+    return [main];
+  })();
+
+  const currentImage = imageList[selectedImageIndex] || imageList[0] || getProductImage(product.image);
 
   useEffect(() => {
     setIsZoomed(false);
     setBgZoom(false);
-  }, [currentImage]);
+    setSelectedImageIndex(0);
+  }, [product._id, product.image]);
 
   useEffect(() => {
     if (!isZoomed) return;
@@ -77,7 +96,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
 
         <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
           <span className="px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-xs font-medium">
-            {product.category}
+            {normalizeCategory(product.category)}
           </span>
           {product.onSale && product.salePercent ? (
             <span className="px-3 py-1 bg-red-500 text-white font-bold text-xs">
@@ -94,20 +113,37 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         <div className="absolute bottom-4 left-4 hidden md:block pointer-events-none">
           {product.onSale && product.salePrice ? (
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-white px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full">
-                €{product.salePrice.toFixed(2)}
-              </span>
-              <span className="text-sm text-white/60 line-through mt-1 px-3">
-                €{product.price.toFixed(2)}
-              </span>
+                <span className="text-2xl font-bold text-white px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full">
+                  {formatPriceDA(product.salePrice)}
+                </span>
+                <span className="text-sm text-white/60 line-through mt-1 px-3">
+                  {formatPriceDA(product.price)}
+                </span>
             </div>
           ) : (
             <span className="text-2xl font-bold text-white px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full">
-              €{product.price.toFixed(2)}
+              {formatPriceDA(product.price)}
             </span>
           )}
         </div>
       </div>
+
+      {imageList.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {imageList.map((img, idx) => (
+            <button
+              key={`${img}-${idx}`}
+              type="button"
+              onClick={() => setSelectedImageIndex(idx)}
+              className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                selectedImageIndex === idx ? "border-white" : "border-white/20"
+              }`}
+            >
+              <img src={img} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {isZoomed ? (

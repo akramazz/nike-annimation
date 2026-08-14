@@ -36,7 +36,7 @@ export default function CommitmentsPage() {
       icon: Truck,
       title: "Livraison Express",
       description: "Recevez vos commandes rapidement avec notre service de livraison premium.",
-      details: ["Livraison offerte dès 100€", "Suivi en temps réel", "Livraison internationale"]
+      details: ["Livraison offerte dès 100 DA", "Suivi en temps réel", "Livraison internationale"]
     }
   ];
 

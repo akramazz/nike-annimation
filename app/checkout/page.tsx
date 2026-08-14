@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { useRouter } from "next/navigation";
 import ProductImage from "../components/products/ProductImage";
 import { normalizeProductImage } from "@/lib/product-normalize";
+import { formatPriceDA } from "@/lib/price-utils";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
@@ -343,7 +344,7 @@ export default function CheckoutPage() {
                 <span className="relative z-10">
                   {isSubmitting
                     ? "Traitement..."
-                    : `Payer €${total.toFixed(2)}`}
+                    : `Payer ${formatPriceDA(total)}`}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               </motion.button>
@@ -392,7 +393,7 @@ export default function CheckoutPage() {
                         </p>
                       </div>
                       <p className="font-bold">
-                        €{(item.price * item.quantity).toFixed(2)}
+                        {formatPriceDA(item.price * item.quantity)}
                       </p>
                     </div>
                   ))}
@@ -401,7 +402,7 @@ export default function CheckoutPage() {
                 <div className="border-t border-white/10 pt-4 space-y-2">
                   <div className="flex justify-between text-white/60">
                     <span>Sous-total</span>
-                    <span>€{total.toFixed(2)}</span>
+                    <span>{formatPriceDA(total)}</span>
                   </div>
                   <div className="flex justify-between text-white/60">
                     <span>Livraison</span>
@@ -409,7 +410,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between text-xl font-bold pt-2 border-t border-white/10">
                     <span>Total</span>
-                    <span>€{total.toFixed(2)}</span>
+                    <span>{formatPriceDA(total)}</span>
                   </div>
                 </div>
 

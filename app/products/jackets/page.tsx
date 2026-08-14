@@ -8,6 +8,8 @@ import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import Link from "next/link";
 import ProductImg from "@/app/components/products/ProductImg";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 
 interface Product {
   _id: string;
@@ -42,7 +44,7 @@ export default function JacketsPage() {
         const res = await fetch(apiUrl("/api/products"));
         const data = await res.json();
         if (data.success && Array.isArray(data.products)) {
-          setProducts(data.products);
+          setProducts(data.products.filter((p: Product) => normalizeCategory(p.category) === PRODUCT_CATEGORIES.SWEAT));
         }
       } catch (e) {
         console.error(e);
@@ -74,10 +76,10 @@ export default function JacketsPage() {
             className="text-center mb-12"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">
-              Vestes
+              Sweats
             </h1>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
-              Découvrez notre collection de vestes premium, conçues pour allier style et performance.
+              Découvrez notre collection de sweats premium, conçus pour allier style et performance.
             </p>
           </motion.div>
 
@@ -103,9 +105,9 @@ export default function JacketsPage() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute top-3 left-3 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
-                        {product.category}
-                      </div>
+                       <div className="absolute top-3 left-3 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full text-white/90 text-xs font-medium border border-white/20">
+                         {normalizeCategory(product.category)}
+                       </div>
                       {product.onSale && product.salePercent && (
                         <div className="absolute top-3 right-3 px-3 py-1 bg-red-500 text-white font-bold text-xs rounded-full">
                           -{product.salePercent}%
@@ -119,11 +121,11 @@ export default function JacketsPage() {
                         <div className="flex flex-col">
                           {product.onSale && product.salePrice ? (
                             <>
-                              <span className="text-lg sm:text-2xl font-bold text-white">€{product.salePrice.toFixed(2)}</span>
-                              <span className="text-white/40 line-through text-xs sm:text-sm">€{product.price.toFixed(2)}</span>
+                              <span className="text-lg sm:text-2xl font-bold text-white">{formatPriceDA(product.salePrice)}</span>
+                              <span className="text-white/40 line-through text-xs sm:text-sm">{formatPriceDA(product.price)}</span>
                             </>
                           ) : (
-                            <span className="text-lg sm:text-2xl font-bold text-white">€{product.price.toFixed(2)}</span>
+                            <span className="text-lg sm:text-2xl font-bold text-white">{formatPriceDA(product.price)}</span>
                           )}
                         </div>
                         <span className={`text-xs px-2 py-1 rounded-full ${
@@ -141,7 +143,7 @@ export default function JacketsPage() {
 
           {!loading && products.length === 0 && (
             <div className="text-center py-20">
-              <p className="text-white/60 text-lg">Aucune veste disponible pour le moment.</p>
+              <p className="text-white/60 text-lg">Aucun sweat disponible pour le moment.</p>
             </div>
           )}
         </div>

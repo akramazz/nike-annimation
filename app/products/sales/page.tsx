@@ -7,6 +7,8 @@ import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { Tag, Flame } from "lucide-react";
 import ProductImg from "../../components/products/ProductImg";
+import { formatPriceDA } from "@/lib/price-utils";
+import { normalizeCategory } from "@/lib/product-categories";
 
 interface Product {
   _id: string;
@@ -115,8 +117,8 @@ export default function SalesPage() {
                       <h3 className="text-lg font-bold text-white mb-1">{product.name}</h3>
                       <p className="text-white/60 text-sm mb-3">{product.color}</p>
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-white">€{product.price.toFixed(2)}</span>
-                        <span className="text-white/50 line-through">€{originalPrice.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-white">{formatPriceDA(product.price)}</span>
+                        <span className="text-white/50 line-through">{formatPriceDA(originalPrice)}</span>
                       </div>
                     </div>
                   </motion.div>

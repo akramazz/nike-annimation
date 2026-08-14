@@ -18,19 +18,19 @@ export default function DeliveryPage() {
       title: "France Métropolitaine",
       price: "Gratuit",
       time: "2-3 jours ouvrés",
-      threshold: "100€",
+      threshold: "100 DA",
       details: ["Livraison à domicile", "Point relais", "Suivi en temps réel"]
     },
     {
       title: "Europe",
-      price: "9,99€",
+      price: "9,99 DA",
       time: "3-5 jours ouvrés",
       threshold: null,
       details: ["Livraison à domicile", "Suivi international", "Douanes incluses"]
     },
     {
       title: "International",
-      price: "19,99€",
+      price: "19,99 DA",
       time: "5-10 jours ouvrés",
       threshold: null,
       details: ["Livraison express", "Assurance colis", "Suivi global"]

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import gsap from "gsap";
+import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import Cart from "./Cart";
 import Link from "next/link";
 
@@ -26,8 +27,8 @@ export default function Navigation() {
       name: "Produits", 
       children: [
         { name: "Tous les produits", href: "/products" },
-        { name: "Vestes", href: "/products/jackets" },
-        { name: "Accessoires", href: "/products/accessories" },
+        { name: PRODUCT_CATEGORIES.SWEAT, href: "/products/jackets" },
+        { name: PRODUCT_CATEGORIES.T_SHIRT, href: "/products/accessories" },
         { name: "Nouveautés", href: "/products/new" },
         { name: "Promotions", href: "/products/sales" },
       ]

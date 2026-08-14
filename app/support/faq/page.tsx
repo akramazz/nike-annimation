@@ -21,7 +21,7 @@ export default function FAQPage() {
     },
     {
       question: "Quels sont les délais de livraison ?",
-      answer: "Nos délais de livraison sont de 2 à 5 jours ouvrés en France métropolitaine. La livraison est gratuite pour toute commande supérieure à 100€."
+      answer: "Nos délais de livraison sont de 2 à 5 jours ouvrés en France métropolitaine. La livraison est gratuite pour toute commande supérieure à 100 DA."
     },
     {
       question: "Quelle est la politique de retour ?",
@@ -41,7 +41,7 @@ export default function FAQPage() {
     },
     {
       question: "Comment contacter le service client ?",
-      answer: "Vous pouvez nous contacter par email à contact@dripbazzardz.com, par téléphone au +213 555 123 456 (du lundi au vendredi, 9h-18h) ou via le formulaire de contact."
+      answer: "Vous pouvez nous contacter par email à azzouzakram357@gmail.com, par téléphone au +213 792 259 216 ou +213 552 815 537 (du lundi au vendredi, 9h-18h) ou via le formulaire de contact."
     },
     {
       question: "Proposez-vous des tailles grandes ?",
