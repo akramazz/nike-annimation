@@ -52,6 +52,7 @@ interface Order {
   email: string;
   phone: string;
   address: string;
+  city?: string;
   items: any[];
   total: number;
   status: string;
@@ -937,6 +938,7 @@ export default function AdminDashboard() {
               <h2 className="text-2xl font-bold mb-6">
                 {modalType === "order" ? "Détails de la commande" : (editingItem ? "Modifier le produit" : "Ajouter un produit")}
               </h2>
+              {modalType !== "order" && (
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
@@ -1165,9 +1167,10 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
-              
+              )}
+               
               {/* Order Details Modal */}
-              {modalType === "order" && editingItem && (
+              {modalType === "order" && selectedOrder && (
                 <div className="mt-6 pt-6 border-t border-white/20">
                   <h3 className="text-lg font-bold mb-4">Détails de la commande</h3>
 
@@ -1175,29 +1178,29 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="text-white/60">Client</span>
-                        <p className="font-medium">{editingItem.customerName || "Non renseigné"}</p>
+                        <p className="font-medium">{selectedOrder.customerName || "Non renseigné"}</p>
                       </div>
                       <div>
                         <span className="text-white/60">Email</span>
-                        <p className="font-medium">{editingItem.email || "Non renseigné"}</p>
+                        <p className="font-medium">{selectedOrder.email || "Non renseigné"}</p>
                       </div>
                       <div>
                         <span className="text-white/60">Téléphone</span>
-                        <p className="font-medium">{editingItem.phone || "Non renseigné"}</p>
+                        <p className="font-medium">{selectedOrder.phone || "Non renseigné"}</p>
                       </div>
                       <div>
                         <span className="text-white/60">Wilaya / Ville</span>
-                        <p className="font-medium">{editingItem.city || "Non renseigné"}</p>
+                        <p className="font-medium">{selectedOrder.city || "Non renseigné"}</p>
                       </div>
                       <div className="sm:col-span-2">
                         <span className="text-white/60">Adresse</span>
-                        <p className="font-medium">{editingItem.address || "Non renseigné"}</p>
+                        <p className="font-medium">{selectedOrder.address || "Non renseigné"}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4 max-h-60 overflow-y-auto">
-                    {editingItem.items?.map((item: any, idx: number) => (
+                    {selectedOrder.items?.map((item: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
                         <ProductImage src={item.image || "/products/default.webp"} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
                         <div className="flex-1">
