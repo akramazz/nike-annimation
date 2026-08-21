@@ -414,6 +414,7 @@ export default function ProductDetailPage() {
                   productPrice={currentPrice}
                   totalAmount={currentPrice * quantity}
                   productColor={product.color || product.category}
+                  productCategory={normalizeCategory(product.category)}
                   selectedSize={defaultSize || "Unique"}
                   quantity={quantity}
                   productImage={product.image}

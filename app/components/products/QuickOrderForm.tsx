@@ -55,6 +55,7 @@ export interface OrderFormProps {
   totalAmount: number;
   productId: string | number;
   productColor?: string;
+  productCategory?: string;
   selectedSize: string;
   quantity: number;
   productImage: string;
@@ -69,6 +70,7 @@ export default function QuickOrderForm({
   totalAmount,
   productId,
   productColor,
+  productCategory,
   selectedSize,
   quantity,
   productImage,
@@ -166,6 +168,7 @@ export default function QuickOrderForm({
             color: productColor || "",
             size: selectedSize,
             image: normalizeProductImage(productImage),
+            category: productCategory || "",
           },
         ],
         total: totalAmount,

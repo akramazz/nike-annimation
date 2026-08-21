@@ -1,13 +1,14 @@
-import mongoose, { Schema, Model, Document, Types } from "mongoose";
+import mongoose, { Schema, Model, Document } from "mongoose";
 
 export interface IOrderItem {
-  productId?: Types.ObjectId;
+  productId?: string;
   name: string;
   price: number;
   quantity: number;
   color: string;
   size: string;
   image: string;
+  category?: string;
 }
 
 export interface IOrder extends Document {
@@ -28,13 +29,14 @@ export interface IOrder extends Document {
 
 const OrderItemSchema = new Schema<IOrderItem>(
   {
-    productId: { type: Schema.Types.ObjectId, ref: "Product" },
+    productId: { type: String, maxlength: 120 },
     name: { type: String, required: true, maxlength: 200 },
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
     color: { type: String, maxlength: 80 },
     size: { type: String, maxlength: 32 },
     image: { type: String, maxlength: 500 },
+    category: { type: String, maxlength: 80 },
   },
   { _id: false }
 );

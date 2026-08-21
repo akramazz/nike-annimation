@@ -1169,15 +1169,49 @@ export default function AdminDashboard() {
               {modalType === "order" && editingItem && (
                 <div className="mt-6 pt-6 border-t border-white/20">
                   <h3 className="text-lg font-bold mb-4">Détails de la commande</h3>
+
+                  <div className="space-y-3 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-white/60">Client</span>
+                        <p className="font-medium">{editingItem.customerName || "Non renseigné"}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/60">Email</span>
+                        <p className="font-medium">{editingItem.email || "Non renseigné"}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/60">Téléphone</span>
+                        <p className="font-medium">{editingItem.phone || "Non renseigné"}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/60">Wilaya / Ville</span>
+                        <p className="font-medium">{editingItem.city || "Non renseigné"}</p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <span className="text-white/60">Adresse</span>
+                        <p className="font-medium">{editingItem.address || "Non renseigné"}</p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-4 max-h-60 overflow-y-auto">
                     {editingItem.items?.map((item: any, idx: number) => (
                       <div key={idx} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
                         <ProductImage src={item.image || "/products/default.webp"} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
                         <div className="flex-1">
                           <p className="font-medium">{item.name}</p>
-                          <p className="text-white/60 text-sm">Taille: {item.size} | Qté: {item.quantity}</p>
+                          <p className="text-white/60 text-sm">
+                            {item.category ? `Catégorie: ${item.category}` : ""}
+                            {item.color ? ` · Couleur: ${item.color}` : ""}
+                            {" · "}
+                            Taille: {item.size || "Non renseigné"} · Qté: {item.quantity}
+                          </p>
                         </div>
+                        <div className="text-right">
                           <p className="font-bold">{formatPriceDA(item.price * item.quantity)}</p>
+                          <p className="text-white/60 text-xs">{formatPriceDA(item.price)} / unité</p>
+                        </div>
                       </div>
                     ))}
                   </div>

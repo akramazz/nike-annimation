@@ -60,12 +60,14 @@ export async function POST(request: NextRequest) {
     const sanitizedItems = items.map((raw: unknown) => {
       const item = raw as Record<string, unknown>;
       return {
+        productId: item.productId != null ? String(item.productId) : undefined,
         name: clampStr(item.name, 200),
         price: parsePrice(item.price),
         quantity: Math.max(1, parseIntSafely(item.quantity, 1)),
         color: clampStr(item.color, 80),
         size: clampStr(item.size, 32),
         image: clampStr(item.image, 500),
+        category: clampStr(item.category, 80),
       };
     });
 
