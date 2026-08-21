@@ -81,6 +81,7 @@ export default function AdminDashboard() {
     "product",
   );
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
@@ -829,7 +830,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="p-4">
                           <button 
-                            onClick={() => { setEditingItem(order); setShowModal(true); setModalType("order"); }}
+                            onClick={() => { setSelectedOrder(order); setShowModal(true); }}
                             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                           >
                             <Eye className="h-4 w-4 text-blue-400" />
