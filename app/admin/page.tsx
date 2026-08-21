@@ -830,7 +830,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="p-4">
                           <button 
-                            onClick={() => { setSelectedOrder(order); setShowModal(true); }}
+                            onClick={() => { setSelectedOrder(order); setShowModal(true); setModalType("order"); }}
                             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                           >
                             <Eye className="h-4 w-4 text-blue-400" />
