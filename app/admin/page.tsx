@@ -9,9 +9,6 @@ import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import ProductImage from "@/app/components/products/ProductImage";
-import ProductImageManager, {
-  type AdminProductImage,
-} from "@/app/admin/components/ProductImageManager";
 import {
   Package,
   ShoppingCart,
@@ -26,7 +23,6 @@ import {
   X,
   Search,
   RefreshCw,
-  ImageIcon,
 } from "lucide-react";
 
 interface Product {
@@ -117,24 +113,6 @@ export default function AdminDashboard() {
     setImagePreview(normalized);
   };
 
-  const handleAdminImagesChange = useCallback((images: AdminProductImage[]) => {
-    setAvailableImages(images.map((img) => img.filename));
-  }, []);
-
-  const refreshAvailableImages = useCallback(async () => {
-    try {
-      const res = await fetch(apiUrl("/api/products/images"), {
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (res.ok && data.success && Array.isArray(data.images)) {
-        handleAdminImagesChange(data.images);
-      }
-    } catch {
-      /* ignore */
-    }
-  }, [handleAdminImagesChange]);
-
   useEffect(() => {
     if (editingItem && modalType === "product") {
       const imgs = Array.isArray((editingItem as any)?.images)
@@ -191,7 +169,6 @@ export default function AdminDashboard() {
           setAuthenticated(Boolean(data.authenticated));
           if (!data.authRequired || data.authenticated) {
             await fetchData();
-            await refreshAvailableImages();
           }
         }
       } catch {
@@ -203,7 +180,7 @@ export default function AdminDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [fetchData, refreshAvailableImages]);
+  }, [fetchData]);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,7 +204,6 @@ export default function AdminDashboard() {
       setLoginPassword("");
       setAuthenticated(true);
       await fetchData();
-      await refreshAvailableImages();
     } catch {
       setLoginError("Erreur réseau.");
     }
@@ -457,7 +433,6 @@ export default function AdminDashboard() {
             {[
               { id: "dashboard", label: "Tableau de bord", icon: TrendingUp },
               { id: "products", label: "Produits", icon: Package },
-              { id: "images", label: "Images", icon: ImageIcon },
               { id: "orders", label: "Commandes", icon: ShoppingCart },
               { id: "messages", label: "Messages", icon: MessageSquare },
             ].map((tab) => (
@@ -723,23 +698,9 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </motion.div>
-          )}
+           )}
 
-          {/* Images Tab */}
-          {activeTab === "images" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ProductImageManager
-                onPublished={fetchData}
-                onImagesChange={handleAdminImagesChange}
-              />
-            </motion.div>
-          )}
-
-          {/* Orders Tab */}
+           {/* Orders Tab */}
           {activeTab === "orders" && (
             <motion.div
               initial={{ opacity: 0 }}
