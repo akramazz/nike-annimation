@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
-import MetaPixelClient from "./components/MetaPixelClient";
+import { AuthProvider } from "./context/AuthContext";
+import PixelTracker from "./components/PixelTracker";
+import MetaPixelInit from "./components/MetaPixelInit";
 
 const appUrlRaw =
   process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
@@ -124,22 +127,11 @@ export default function RootLayout({
         {/* Disable automatic email detection */}
         <meta name="format-detection" content="email=no" />
 
-        {/* Meta Pixel — in HTML so Meta Events Manager / crawlers can detect it */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s?s.parentNode.insertBefore(t,s):(b.head||b.documentElement).appendChild(t)}(window,document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init','517991158551582');
-fbq('track','PageView');
-            `,
-          }}
+        {/* Meta Pixel */}
+        <Script
+          id="meta-pixel"
+          src="https://connect.facebook.net/en_US/fbevents.js"
+          strategy="afterInteractive"
         />
         </head>
         <body className="font-sans antialiased bg-black text-white overflow-x-hidden">
@@ -148,22 +140,25 @@ fbq('track','PageView');
               height="1"
               width="1"
               style={{ display: "none" }}
-              src={`https://www.facebook.com/tr?id=517991158551582&ev=PageView&noscript=1`}
+              src={`https://www.facebook.com/tr?id=1668719870942213&ev=PageView&noscript=1`}
               alt=""
             />
           </noscript>
-          <MetaPixelClient />
+          <PixelTracker />
+          <MetaPixelInit />
           {/* Skip to main content pour l'accessibilité */}
          <a
-           href="#main-content"
-           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:font-semibold"
-         >
-           Aller au contenu principal
-         </a>
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:font-semibold"
+          >
+            Aller au contenu principal
+          </a>
 
-         {/* Contenu principal avec CartProvider */}
+         {/* Contenu principal avec CartProvider + AuthProvider */}
          <CartProvider>
-           <main id="main-content">{children}</main>
+           <AuthProvider>
+             <main id="main-content">{children}</main>
+           </AuthProvider>
          </CartProvider>
 
          {/* Préchargement léger — ne pas toucher aux src des images lazy */}

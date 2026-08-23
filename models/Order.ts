@@ -22,6 +22,7 @@ export interface IOrder extends Document {
   country?: string;
   total: number;
   status: string;
+  stockAdjusted: boolean;
   items: IOrderItem[];
   createdAt: Date;
   updatedAt: Date;
@@ -57,6 +58,7 @@ const OrderSchema = new Schema<IOrder>(
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
+    stockAdjusted: { type: Boolean, default: false },
     items: { type: [OrderItemSchema], required: true },
   },
   { timestamps: true }

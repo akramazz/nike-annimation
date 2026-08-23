@@ -20,9 +20,11 @@ import {
   Twitter,
   Facebook,
   Linkedin,
+  ChevronDown,
 } from "lucide-react";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory } from "@/lib/product-categories";
+import StarRating from "@/app/components/StarRating";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -40,6 +42,9 @@ export default function ProductDetailPage() {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [showQuickOrder, setShowQuickOrder] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -47,6 +52,7 @@ export default function ProductDetailPage() {
     setLoading(true);
     setProduct(null);
     setOrderSuccess(false);
+    setShowQuickOrder(false);
 
     getProduct(id).then((p) => {
       if (cancelled) return;
@@ -58,6 +64,16 @@ export default function ProductDetailPage() {
         if (saved) setIsLiked(saved === "true");
         const savedSize = localStorage.getItem(`product_size_${p._id}`);
         if (savedSize) setSelectedSize(savedSize);
+
+        fetch(apiUrl(`/api/ratings?productId=${encodeURIComponent(p._id)}`))
+          .then((res) => res.json())
+          .then((data) => {
+            if (!cancelled && data.success) {
+              setAverageRating(data.average || 0);
+              setRatingCount(data.count || 0);
+            }
+          })
+          .catch(() => {});
       }
     });
 
@@ -346,6 +362,8 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
+              <StarRating value={averageRating} count={ratingCount} />
+
               <p className="text-white/70 text-base leading-relaxed">{product.description}</p>
 
               <div>
@@ -407,19 +425,40 @@ export default function ProductDetailPage() {
               </motion.button>
 
               <div className="space-y-4">
-                <h3 className="text-base font-semibold">Commande rapide</h3>
-                <QuickOrderForm
-                  productId={product.id || product._id}
-                  productName={product.name}
-                  productPrice={currentPrice}
-                  totalAmount={currentPrice * quantity}
-                  productColor={product.color || product.category}
-                  productCategory={normalizeCategory(product.category)}
-                  selectedSize={defaultSize || "Unique"}
-                  quantity={quantity}
-                  productImage={product.image}
-                  onSuccess={() => setOrderSuccess(true)}
-                />
+                <button
+                  onClick={() => setShowQuickOrder(!showQuickOrder)}
+                  className="flex items-center justify-between w-full p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                >
+                  <span className="text-base font-semibold">Commander rapidement</span>
+                  <motion.div
+                    animate={{ rotate: showQuickOrder ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDown className="h-5 w-5" />
+                  </motion.div>
+                </button>
+
+                <motion.div
+                  initial={false}
+                  animate={{ height: showQuickOrder ? "auto" : 0, opacity: showQuickOrder ? 1 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  {showQuickOrder && (
+                    <QuickOrderForm
+                      productId={product.id || product._id}
+                      productName={product.name}
+                      productPrice={currentPrice}
+                      totalAmount={currentPrice * quantity}
+                      productColor={product.color || product.category}
+                      productCategory={normalizeCategory(product.category)}
+                      selectedSize={defaultSize || "Unique"}
+                      quantity={quantity}
+                      productImage={product.image}
+                      onSuccess={() => setOrderSuccess(true)}
+                    />
+                  )}
+                </motion.div>
               </div>
 
               <ProductBenefits />

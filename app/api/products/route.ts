@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dns from "dns";
 import connectDB from "@/utils/mongodb";
 import Product from "@/models/Product";
+import Rating from "@/models/Rating";
 import { isAdminRequest } from "@/lib/admin-auth";
 import { getProductImage } from "@/lib/image-utils";
 import { normalizeCategory } from "@/lib/product-categories";
@@ -13,23 +14,150 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
+    const { searchParams } = new URL(request.url);
     const includeUnpublished =
       isAdminRequest(request) &&
-      new URL(request.url).searchParams.get("includeUnpublished") === "1";
+      searchParams.get("includeUnpublished") === "1";
 
-    const filter = includeUnpublished ? {} : { published: { $ne: false } };
-    const products = await Product.find(filter).sort({ _id: 1 }).lean();
-    const plainProducts = products.map((p, index) => ({
-      ...p,
-      id: index + 1,
-      _id: p._id.toString(),
-      image: getProductImage(p.image as string | undefined),
-      published: p.published !== false,
-      category: normalizeCategory(p.category as string | undefined),
-      createdAt: p.createdAt?.toISOString(),
-      updatedAt: p.updatedAt?.toISOString(),
-    }));
-    return NextResponse.json({ success: true, products: plainProducts });
+    const category = searchParams.get("category");
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+    const minRating = searchParams.get("minRating");
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "12", 10) || 12));
+    const skip = (page - 1) * limit;
+
+    const filter: Record<string, unknown> = includeUnpublished ? {} : { published: { $ne: false } };
+
+    if (category) {
+      filter.category = normalizeCategory(category);
+    }
+    if (minPrice !== null && minPrice !== "") {
+      filter.price = { ...(filter.price as Record<string, number> | undefined), $gte: Math.max(0, Number(minPrice)) };
+    }
+    if (maxPrice !== null && maxPrice !== "") {
+      filter.price = { ...(filter.price as Record<string, number> | undefined), $lte: Math.max(0, Number(maxPrice)) };
+    }
+
+    const sort: any = { createdAt: -1 };
+    if (sortBy === "price_asc") sort.price = 1;
+    else if (sortBy === "price_desc") sort.price = -1;
+    else if (sortBy === "name") sort.name = 1;
+    else if (sortBy === "rating") sort._id = 1;
+
+    const useAggregation = minRating !== null && minRating !== "" && !includeUnpublished;
+
+    let products: any[];
+    let total: number;
+
+    if (useAggregation) {
+      const pipeline: any[] = [
+        { $match: filter },
+        {
+          $addFields: {
+            _idStr: { $toString: "$_id" },
+          },
+        },
+        {
+          $lookup: {
+            from: "ratings",
+            localField: "_idStr",
+            foreignField: "productId",
+            as: "ratings",
+          },
+        },
+        {
+          $addFields: {
+            averageRating: { $avg: "$ratings.rating" },
+            ratingCount: { $size: "$ratings" },
+          },
+        },
+        { $match: { averageRating: { $gte: Number(minRating) } } },
+      ];
+
+      if (sortBy === "rating") {
+        pipeline.push({ $sort: { averageRating: -1, ratingCount: -1, createdAt: -1 } });
+      } else if (sortBy === "price_asc") {
+        pipeline.push({ $sort: { price: 1 } });
+      } else if (sortBy === "price_desc") {
+        pipeline.push({ $sort: { price: -1 } });
+      } else if (sortBy === "name") {
+        pipeline.push({ $sort: { name: 1 } });
+      } else {
+        pipeline.push({ $sort: { createdAt: -1 } });
+      }
+
+      pipeline.push({ $skip: skip }, { $limit: limit });
+
+      const [aggregated, countResult] = await Promise.all([
+        Product.aggregate(pipeline),
+        Product.aggregate([
+          { $match: filter },
+          {
+            $addFields: {
+              _idStr: { $toString: "$_id" },
+            },
+          },
+          {
+            $lookup: {
+              from: "ratings",
+              localField: "_idStr",
+              foreignField: "productId",
+              as: "ratings",
+            },
+          },
+          { $addFields: { averageRating: { $avg: "$ratings.rating" } } },
+          { $match: { averageRating: { $gte: Number(minRating) } } },
+          { $count: "count" },
+        ]),
+      ]);
+
+      products = aggregated;
+      total = countResult.length > 0 ? countResult[0].count : 0;
+    } else {
+      const [dbProducts, dbTotal] = await Promise.all([
+        Product.find(filter).sort(sort).skip(skip).limit(limit).lean(),
+        Product.countDocuments(filter),
+      ]);
+
+      products = dbProducts;
+      total = dbTotal;
+    }
+
+    const plainProducts = products.map((p: any, index: number) => {
+      const base: Record<string, unknown> = {
+        ...p,
+        id: includeUnpublished ? index + 1 : (p.id || index + 1),
+        _id: p._id.toString(),
+        image: getProductImage(p.image as string | undefined),
+        published: p.published !== false,
+        category: normalizeCategory(p.category as string | undefined),
+        createdAt: p.createdAt?.toISOString(),
+        updatedAt: p.updatedAt?.toISOString(),
+      };
+
+      if (p.ratings && p.ratings.length > 0) {
+        base.averageRating = Math.round((p.averageRating || 0) * 10) / 10;
+        base.ratingCount = p.ratingCount || p.ratings.length;
+      } else {
+        base.averageRating = 0;
+        base.ratingCount = 0;
+      }
+
+      return base;
+    });
+
+    return NextResponse.json({
+      success: true,
+      products: plainProducts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch products";
     console.error("GET /api/products:", message);

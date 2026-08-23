@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/utils/mongodb";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
@@ -7,6 +8,14 @@ import { isAdminRequest } from "@/lib/admin-auth";
 export const dynamic = "force-dynamic";
 
 const ALLOWED_STATUSES = new Set(["pending", "confirmed", "shipped", "delivered", "cancelled"]);
+
+const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  delivered: [],
+  cancelled: [],
+};
 
 function clampStr(str: unknown, maxLen: number): string {
   return String(str || "").slice(0, maxLen).trim();
@@ -20,6 +29,18 @@ function parsePrice(val: unknown): number {
 function parseIntSafely(val: unknown, fallback: number): number {
   const num = Number(val);
   return Number.isFinite(num) ? Math.floor(num) : fallback;
+}
+
+async function findProductByIdentifier(identifier: string | number | undefined) {
+  if (!identifier) return null;
+  const strId = String(identifier).trim();
+  if (!strId) return null;
+
+  let product = await Product.findById(strId);
+  if (!product && !isNaN(Number(strId))) {
+    product = await Product.findOne({ id: Number(strId) });
+  }
+  return product;
 }
 
 export async function GET(request: NextRequest) {
@@ -95,16 +116,9 @@ export async function POST(request: NextRequest) {
       country: clampStr(body.country, 120),
       total,
       status: "pending",
+      stockAdjusted: false,
       items: sanitizedItems,
     });
-
-    for (const item of sanitizedItems) {
-      const product = await Product.findOne({ name: item.name });
-      if (product) {
-        product.stock = Math.max(0, product.stock - item.quantity);
-        await product.save();
-      }
-    }
 
     const plain = {
       ...order.toObject(),
@@ -127,26 +141,107 @@ export async function PUT(request: NextRequest) {
     await connectDB();
     const body = await request.json();
     const id = String(body.id || "").trim();
-    const status = String(body.status || "").trim();
+    const newStatus = String(body.status || "").trim();
 
-    if (!id || !ALLOWED_STATUSES.has(status)) {
+    if (!id || !ALLOWED_STATUSES.has(newStatus)) {
       return NextResponse.json({ success: false, error: "Valid order id and status are required" }, { status: 400 });
     }
 
-    const updated = await Order.findByIdAndUpdate(id, { status }, { new: true }).lean();
-
-    if (!updated) {
+    const order = await Order.findById(id);
+    if (!order) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
     }
 
-    const plain = {
-      ...updated,
-      _id: updated._id.toString(),
-      createdAt: updated.createdAt?.toISOString(),
-      updatedAt: updated.updatedAt?.toISOString(),
-    };
+    const previousStatus = order.status;
+    if (previousStatus === newStatus) {
+      const plain = {
+        ...order.toObject(),
+        _id: order._id.toString(),
+        createdAt: order.createdAt?.toISOString(),
+        updatedAt: order.updatedAt?.toISOString(),
+      };
+      return NextResponse.json({ success: true, order: plain });
+    }
 
-    return NextResponse.json({ success: true, order: plain });
+    const allowedNext = ALLOWED_TRANSITIONS[previousStatus];
+    if (!allowedNext || !allowedNext.includes(newStatus)) {
+      return NextResponse.json(
+        { success: false, error: `Transition invalide: ${previousStatus} → ${newStatus}` },
+        { status: 400 }
+      );
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      if (previousStatus === "pending" && newStatus === "confirmed") {
+        if (order.stockAdjusted) {
+          throw new Error("Le stock a déjà été déduit pour cette commande.");
+        }
+
+        for (const item of order.items) {
+          const product = await findProductByIdentifier(item.productId || item.name);
+          if (!product) {
+            throw new Error(`Produit introuvable: ${item.name}`);
+          }
+          if (product.stock < item.quantity) {
+            throw new Error(`Stock insuffisant pour ${item.name}: ${product.stock} restants, ${item.quantity} demandés`);
+          }
+        }
+
+        for (const item of order.items) {
+          const product = await findProductByIdentifier(item.productId || item.name);
+          if (!product) {
+            throw new Error(`Produit introuvable: ${item.name}`);
+          }
+          await Product.findByIdAndUpdate(
+            product._id,
+            { $inc: { stock: -item.quantity } },
+            { session, new: true }
+          );
+        }
+
+        order.stockAdjusted = true;
+      } else if (previousStatus === "confirmed" && newStatus === "cancelled") {
+        if (!order.stockAdjusted) {
+          throw new Error("Le stock n'a pas été déduit, rien à restaurer.");
+        }
+
+        for (const item of order.items) {
+          const product = await findProductByIdentifier(item.productId || item.name);
+          if (product) {
+            await Product.findByIdAndUpdate(
+              product._id,
+              { $inc: { stock: item.quantity } },
+              { session, new: true }
+            );
+          }
+        }
+
+        order.stockAdjusted = false;
+      }
+
+      order.status = newStatus;
+      await order.save({ session });
+
+      await session.commitTransaction();
+
+      const plain = {
+        ...order.toObject(),
+        _id: order._id.toString(),
+        createdAt: order.createdAt?.toISOString(),
+        updatedAt: order.updatedAt?.toISOString(),
+      };
+
+      return NextResponse.json({ success: true, order: plain });
+    } catch (error) {
+      await session.abortTransaction();
+      const message = error instanceof Error ? error.message : "Erreur lors de la mise à jour";
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
+    } finally {
+      session.endSession();
+    }
   } catch {
     return NextResponse.json({ success: false, error: "Failed to update order" }, { status: 500 });
   }
@@ -165,10 +260,43 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Valid order id is required" }, { status: 400 });
     }
 
-    const deleted = await Order.findByIdAndDelete(id);
-
+    const deleted = await Order.findById(id);
     if (!deleted) {
       return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+    }
+
+    if (deleted.status === "delivered") {
+      return NextResponse.json(
+        { success: false, error: "Une commande livrée ne peut pas être supprimée." },
+        { status: 400 }
+      );
+    }
+
+    if (deleted.status === "confirmed" && deleted.stockAdjusted) {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        for (const item of deleted.items) {
+          const product = await findProductByIdentifier(item.productId || item.name);
+          if (product) {
+            await Product.findByIdAndUpdate(
+              product._id,
+              { $inc: { stock: item.quantity } },
+              { session, new: true }
+            );
+          }
+        }
+        await Order.findByIdAndDelete(id, { session });
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+        const message = error instanceof Error ? error.message : "Erreur lors de la suppression";
+        return NextResponse.json({ success: false, error: message }, { status: 400 });
+      } finally {
+        session.endSession();
+      }
+    } else {
+      await Order.findByIdAndDelete(id);
     }
 
     return NextResponse.json({ success: true, message: "Order deleted" });
