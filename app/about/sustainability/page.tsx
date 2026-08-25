@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import { Leaf, Recycle, Droplets, Sun } from "lucide-react";
 
 export default function SustainabilityPage() {
@@ -48,7 +46,6 @@ export default function SustainabilityPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
@@ -87,7 +84,6 @@ export default function SustainabilityPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

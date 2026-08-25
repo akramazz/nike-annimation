@@ -9,6 +9,7 @@ import ProductGallery from "@/app/components/products/ProductGallery";
 import QuickOrderForm from "@/app/components/products/QuickOrderForm";
 import ProductBenefits from "@/app/components/products/ProductBenefits";
 import { useCart } from "@/app/context/CartContext";
+import { useAuth } from "@/app/context/AuthContext";
 import { getProduct, UnifiedProduct } from "@/app/lib/get-product";
 import { apiUrl } from "@/lib/api-client";
 import {
@@ -30,6 +31,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addItem } = useCart();
+  const { user } = useAuth();
   const id = String(params?.id ?? "");
 
   const [product, setProduct] = useState<UnifiedProduct | null>(null);
@@ -45,6 +47,9 @@ export default function ProductDetailPage() {
   const [showQuickOrder, setShowQuickOrder] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
+  const [userRating, setUserRating] = useState(0);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [ratingMessage, setRatingMessage] = useState<string | null>(null);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -71,6 +76,7 @@ export default function ProductDetailPage() {
             if (!cancelled && data.success) {
               setAverageRating(data.average || 0);
               setRatingCount(data.count || 0);
+              if (data.userRating) setUserRating(data.userRating);
             }
           })
           .catch(() => {});
@@ -94,7 +100,7 @@ export default function ProductDetailPage() {
       await fetch(apiUrl("/api/products/likes"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: product.id || product._id, action }),
+        body: JSON.stringify({ id: product._id, action }),
       });
     } catch {
       /* ignore */
@@ -145,12 +151,14 @@ export default function ProductDetailPage() {
     const size = selectedSize || product.sizes?.[0] || "Unique";
     addItem(
       {
-        id: product.id || Number(product._id) || 0,
+        _id: product._id,
+        productId: product._id,
         name: product.name,
         price: product.price,
         image: product.image,
         color: product.color || product.category,
         size,
+        category: product.category,
       },
       quantity,
     );
@@ -364,6 +372,52 @@ export default function ProductDetailPage() {
 
               <StarRating value={averageRating} count={ratingCount} />
 
+              {user && (
+                <div className="mt-4">
+                  <p className="text-sm text-white/60 mb-2">Votre note</p>
+                  <StarRating
+                    value={userRating || averageRating}
+                    count={0}
+                    onChange={async (rating) => {
+                      if (!product || isSubmittingRating) return;
+                      setIsSubmittingRating(true);
+                      setRatingMessage(null);
+                      try {
+                        const res = await fetch(apiUrl("/api/ratings"), {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ productId: product._id, rating }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          setUserRating(rating);
+                          setAverageRating(data.average || rating);
+                          setRatingCount((c) => c + (data.userRating ? 0 : 1));
+                          setRatingMessage("Votre avis a été enregistré.");
+                          setTimeout(() => setRatingMessage(null), 3000);
+                        } else {
+                          setRatingMessage(data.error || "Erreur lors de la notation.");
+                        }
+                      } catch {
+                        setRatingMessage("Erreur réseau.");
+                      } finally {
+                        setIsSubmittingRating(false);
+                      }
+                    }}
+                    readonly={isSubmittingRating}
+                  />
+                  {ratingMessage && (
+                    <p className="text-xs text-white/60 mt-1">{ratingMessage}</p>
+                  )}
+                </div>
+              )}
+
+              {!user && (
+                <p className="text-xs text-white/40 mt-2">
+                  Connectez-vous pour noter ce produit.
+                </p>
+              )}
+
               <p className="text-white/70 text-base leading-relaxed">{product.description}</p>
 
               <div>
@@ -446,7 +500,7 @@ export default function ProductDetailPage() {
                 >
                   {showQuickOrder && (
                     <QuickOrderForm
-                      productId={product.id || product._id}
+                      productId={product._id}
                       productName={product.name}
                       productPrice={currentPrice}
                       totalAmount={currentPrice * quantity}

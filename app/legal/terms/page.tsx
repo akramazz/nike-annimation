@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 
 export default function TermsPage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -57,8 +55,6 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -97,8 +93,6 @@ export default function TermsPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

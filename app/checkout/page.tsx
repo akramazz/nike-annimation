@@ -117,13 +117,14 @@ export default function CheckoutPage() {
       postalCode: formData.get("postalCode"),
       country: formData.get("country"),
       items: items.map((item) => ({
-        productId: item.id,
+        productId: item._id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
         color: item.color,
         size: item.size,
         image: normalizeProductImage(item.image),
+        category: item.category,
       })),
       total,
     };
@@ -372,7 +373,7 @@ export default function CheckoutPage() {
                 <div className="space-y-4 mb-6">
                   {items.map((item) => (
                     <div
-                      key={`${item.id}-${item.size}`}
+                      key={`${item._id}-${item.size}`}
                       className="flex items-center space-x-4"
                     >
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10">

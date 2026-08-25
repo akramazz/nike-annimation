@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import { Truck, Clock, Check, Package } from "lucide-react";
 
 export default function DeliveryPage() {
@@ -46,8 +44,6 @@ export default function DeliveryPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -130,8 +126,6 @@ export default function DeliveryPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

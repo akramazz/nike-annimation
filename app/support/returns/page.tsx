@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import { RotateCcw, Package, CreditCard, Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -23,8 +21,6 @@ export default function ReturnsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -140,8 +136,6 @@ export default function ReturnsPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

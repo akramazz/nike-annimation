@@ -2,11 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { Sparkles } from "lucide-react";
-import ProductImg from "../../components/products/ProductImg";
+import ProductImage from "@/app/components/products/ProductImage";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory } from "@/lib/product-categories";
 
@@ -55,8 +53,6 @@ export default function NewProductsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -95,7 +91,7 @@ export default function NewProductsPage() {
                       <Sparkles className="h-3 w-3" />
                       Nouveau
                     </div>
-                      <ProductImg
+                      <ProductImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -121,8 +117,6 @@ export default function NewProductsPage() {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

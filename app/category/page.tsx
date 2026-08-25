@@ -4,8 +4,6 @@ import { useEffect, useRef, useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import CategoryScene from "../components/CategoryScene";
 import { apiUrl } from "@/lib/api-client";
 import { DEFAULT_SIZES, normalizeProductImage } from "@/lib/product-normalize";
@@ -210,12 +208,14 @@ export default function CategoryPage() {
 
     addItem(
       {
-        id: Number(selectedProduct._id) || selectedProduct.id!,
+        _id: selectedProduct._id,
+        productId: selectedProduct._id,
         name: selectedProduct.name,
         price: selectedProduct.price,
         image: normalizeProductImage(selectedProduct.image),
         color: selectedProduct.color,
         size: selectedSize,
+        category: selectedProduct.category,
       },
       1,
     );
@@ -228,9 +228,6 @@ export default function CategoryPage() {
 
   return (
     <div className="relative min-h-screen bg-black">
-      {/* Navigation fixe animée */}
-      <Navigation />
-
       {/* Section héro avec scène 3D */}
       <section
         ref={heroRef}
@@ -635,9 +632,6 @@ export default function CategoryPage() {
           </motion.div>
         </div>
       </section>
-
-      {/* Pied de page */}
-      <Footer />
 
       {/* Effet de grain de film */}
       <div

@@ -3,11 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import Link from "next/link";
-import ProductImg from "@/app/components/products/ProductImg";
+import ProductImage from "@/app/components/products/ProductImage";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 
@@ -66,8 +64,6 @@ export default function JacketsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -99,7 +95,7 @@ export default function JacketsPage() {
                     className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 cursor-pointer"
                   >
                     <div className="relative h-48 sm:h-64 overflow-hidden">
-                      <ProductImg
+                      <ProductImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -148,8 +144,6 @@ export default function JacketsPage() {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -54,15 +54,15 @@ export default function ProductCard({ product, index }: ProductCardProps) {
       setLikes(product.likes);
     }
     if (typeof window !== "undefined") {
-      const savedIsLiked = localStorage.getItem(`product_liked_${product.id}`);
+      const savedIsLiked = localStorage.getItem(`product_liked_${product._id}`);
       if (savedIsLiked) setIsLiked(savedIsLiked === "true");
     }
-  }, [product.id, product.likes]);
+  }, [product._id, product.likes]);
 
   const handleCardClick = useCallback(() => {
-    const productId = product.id || product._id || 0;
+    const productId = product._id;
     router.push(`/products/${productId}`);
-  }, [product.id, product._id, router]);
+  }, [product._id, router]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -71,14 +71,14 @@ export default function ProductCard({ product, index }: ProductCardProps) {
       const res = await fetch(apiUrl("/api/products/likes"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: product.id, action }),
+        body: JSON.stringify({ id: product._id, action }),
       });
       const data = await res.json();
       if (data.success) {
         setLikes(data.likes);
         setIsLiked(action === "like");
         if (typeof window !== "undefined") {
-          localStorage.setItem(`product_liked_${product.id}`, (action === "like").toString());
+          localStorage.setItem(`product_liked_${product._id}`, (action === "like").toString());
         }
       }
     } catch { /* ignore */ }
@@ -105,12 +105,14 @@ export default function ProductCard({ product, index }: ProductCardProps) {
     const size = selectedSize || product.sizes?.[0] || "Unique";
     addItem(
       {
-        id: product.id || Number(product._id) || 0,
+        _id: product._id,
+        productId: product._id,
         name: product.name,
         price: product.price,
         image: normalizeProductImage(product.image),
         color: product.color || product.category,
         size,
+        category: product.category,
       },
       1,
     );

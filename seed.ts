@@ -4,7 +4,7 @@ import connectDB from "./utils/mongodb";
 import Product from "./models/Product";
 import Order from "./models/Order";
 import Message from "./models/Message";
-import { PRODUCT_CATALOG } from "./lib/product-catalog";
+import { CATALOG_PRODUCTS } from "./lib/static-products";
 
 // Windows / certains réseaux: Node échoue sur querySrv Atlas sans DNS public
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
@@ -103,9 +103,9 @@ async function seed() {
     console.log("Starting database seed...\n");
 
     await resetCollections();
+    await Product.insertMany(CATALOG_PRODUCTS);
 
-    await Product.insertMany(PRODUCT_CATALOG);
-    console.log(`✓ Inserted ${PRODUCT_CATALOG.length} products`);
+    console.log(`✓ Inserted ${CATALOG_PRODUCTS.length} products`);
 
     await Order.insertMany(seedOrders);
     console.log(`✓ Inserted ${seedOrders.length} orders`);

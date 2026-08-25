@@ -33,6 +33,10 @@ export async function GET(request: NextRequest) {
     if (category) {
       filter.category = normalizeCategory(category);
     }
+    const onSale = searchParams.get("onSale");
+    if (onSale === "true") {
+      filter.onSale = true;
+    }
     if (minPrice !== null && minPrice !== "") {
       filter.price = { ...(filter.price as Record<string, number> | undefined), $gte: Math.max(0, Number(minPrice)) };
     }
@@ -116,13 +120,67 @@ export async function GET(request: NextRequest) {
       products = aggregated;
       total = countResult.length > 0 ? countResult[0].count : 0;
     } else {
-      const [dbProducts, dbTotal] = await Promise.all([
-        Product.find(filter).sort(sort).skip(skip).limit(limit).lean(),
-        Product.countDocuments(filter),
+      const pipeline: any[] = [
+        { $match: filter },
+        {
+          $addFields: {
+            _idStr: { $toString: "$_id" },
+          },
+        },
+        {
+          $lookup: {
+            from: "ratings",
+            localField: "_idStr",
+            foreignField: "productId",
+            as: "ratings",
+          },
+        },
+        {
+          $addFields: {
+            averageRating: { $avg: "$ratings.rating" },
+            ratingCount: { $size: "$ratings" },
+          },
+        },
+      ];
+
+      if (sortBy === "rating") {
+        pipeline.push({ $sort: { averageRating: -1, ratingCount: -1, createdAt: -1 } });
+      } else if (sortBy === "price_asc") {
+        pipeline.push({ $sort: { price: 1 } });
+      } else if (sortBy === "price_desc") {
+        pipeline.push({ $sort: { price: -1 } });
+      } else if (sortBy === "name") {
+        pipeline.push({ $sort: { name: 1 } });
+      } else {
+        pipeline.push({ $sort: { createdAt: -1 } });
+      }
+
+      pipeline.push({ $skip: skip }, { $limit: limit });
+
+      const [aggregated, countResult] = await Promise.all([
+        Product.aggregate(pipeline),
+        Product.aggregate([
+          { $match: filter },
+          {
+            $addFields: {
+              _idStr: { $toString: "$_id" },
+            },
+          },
+          {
+            $lookup: {
+              from: "ratings",
+              localField: "_idStr",
+              foreignField: "productId",
+              as: "ratings",
+            },
+          },
+          { $addFields: { averageRating: { $avg: "$ratings.rating" } } },
+          { $count: "count" },
+        ]),
       ]);
 
-      products = dbProducts;
-      total = dbTotal;
+      products = aggregated;
+      total = countResult.length > 0 ? countResult[0].count : 0;
     }
 
     const plainProducts = products.map((p: any, index: number) => {

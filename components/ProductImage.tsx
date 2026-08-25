@@ -1,4 +1,0 @@
-"use client";
-
-/** Réexport — utiliser @/app/components/products/ProductImage */
-export { default } from "@/app/components/products/ProductImage";

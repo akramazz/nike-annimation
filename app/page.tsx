@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, Suspense, lazy, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ProductImage from "./components/products/ProductImage";
 import { apiUrl } from "@/lib/api-client";
 import { formatPriceDA } from "@/lib/price-utils";
-import ProductImage from "./components/products/ProductImage";
-
-// Dynamic imports for components
-const Navigation = lazy(() => import("./components/Navigation"));
-const HeroSection = lazy(() => import("./components/HeroSection"));
-const ProductSection = lazy(() => import("./components/ProductSection"));
-const Footer = lazy(() => import("./components/Footer"));
+import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
+import { FALLBACK_JACKETS } from "@/lib/static-products";
 
 interface Product {
   _id: string;
@@ -32,14 +27,6 @@ interface Product {
   likes?: number;
   averageRating?: number;
   ratingCount?: number;
-}
-
-function LoadingSpinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="loading-spinner"></div>
-    </div>
-  );
 }
 
 function StarRating({ value, count }: { value: number; count: number }) {
@@ -68,83 +55,54 @@ function StarRating({ value, count }: { value: number; count: number }) {
   );
 }
 
-function BestProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch(apiUrl("/api/products?sortBy=rating&limit=8"), { next: { revalidate: 300 } });
-        const data = await res.json();
-        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-          setProducts(data.products);
-        }
-      } catch {
-        // ignore
-      }
-      setLoading(false);
-    };
-    fetchProducts();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">Meilleurs produits</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-2xl bg-white/5 animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (products.length === 0) {
-    return null;
-  }
-
+function HeroSection() {
   return (
-    <section className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-3xl font-bold text-center mb-12"
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black z-10" />
+      <div className="absolute inset-0">
+        <ProductImage
+          src="/products/rouge.webp"
+          alt="Hero background"
+          fill
+          className="object-cover opacity-40"
+        />
+      </div>
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight"
         >
-          Meilleurs produits
-        </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product, index) => (
-            <motion.div
-              key={product._id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => window.location.href = `/products/${product.id || product._id}`}
-              className="group relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10 cursor-pointer"
-            >
-              <div className="relative aspect-square overflow-hidden bg-white/5">
-                <ProductImage src={product.image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-              <div className="p-4 space-y-2">
-                <h3 className="font-semibold text-sm line-clamp-1">{product.name}</h3>
-                <span className="text-lg font-bold">{formatPriceDA(product.price)}</span>
-                {product.averageRating && product.averageRating > 0 ? (
-                  <StarRating value={product.averageRating} count={product.ratingCount || 0} />
-                ) : (
-                  <span className="text-white/40 text-xs">Aucun avis</span>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+          DRIPBAZZARDZ
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-xl md:text-2xl text-white/70 mb-8 max-w-2xl mx-auto"
+        >
+          Streetwear premium. Des pièces sélectionnées pour votre style.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          <Link
+            href="/products"
+            className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all text-lg"
+          >
+            Explorer les produits
+          </Link>
+          <Link
+            href="/products"
+            className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-all text-lg border border-white/20"
+          >
+            Voir les catégories
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
@@ -159,14 +117,14 @@ function CategoriesSection() {
       name: "SWEAT",
       description: "Vestes, sweats et pièces streetwear premium",
       image: "/products/rouge.webp",
-      route: "/products/jackets",
+      route: "/products?category=sweat",
     },
     {
       id: "tshirt",
       name: "TSHIRT",
       description: "T-shirts et accessoires tendance",
       image: "/products/casquette.webp",
-      route: "/products/accessories",
+      route: "/products?category=tshirt",
     },
   ];
 
@@ -177,7 +135,7 @@ function CategoriesSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-3xl font-bold text-center mb-12"
+          className="text-3xl md:text-4xl font-bold text-center mb-12"
         >
           Nos catégories
         </motion.h2>
@@ -190,13 +148,18 @@ function CategoriesSection() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.2 }}
               onClick={() => router.push(category.route)}
-              className="group relative aspect-video rounded-3xl overflow-hidden cursor-pointer"
+              className="group relative aspect-[4/3] md:aspect-video rounded-3xl overflow-hidden cursor-pointer"
             >
-              <ProductImage src={category.image} alt={category.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+              <ProductImage
+                src={category.image}
+                alt={category.name}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-end p-8">
-                <h3 className="text-3xl font-bold mb-2">{category.name}</h3>
-                <p className="text-white/70 mb-4">{category.description}</p>
+                <h3 className="text-3xl md:text-4xl font-bold mb-2">{category.name}</h3>
+                <p className="text-white/70 mb-4 text-sm md:text-base">{category.description}</p>
                 <span className="inline-flex items-center px-6 py-3 bg-white text-black font-bold rounded-full w-fit group-hover:bg-white/90 transition-colors">
                   Explorer la collection
                 </span>
@@ -209,71 +172,141 @@ function CategoriesSection() {
   );
 }
 
-export default function Page() {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted || typeof window === "undefined") return;
-    gsap.registerPlugin(ScrollTrigger);
-    const sections = gsap.utils.toArray<HTMLElement>("section");
-    sections.forEach((section) => {
-      gsap.fromTo(
-        section,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 80%",
-            end: "top 20%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-    });
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [isMounted]);
+function ProductGrid({ title, products, href }: { title: string; products: Product[]; href?: string }) {
+  if (products.length === 0) return null;
 
   return (
-    <div className="relative min-h-screen bg-black">
-      <Suspense fallback={<div className="fixed top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-xl z-50" />}>
-        <Navigation />
-      </Suspense>
+    <section className="py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-12">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-bold"
+          >
+            {title}
+          </motion.h2>
+          {href && (
+            <Link href={href} className="text-white/60 hover:text-white transition-colors">
+              Voir tout →
+            </Link>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.slice(0, 8).map((product, index) => (
+            <motion.div
+              key={product._id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Link
+                href={`/products/${product._id}`}
+                className="group block rounded-2xl overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300"
+              >
+                <div className="relative aspect-square overflow-hidden bg-white/5">
+                  <ProductImage
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div className="p-4 space-y-2">
+                  <h3 className="font-semibold text-sm line-clamp-1">{product.name}</h3>
+                  <span className="text-lg font-bold">{formatPriceDA(product.price)}</span>
+                  {product.averageRating && product.averageRating > 0 ? (
+                    <StarRating value={product.averageRating} count={product.ratingCount || 0} />
+                  ) : (
+                    <span className="text-white/40 text-xs">Aucun avis</span>
+                  )}
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-      <Suspense fallback={<LoadingSpinner />}>
-        <HeroSection />
-      </Suspense>
+function CtaSection() {
+  return (
+    <section className="py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-white/10 to-white/5 border border-white/10 p-8 md:p-16 text-center"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Découvrez notre collection
+          </h2>
+          <p className="text-white/70 mb-8 max-w-xl mx-auto">
+            Des pièces uniques sélectionnées pour les amateurs de streetwear.
+          </p>
+          <Link
+            href="/products"
+            className="inline-flex items-center px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all text-lg"
+          >
+            Explorer maintenant
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
+export default function HomePage() {
+  const [bestProducts, setBestProducts] = useState<Product[]>([]);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const [bestRes, newRes] = await Promise.all([
+          fetch(apiUrl("/api/products?sortBy=rating&limit=8"), { next: { revalidate: 300 } }),
+          fetch(apiUrl("/api/products?sortBy=newest&limit=8"), { next: { revalidate: 300 } }),
+        ]);
+
+        const [bestData, newData] = await Promise.all([bestRes.json(), newRes.json()]);
+
+        if (bestData.success && Array.isArray(bestData.products)) {
+          setBestProducts(bestData.products);
+        }
+        if (newData.success && Array.isArray(newData.products)) {
+          setNewProducts(newData.products);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black">
+      <HeroSection />
       <CategoriesSection />
-
-      <BestProducts />
-
-      <section id="products">
-        <Suspense fallback={<LoadingSpinner />}>
-          <ProductSection />
-        </Suspense>
-      </section>
-
-      <Suspense fallback={<div className="h-64 bg-black/30" />}>
-        <Footer />
-      </Suspense>
-
-      <div
-        className="fixed inset-0 pointer-events-none z-50 opacity-5"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: "repeat",
-        }}
-      />
+      <ProductGrid title="Produits populaires" products={bestProducts} href="/products" />
+      <ProductGrid title="Nouveautés" products={newProducts} href="/products?sort=newest" />
+      <CtaSection />
     </div>
   );
 }

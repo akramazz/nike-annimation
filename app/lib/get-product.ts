@@ -1,7 +1,6 @@
 import { apiUrl } from "@/lib/api-client";
 import { getProductImage } from "@/lib/image-utils";
-import { PRODUCT_CATALOG, catalogFromFilename } from "@/lib/product-catalog";
-import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
+import { STATIC_ACCESSORIES, FALLBACK_JACKETS, CATALOG_PRODUCTS } from "@/lib/static-products";
 
 export interface UnifiedProduct {
   _id: string;
@@ -114,21 +113,9 @@ export async function getProduct(id: string): Promise<UnifiedProduct | null> {
     }
   }
 
-  const catalogEntry = PRODUCT_CATALOG.find((p) => p.image.toLowerCase() === trimmedId.toLowerCase());
+  const catalogEntry = CATALOG_PRODUCTS.find((p) => p.image.toLowerCase() === trimmedId.toLowerCase());
   if (catalogEntry) {
     const normalized = normalizeCatalogProduct(catalogEntry);
-    fetchCache.set(id, normalized);
-    return normalized;
-  }
-
-  const filenameGuess = trimmedId.startsWith("/products/")
-    ? trimmedId.slice("/products/".length)
-    : trimmedId.startsWith("products/")
-      ? trimmedId.slice("products/".length)
-      : trimmedId;
-  if (filenameGuess && !filenameGuess.includes("/")) {
-    const generated = catalogFromFilename(filenameGuess);
-    const normalized = normalizeCatalogProduct(generated);
     fetchCache.set(id, normalized);
     return normalized;
   }

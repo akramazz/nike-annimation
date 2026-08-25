@@ -2,11 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
 import { apiUrl } from "@/lib/api-client";
 import { Tag, Flame } from "lucide-react";
-import ProductImg from "../../components/products/ProductImg";
+import ProductImage from "@/app/components/products/ProductImage";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory } from "@/lib/product-categories";
 
@@ -58,8 +56,6 @@ export default function SalesPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -106,7 +102,7 @@ export default function SalesPage() {
                       <div className="absolute top-4 right-4 z-10 px-3 py-1 bg-red-500/20 backdrop-blur-xl rounded-full text-red-400 text-xs font-medium border border-red-500/30">
                         -{Math.round((discount / originalPrice) * 100)}%
                       </div>
-                      <ProductImg
+                      <ProductImage
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -134,8 +130,6 @@ export default function SalesPage() {
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

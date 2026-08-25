@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import Navigation from "../components/Navigation";
-import Footer from "../components/Footer";
 import { Suspense } from "react";
 
 function LoadingSpinner() {
@@ -71,8 +69,6 @@ export default function AboutPage() {
 
   return (
     <div className="relative min-h-screen bg-black">
-      <Navigation />
-
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
@@ -151,8 +147,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

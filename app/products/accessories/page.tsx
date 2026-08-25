@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import ProductImg from "@/app/components/products/ProductImg";
-import Navigation from "../../components/Navigation";
-import Footer from "../../components/Footer";
+import ProductImage from "@/app/components/products/ProductImage";
 import { useCart } from "../../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ShoppingBag, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { STATIC_ACCESSORIES } from "@/lib/static-accessories";
+import { STATIC_ACCESSORIES } from "@/lib/static-products";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory } from "@/lib/product-categories";
+import { normalizeProductImage } from "@/lib/product-normalize";
 
 interface Product {
   _id: string;
@@ -30,7 +29,6 @@ interface Product {
 const staticAccessories: Product[] = STATIC_ACCESSORIES.map((acc) => ({
   ...acc,
   color: acc.category,
-  type: "accessory" as const,
 }));
 
 export default function AccessoriesPage() {
@@ -98,14 +96,15 @@ export default function AccessoriesPage() {
     
     setShowSizeError(prev => ({ ...prev, [productId]: false }));
     const size = selectedSize || product.sizes?.[0] || "Unique";
-    const productIdNum = product.id || 1;
     addItem({
-      id: productIdNum,
+      _id: product._id,
+      productId: product._id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: normalizeProductImage(product.image),
       color: product.color,
       size,
+      category: product.category,
     });
   };
 
@@ -147,8 +146,6 @@ export default function AccessoriesPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navigation />
-      
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <motion.div
@@ -175,7 +172,7 @@ export default function AccessoriesPage() {
                   className="group bg-white/5 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
-                  <ProductImg
+                  <ProductImage
                     src={product.image}
                     alt={product.name}
                     className="w-full h-full object-cover"
@@ -245,8 +242,6 @@ export default function AccessoriesPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
