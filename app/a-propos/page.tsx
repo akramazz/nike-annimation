@@ -15,9 +15,16 @@ export default function AProposPage() {
   return (
     <div className="relative min-h-screen bg-black">
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-10" />
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src="/logo.png"
+            alt=""
+            fill
+            className="object-contain opacity-[0.08] md:scale-125 scale-110"
+            style={{ mixBlendMode: "screen" }}
+          />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-10" />
         <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7 }} className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 mb-8">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse mr-2" />
