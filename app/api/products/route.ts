@@ -92,7 +92,9 @@ export async function GET(request: NextRequest) {
         pipeline.push({ $sort: { createdAt: -1 } });
       }
 
-      pipeline.push({ $skip: skip }, { $limit: limit });
+      if (!includeUnpublished) {
+        pipeline.push({ $skip: skip }, { $limit: limit });
+      }
 
       const [aggregated, countResult] = await Promise.all([
         Product.aggregate(pipeline),
@@ -155,7 +157,9 @@ export async function GET(request: NextRequest) {
         pipeline.push({ $sort: { createdAt: -1 } });
       }
 
-      pipeline.push({ $skip: skip }, { $limit: limit });
+      if (!includeUnpublished) {
+        pipeline.push({ $skip: skip }, { $limit: limit });
+      }
 
       const [aggregated, countResult] = await Promise.all([
         Product.aggregate(pipeline),

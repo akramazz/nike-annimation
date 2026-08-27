@@ -9,11 +9,11 @@ import { getProductImage, DEFAULT_PRODUCT_IMAGE } from "@/lib/image-utils";
 import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import ProductImage from "@/app/components/products/ProductImage";
+import { useAdminNav } from "@/app/context/AdminNavContext";
 import {
   Package,
   ShoppingCart,
   MessageSquare,
-  TrendingUp,
   DollarSign,
   Plus,
   Edit,
@@ -23,6 +23,7 @@ import {
   X,
   Search,
   RefreshCw,
+  Users,
 } from "lucide-react";
 
 interface Product {
@@ -66,11 +67,20 @@ interface Message {
   createdAt: string;
 }
 
+interface AdminUser {
+  _id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const { section, setSection } = useAdminNav();
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -131,15 +141,17 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [productsRes, ordersRes, messagesRes] = await Promise.all([
+      const [productsRes, ordersRes, messagesRes, usersRes] = await Promise.all([
         fetch(apiUrl("/api/products?includeUnpublished=1"), { credentials: "include" }),
         fetch(apiUrl("/api/orders"), { credentials: "include" }),
         fetch(apiUrl("/api/messages"), { credentials: "include" }),
+        fetch(apiUrl("/api/admin/users"), { credentials: "include" }),
       ]);
 
       const productsData = await productsRes.json();
       const ordersData = await ordersRes.json();
       const messagesData = await messagesRes.json();
+      const usersData = await usersRes.json();
 
       if (productsRes.ok && productsData.success) {
         setProducts(productsData.products);
@@ -149,6 +161,9 @@ export default function AdminDashboard() {
       }
       if (messagesRes.ok && messagesData.success) {
         setMessages(messagesData.messages);
+      }
+      if (usersRes.ok && usersData.success) {
+        setUsers(usersData.users);
       }
     } catch {
       /* ignore */
@@ -218,6 +233,7 @@ export default function AdminDashboard() {
     setAuthenticated(false);
     setOrders([]);
     setMessages([]);
+    setUsers([]);
   };
 
   // Stats
@@ -227,28 +243,24 @@ export default function AdminDashboard() {
       value: products.length,
       icon: Package,
       color: "from-blue-500 to-blue-600",
-      change: "+12%",
     },
     {
       title: "Commandes",
       value: orders.length,
       icon: ShoppingCart,
       color: "from-green-500 to-green-600",
-      change: "+8%",
     },
     {
       title: "Messages",
       value: messages.filter((m) => m.status === "unread").length,
       icon: MessageSquare,
       color: "from-purple-500 to-purple-600",
-      change: "+23%",
     },
     {
       title: "Revenus",
       value: `${formatPriceDA(orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0))}`,
       icon: DollarSign,
       color: "from-orange-500 to-orange-600",
-      change: "+15%",
     },
   ];
 
@@ -261,7 +273,7 @@ export default function AdminDashboard() {
         { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out" },
       );
     }
-  }, [activeTab]);
+  }, [section]);
 
   const handleDeleteProduct = async (id: string) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
@@ -428,31 +440,8 @@ export default function AdminDashboard() {
 
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Navigation Tabs */}
-          <div className="flex space-x-2 mb-8 overflow-x-auto pb-2">
-            {[
-              { id: "dashboard", label: "Tableau de bord", icon: TrendingUp },
-              { id: "products", label: "Produits", icon: Package },
-              { id: "orders", label: "Commandes", icon: ShoppingCart },
-              { id: "messages", label: "Messages", icon: MessageSquare },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all duration-300 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "bg-white text-black"
-                    : "bg-white/10 text-white/80 hover:bg-white/20"
-                }`}
-              >
-                <tab.icon className="h-5 w-5" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
           {/* Dashboard Tab */}
-          {activeTab === "dashboard" && (
+          {section === "dashboard" && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -473,9 +462,6 @@ export default function AdminDashboard() {
                       >
                         <stat.icon className="h-6 w-6 text-white" />
                       </div>
-                      <span className="text-green-400 text-sm font-medium">
-                        {stat.change}
-                      </span>
                     </div>
                     <h3 className="text-white/60 text-sm mb-1">{stat.title}</h3>
                     <p className="text-3xl font-bold">{stat.value}</p>
@@ -552,7 +538,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Products Tab */}
-          {activeTab === "products" && (
+            {section === "products" && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -701,7 +687,7 @@ export default function AdminDashboard() {
            )}
 
            {/* Orders Tab */}
-          {activeTab === "orders" && (
+            {section === "orders" && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -807,7 +793,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Messages Tab */}
-          {activeTab === "messages" && (
+            {section === "messages" && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -873,6 +859,64 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Users Tab */}
+          {section === "users" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h1 className="text-3xl font-bold mb-8">Utilisateurs</h1>
+
+              <div className="overflow-x-auto rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left p-4 font-medium text-white/60">
+                        Utilisateur
+                      </th>
+                      <th className="text-left p-4 font-medium text-white/60">
+                        Email
+                      </th>
+                      <th className="text-left p-4 font-medium text-white/60">
+                        Date d'inscription
+                      </th>
+                      <th className="text-left p-4 font-medium text-white/60">
+                        Identifiant
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr
+                        key={user._id}
+                        className="border-b border-white/5 hover:bg-white/5"
+                      >
+                        <td className="p-4">
+                          <span className="font-medium">{user.name}</span>
+                        </td>
+                        <td className="p-4 text-white/80">{user.email}</td>
+                        <td className="p-4 text-white/60">
+                          {new Date(user.createdAt).toLocaleDateString("fr-FR")}
+                        </td>
+                        <td className="p-4 font-mono text-sm text-white/60">
+                          {user._id}
+                        </td>
+                      </tr>
+                    ))}
+                    {users.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="p-6 text-center text-white/60">
+                          Aucun utilisateur enregistré.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </motion.div>
           )}
