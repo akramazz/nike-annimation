@@ -61,7 +61,7 @@ function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black z-10" />
       <div className="absolute inset-0">
         <ProductImage
-          src="/products/rouge.webp"
+          src="/products/db-styke.jpg"
           alt="Hero background"
           fill
           className="object-cover opacity-40"
