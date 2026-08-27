@@ -181,7 +181,11 @@ export async function PUT(request: NextRequest) {
         }
 
         for (const item of order.items) {
-          const product = await findProductByIdentifier(item.productId || item.name);
+          const productId = item.productId;
+          if (!productId) {
+            throw new Error(`Produit introuvable pour l'article: ${item.name}`);
+          }
+          const product = await findProductByIdentifier(productId);
           if (!product) {
             throw new Error(`Produit introuvable: ${item.name}`);
           }
@@ -191,7 +195,11 @@ export async function PUT(request: NextRequest) {
         }
 
         for (const item of order.items) {
-          const product = await findProductByIdentifier(item.productId || item.name);
+          const productId = item.productId;
+          if (!productId) {
+            throw new Error(`Produit introuvable pour l'article: ${item.name}`);
+          }
+          const product = await findProductByIdentifier(productId);
           if (!product) {
             throw new Error(`Produit introuvable: ${item.name}`);
           }
