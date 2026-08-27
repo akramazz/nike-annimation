@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Search, ShoppingBag, ChevronDown, User } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
 import CartDrawer from "@/app/components/cart/CartDrawer";
 import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
@@ -41,7 +42,7 @@ export default function Header() {
         { name: "Promotions", href: "/products?onSale=true" },
       ],
     },
-    { name: "À propos", href: "/about" },
+    { name: "À propos", href: "/a-propos" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -57,8 +58,8 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white flex items-center justify-center">
-                <span className="text-black font-bold text-lg md:text-xl">D</span>
+              <div className="relative w-10 h-10 md:w-12 md:h-12">
+                <Image src="/logo.png" alt="DripBazzardz" fill className="object-contain" />
               </div>
               <span className="text-white font-bold text-xl md:text-2xl hidden sm:block">
                 DripBazzardz
