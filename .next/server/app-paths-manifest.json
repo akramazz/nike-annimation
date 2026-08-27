@@ -7,6 +7,7 @@
   "/about/page": "app/about/page.js",
   "/about/sustainability/page": "app/about/sustainability/page.js",
   "/admin/page": "app/admin/page.js",
+  "/api/admin/users/route": "app/api/admin/users/route.js",
   "/api/auth/admin/login/route": "app/api/auth/admin/login/route.js",
   "/api/auth/admin/logout/route": "app/api/auth/admin/logout/route.js",
   "/api/auth/admin/me/route": "app/api/auth/admin/me/route.js",

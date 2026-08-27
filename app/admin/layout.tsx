@@ -16,20 +16,18 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { id: "dashboard", label: "Tableau de bord", href: "/admin", icon: LayoutDashboard },
-  { id: "products", label: "Produits", href: "/admin", icon: Package },
-  { id: "orders", label: "Commandes", href: "/admin", icon: ShoppingCart },
-  { id: "messages", label: "Messages", href: "/admin", icon: MessageSquare },
-  { id: "users", label: "Utilisateurs", href: "/admin", icon: Users },
+  { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
+  { id: "products", label: "Produits", icon: Package },
+  { id: "orders", label: "Commandes", icon: ShoppingCart },
+  { id: "messages", label: "Messages", icon: MessageSquare },
+  { id: "users", label: "Utilisateurs", icon: Users },
 ];
 
-function AdminSidebar() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+function AdminSidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) {
   const { section, setSection } = useAdminNav();
 
   return (
     <>
-      {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
@@ -37,7 +35,6 @@ function AdminSidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={[
           "fixed top-0 left-0 z-50 h-screen w-64 border-r border-white/10 bg-black transition-transform duration-300",
@@ -105,27 +102,7 @@ function AdminSidebar() {
           </div>
         </div>
       </aside>
-
-      {/* Main content */}
-      <div className="lg:ml-64">
-        {/* Top bar mobile */}
-        <header className="sticky top-0 z-30 border-b border-white/10 bg-black/80 backdrop-blur-xl lg:hidden">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button
-              type="button"
-              className="p-2 text-white/80 hover:text-white"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Ouvrir le menu"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-            <span className="text-white font-bold text-sm">Administration</span>
-            <div className="w-8" />
-          </div>
-        </header>
-
-        <main className="p-4 md:p-8" />
-      </>
+    </>
   );
 }
 
@@ -134,10 +111,30 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <AdminNavProvider>
-      <AdminSidebar />
-      {children}
+      <div className="min-h-screen bg-black text-white">
+        <AdminSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="lg:ml-64">
+          <header className="sticky top-0 z-30 border-b border-white/10 bg-black/80 backdrop-blur-xl lg:hidden">
+            <div className="flex items-center justify-between px-4 py-3">
+              <button
+                type="button"
+                className="p-2 text-white/80 hover:text-white"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Ouvrir le menu"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+              <span className="text-white font-bold text-sm">Administration</span>
+              <div className="w-8" />
+            </div>
+          </header>
+          <main className="p-4 md:p-8">{children}</main>
+        </div>
+      </div>
     </AdminNavProvider>
   );
 }
