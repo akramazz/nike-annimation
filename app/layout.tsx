@@ -7,6 +7,7 @@ import PixelTracker from "./components/PixelTracker";
 import MetaPixelInit from "./components/MetaPixelInit";
 import Header from "./components/layout/Header";
 import Footer from "./components/Footer";
+import PublicFrame from "./components/PublicFrame";
 
 const appUrlRaw =
   process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
@@ -159,11 +160,7 @@ export default function RootLayout({
          {/* Contenu principal avec CartProvider + AuthProvider */}
          <CartProvider>
            <AuthProvider>
-             <Header />
-             <main id="main-content" className="pt-16 md:pt-20">
-               {children}
-             </main>
-             <Footer />
+             <PublicFrame>{children}</PublicFrame>
            </AuthProvider>
          </CartProvider>
 
