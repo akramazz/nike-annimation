@@ -14,6 +14,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { apiUrl } from "@/lib/api-client";
 
 const navItems = [
   { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -86,13 +87,20 @@ function AdminSidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; s
           </nav>
 
           <div className="border-t border-white/10 px-4 py-4">
-            <Link
-              href="/api/auth/admin/logout"
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            <button
+              type="button"
+              onClick={async () => {
+                await fetch(apiUrl("/api/auth/admin/logout"), {
+                  method: "POST",
+                  credentials: "include",
+                });
+                window.location.href = "/admin";
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
             >
               <LogOut className="h-4 w-4" />
               <span>Déconnexion</span>
-            </Link>
+            </button>
             <Link
               href="/"
               className="mt-1 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"

@@ -9,6 +9,7 @@ import { useCart } from "@/app/context/CartContext";
 import { useAuth } from "@/app/context/AuthContext";
 import CartDrawer from "@/app/components/cart/CartDrawer";
 import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
+import { apiUrl } from "@/lib/api-client";
 
 interface NavItem {
   name: string;
@@ -21,6 +22,10 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ _id: string; name: string; image?: string }>>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { itemCount } = useCart();
   const { user } = useAuth();
 
@@ -31,6 +36,41 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isSearchOpen) {
+      setSearchQuery("");
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const q = searchQuery.trim();
+      if (!q) {
+        setSearchResults([]);
+        return;
+      }
+
+      try {
+        setSearchLoading(true);
+        const res = await fetch(apiUrl(`/api/products/search?q=${encodeURIComponent(q)}&limit=8`), {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.products)) {
+          setSearchResults(data.products);
+        } else {
+          setSearchResults([]);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [isSearchOpen, searchQuery]);
 
   const navItems: NavItem[] = [
     { name: "Accueil", href: "/" },
@@ -121,11 +161,52 @@ export default function Header() {
 
           <div className="flex items-center space-x-2 md:space-x-4">
             <button
+              type="button"
               className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
               aria-label="Rechercher"
+              onClick={() => setIsSearchOpen((v) => !v)}
             >
               <Search className="h-5 w-5" />
             </button>
+
+            {isSearchOpen && (
+              <div className="hidden md:flex items-center relative">
+                <input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Rechercher un produit..."
+                  className="w-64 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-white/40"
+                />
+                {searchLoading && (
+                  <span className="absolute right-3 text-white/60 text-xs">...</span>
+                )}
+                {searchQuery && (
+                  <div className="absolute top-full left-0 mt-2 w-full max-w-md bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                    {searchResults.length === 0 && !searchLoading && (
+                      <p className="p-4 text-white/60 text-sm">Aucun produit trouvé.</p>
+                    )}
+                    {searchResults.map((product) => (
+                      <Link
+                        key={product._id}
+                        href={`/products/${product._id}`}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          setSearchQuery("");
+                          setSearchResults([]);
+                        }}
+                      >
+                        {product.image && (
+                          <img src={product.image} alt="" className="h-8 w-8 rounded-md object-cover border border-white/10" />
+                        )}
+                        <span className="text-white/90 text-sm">{product.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {user ? (
               <Link
