@@ -311,7 +311,10 @@ export default function AccountProfilePage() {
 
         <section className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Compte</h2>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
+            <button onClick={() => router.push("/account/orders")} className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl">
+              Mes commandes
+            </button>
             <button onClick={handleLogout} className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl">
               Se déconnecter
             </button>

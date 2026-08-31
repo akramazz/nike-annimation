@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { apiUrl } from "@/lib/api-client";
@@ -75,6 +76,7 @@ interface AdminUser {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const { section, setSection } = useAdminNav();
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -233,6 +235,7 @@ export default function AdminDashboard() {
     setOrders([]);
     setMessages([]);
     setUsers([]);
+    router.push("/admin");
   };
 
   // Stats
