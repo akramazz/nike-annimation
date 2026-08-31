@@ -6,6 +6,7 @@ import { Menu, X, Search, ShoppingBag, ChevronDown, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/app/context/CartContext";
+import { useAuth } from "@/app/context/AuthContext";
 import CartDrawer from "@/app/components/cart/CartDrawer";
 import { PRODUCT_CATEGORIES } from "@/lib/product-categories";
 
@@ -21,6 +22,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { itemCount } = useCart();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -125,13 +127,23 @@ export default function Header() {
               <Search className="h-5 w-5" />
             </button>
 
-            <Link
-              href="/login"
-              className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
-              aria-label="Compte"
-            >
-              <User className="h-5 w-5" />
-            </Link>
+            {user ? (
+              <Link
+                href="/account/profile"
+                className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
+                aria-label="Mon compte"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
+                aria-label="Compte"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -225,6 +237,25 @@ export default function Header() {
                   )}
                 </div>
               ))}
+              <div className="pt-2">
+                {user ? (
+                  <Link
+                    href="/account/profile"
+                    className="block text-white/80 hover:text-white transition-colors duration-200 text-lg font-medium py-3 border-b border-white/10"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Mon compte
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="block text-white/80 hover:text-white transition-colors duration-200 text-lg font-medium py-3 border-b border-white/10"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Se connecter
+                  </Link>
+                )}
+              </div>
             </div>
           </motion.nav>
         )}

@@ -283,9 +283,8 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         setProducts(products.filter((p) => p._id !== id));
-      } else {
-        await fetchData();
       }
+      await fetchData();
     } catch {
       await fetchData();
     }
@@ -300,7 +299,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ id, status }),
       });
       if (res.ok) {
-        setOrders(orders.map((o) => (o._id === id ? { ...o, status } : o)));
+        await fetchData();
       }
     } catch {
       /* ignore */
@@ -316,7 +315,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({ id, status }),
       });
       if (res.ok) {
-        setMessages(messages.map((m) => (m._id === id ? { ...m, status } : m)));
+        await fetchData();
       }
     } catch {
       /* ignore */
@@ -333,8 +332,9 @@ export default function AdminDashboard() {
       if (res.ok) {
         setMessages(messages.filter((m) => m._id !== id));
       }
+      await fetchData();
     } catch {
-      /* ignore */
+      await fetchData();
     }
   };
 

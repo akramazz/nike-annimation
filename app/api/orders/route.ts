@@ -4,6 +4,8 @@ import connectDB from "@/utils/mongodb";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 import { isAdminRequest } from "@/lib/admin-auth";
+import { getCurrentUserFromToken } from "@/lib/auth";
+import { sendOrderConfirmationEmail, sendOrderStatusEmail } from "@/lib/emails";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +107,9 @@ export async function POST(request: NextRequest) {
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 11).toUpperCase()}`;
 
+    const token = request.cookies.get("user_session")?.value;
+    const user = token ? await getCurrentUserFromToken(token) : null;
+
     const order = await Order.create({
       orderNumber,
       customerName,
@@ -117,6 +122,7 @@ export async function POST(request: NextRequest) {
       total,
       status: "pending",
       stockAdjusted: false,
+      userId: user?._id,
       items: sanitizedItems,
     });
 
@@ -126,6 +132,30 @@ export async function POST(request: NextRequest) {
       createdAt: order.createdAt?.toISOString(),
       updatedAt: order.updatedAt?.toISOString(),
     };
+
+    try {
+      await sendOrderConfirmationEmail({
+        to: email,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        orderNumber: order.orderNumber,
+        createdAt: order.createdAt?.toISOString() || new Date().toISOString(),
+        items: sanitizedItems.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        total,
+        address: String(body.address || ""),
+        city: String(body.city || ""),
+        postalCode: String(body.postalCode || ""),
+        country: String(body.country || ""),
+        phone: String(body.phone || ""),
+        status: order.status,
+      });
+    } catch {
+      // ignore email failure
+    }
 
     return NextResponse.json({ success: true, order: plain }, { status: 201 });
   } catch {
@@ -241,6 +271,19 @@ export async function PUT(request: NextRequest) {
         createdAt: order.createdAt?.toISOString(),
         updatedAt: order.updatedAt?.toISOString(),
       };
+
+      if (order.email) {
+        try {
+          await sendOrderStatusEmail({
+            to: order.email,
+            firstName: order.customerName,
+            orderNumber: order.orderNumber,
+            status: newStatus,
+          });
+        } catch {
+          // ignore email failure
+        }
+      }
 
       return NextResponse.json({ success: true, order: plain });
     } catch (error) {
