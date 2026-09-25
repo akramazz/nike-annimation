@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
@@ -24,6 +24,8 @@ import {
   X,
   Search,
   Users,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 interface Product {
@@ -102,21 +104,37 @@ export default function AdminDashboard() {
   const [productPublished, setProductPublished] = useState(true);
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   const [additionalImageInput, setAdditionalImageInput] = useState("");
+  const productFormRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
 
-  const addAdditionalImages = () => {
-    const urls = additionalImageInput
-      .split(",")
-      .map((url) => getProductImage(url.trim()))
-      .filter(Boolean);
-    setAdditionalImages((prev) => {
-      const next = [...prev];
-      for (const url of urls) {
-        if (!next.includes(url)) next.push(url);
-      }
-      return next;
-    });
-    setAdditionalImageInput("");
-  };
+   const addAdditionalImages = () => {
+     const urls = additionalImageInput
+       .split(",")
+       .map((url) => getProductImage(url.trim()))
+       .filter(Boolean);
+     setAdditionalImages((prev) => {
+       const next = [...prev];
+       for (const url of urls) {
+         if (!next.includes(url)) next.push(url);
+       }
+       return next;
+     });
+     setAdditionalImageInput("");
+   };
+
+   useEffect(() => {
+     if (showModal && modalType !== "order") {
+       const el = productFormRef.current;
+       if (el) {
+         el.scrollTop = 0;
+         setCanScrollUp(false);
+         setCanScrollDown(
+           el.scrollHeight - el.scrollTop - el.clientHeight > 1,
+         );
+       }
+     }
+   }, [showModal, modalType]);
 
   const setProductImageChoice = (value: string) => {
     const normalized = getProductImage(value || undefined);
@@ -172,31 +190,58 @@ export default function AdminDashboard() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(apiUrl("/api/auth/admin/me"), {
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (!cancelled && data.success) {
-          setAuthRequired(Boolean(data.authRequired));
-          setAuthenticated(Boolean(data.authenticated));
-          if (!data.authRequired || data.authenticated) {
-            await fetchData();
-          }
-        }
-      } catch {
-        if (!cancelled) setAuthenticated(false);
-      } finally {
-        if (!cancelled) setSessionChecked(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchData]);
+   useEffect(() => {
+     let cancelled = false;
+     (async () => {
+       try {
+         const res = await fetch(apiUrl("/api/auth/admin/me"), {
+           credentials: "include",
+         });
+         const data = await res.json();
+         if (!cancelled && data.success) {
+           setAuthRequired(Boolean(data.authRequired));
+           setAuthenticated(Boolean(data.authenticated));
+           if (!data.authRequired || data.authenticated) {
+             await fetchData();
+           }
+         }
+       } catch {
+         if (!cancelled) setAuthenticated(false);
+       } finally {
+         if (!cancelled) setSessionChecked(true);
+       }
+     })();
+     return () => {
+       cancelled = true;
+     };
+   }, [fetchData]);
+
+  const updateScrollButtons = () => {
+     const el = productFormRef.current;
+     if (!el) {
+       setCanScrollUp(false);
+       setCanScrollDown(false);
+       return;
+     }
+     setCanScrollUp(el.scrollTop > 0);
+     setCanScrollDown(
+       el.scrollHeight - el.scrollTop - el.clientHeight > 1,
+     );
+   };
+
+  const scrollUp = () => {
+     const el = productFormRef.current;
+     if (!el) return;
+     el.scrollBy({ top: -200, behavior: "smooth" });
+     setTimeout(updateScrollButtons, 300);
+   };
+
+  const scrollDown = () => {
+     const el = productFormRef.current;
+     if (!el) return;
+     el.scrollBy({ top: 200, behavior: "smooth" });
+     setTimeout(updateScrollButtons, 300);
+   };
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -897,302 +942,366 @@ export default function AdminDashboard() {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-lg p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20"
             >
-              <h2 className="text-2xl font-bold mb-6">
-                {modalType === "order" ? "Détails de la commande" : (editingItem ? "Modifier le produit" : "Ajouter un produit")}
-              </h2>
-              {modalType !== "order" && (
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const sizesRaw = String(formData.get("sizes") ?? "");
-                  const sizes = sizesRaw
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-                  const color = String(formData.get("color") ?? "").trim();
-                  const normalizedImage = getProductImage(
-                    selectedImage || undefined,
-                  );
-                   const productData = {
-                     name: formData.get("name"),
-                     color,
-                     price: parseFloat(formData.get("price") as string),
-                     stock: parseInt(formData.get("stock") as string, 10),
-                     category: formData.get("category"),
-                     description: formData.get("description"),
-                     image: normalizedImage,
-                     published: productPublished,
-                     ...(sizes.length > 0 ? { sizes } : {}),
-                     images: additionalImages
-                       .map((url) => getProductImage(url.trim()))
-                       .filter(Boolean)
-                       .map((url, idx) => ({ url, isMain: idx === 0 })),
-                   };
+               <h2 className="text-2xl font-bold mb-6">
+                 {modalType === "order"
+                   ? "Détails de la commande"
+                   : editingItem
+                     ? "Modifier le produit"
+                     : "Ajouter un produit"}
+               </h2>
 
-                  const opts = {
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include" as RequestCredentials,
-                    body: JSON.stringify(
-                      editingItem
-                        ? { id: editingItem._id, ...productData }
-                        : productData,
-                    ),
-                  };
-
-                  if (editingItem) {
-                    await fetch(apiUrl("/api/products"), {
-                      method: "PUT",
-                      ...opts,
-                    });
-                  } else {
-                    await fetch(apiUrl("/api/products"), {
-                      method: "POST",
-                      ...opts,
-                    });
-                  }
-
-                  await fetchData();
-                  setShowModal(false);
-                }}
-              >
-                <div className="space-y-4">
-                  <input
-                    name="name"
-                    placeholder="Nom du produit"
-                    defaultValue={editingItem?.name}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                  />
-                  <input
-                    name="color"
-                    placeholder="Couleur"
-                    defaultValue={editingItem?.color}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      name="price"
-                      type="number"
-                      step="0.01"
-                      placeholder="Prix"
-                      defaultValue={editingItem?.price}
-                      required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                    />
-                    <input
-                      name="stock"
-                      type="number"
-                      placeholder="Stock"
-                      defaultValue={editingItem?.stock}
-                      required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                    />
-                  </div>
-                  <select
-                     name="category"
-                     defaultValue={normalizeCategory(editingItem?.category)}
-                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                   >
-                     <option value={PRODUCT_CATEGORIES.SWEAT}>{PRODUCT_CATEGORIES.SWEAT}</option>
-                     <option value={PRODUCT_CATEGORIES.T_SHIRT}>{PRODUCT_CATEGORIES.T_SHIRT}</option>
-                   </select>
-                  <textarea
-                    name="description"
-                    placeholder="Description"
-                    defaultValue={editingItem?.description}
-                    rows={3}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 resize-none"
-                  />
-                  <input
-                    name="image"
-                    placeholder="Image (URL ou chemin, ex. /products/algersoliel.webp)"
-                    value={selectedImage}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setSelectedImage(value);
-                      setImagePreview(getProductImage(value || undefined));
-                    }}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                  />
-                  <select
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    value={
-                      availableImages.some(
-                        (img) => `/products/${img}` === selectedImage,
-                      )
-                        ? selectedImage
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value) {
-                        setSelectedImage(value);
-                        setImagePreview(value);
-                      }
-                    }}
-                  >
-                    <option value="">-- Choisir une image --</option>
-                    {availableImages.map((img) => (
-                      <option key={img} value={`/products/${img}`}>
-                        {img}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 border border-white/20">
-                      <img
-                        src={imagePreview}
-                        alt="Aperçu image"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <span className="text-white/70 text-sm">
-                      {availableImages.length} image(s) disponible(s)
-                    </span>
-                   </div>
-                   <div className="space-y-2">
-                     <p className="text-white/70 text-xs font-medium">Images supplémentaires (chemins séparés par des virgules)</p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="/products/xxx.webp, /products/yyy.webp"
-                          value={additionalImageInput}
-                          onChange={(e) => setAdditionalImageInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addAdditionalImages();
-                            }
-                          }}
-                          className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                        />
-                        <button
-                          type="button"
-                          onClick={addAdditionalImages}
-                          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors"
-                        >
-                          Ajouter
-                        </button>
-                      </div>
-                     <div className="flex flex-wrap gap-2">
-                       {additionalImages.map((img, idx) => (
-                         <div key={idx} className="relative">
-                           <img src={getProductImage(img)} alt="" className="w-16 h-16 object-cover rounded-lg border border-white/20" />
-                           <button
-                             type="button"
-                             onClick={() => setAdditionalImages((prev) => prev.filter((_, i) => i !== idx))}
-                             className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full text-white text-[10px]"
-                           >
-                             ✕
-                           </button>
-                         </div>
-                       ))}
+               {modalType === "order" && selectedOrder && (
+                 <div className="space-y-6">
+                   <div className="space-y-3">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                       <div>
+                         <span className="text-white/60">Client</span>
+                         <p className="font-medium">
+                           {selectedOrder.customerName || "Non renseigné"}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">Email</span>
+                         <p className="font-medium">
+                           {selectedOrder.email || "Non renseigné"}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">Téléphone</span>
+                         <p className="font-medium">
+                           {selectedOrder.phone || "Non renseigné"}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">Wilaya / Ville</span>
+                         <p className="font-medium">
+                           {selectedOrder.city || "Non renseigné"}
+                         </p>
+                       </div>
+                       <div className="sm:col-span-2">
+                         <span className="text-white/60">Adresse</span>
+                         <p className="font-medium">
+                           {selectedOrder.address || "Non renseigné"}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">N° Commande</span>
+                         <p className="font-medium font-mono">
+                           {selectedOrder.orderNumber}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">Date</span>
+                         <p className="font-medium">
+                           {new Date(selectedOrder.createdAt).toLocaleDateString(
+                             "fr-FR",
+                           )}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">Total</span>
+                         <p className="font-bold">
+                           {formatPriceDA(Number(selectedOrder.total || 0))}
+                         </p>
+                       </div>
+                       <div>
+                         <span className="text-white/60">Statut</span>
+                         <p className="font-medium">{selectedOrder.status}</p>
+                       </div>
                      </div>
                    </div>
-                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={productPublished}
-                      onChange={(e) => setProductPublished(e.target.checked)}
-                      className="w-4 h-4 rounded"
-                    />
-                    <span className="text-white/80 text-sm">
-                      Visible sur le site (publié)
-                    </span>
-                  </label>
-                  <input
-                    name="sizes"
-                    placeholder={`Tailles séparées par des virgules (défaut: ${DEFAULT_SIZES.join(",")})`}
-                    defaultValue={
-                      editingItem?.sizes?.length
-                        ? editingItem.sizes.join(",")
-                        : DEFAULT_SIZES.join(",")
-                    }
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                  />
-                </div>
-                <div className="flex space-x-4 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-medium transition-colors"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-colors"
-                  >
-                    {editingItem ? "Modifier" : "Ajouter"}
-                  </button>
-                </div>
-              </form>
-              )}
-               
-              {/* Order Details Modal */}
-              {modalType === "order" && selectedOrder && (
-                <div className="mt-6 pt-6 border-t border-white/20">
-                  <h3 className="text-lg font-bold mb-4">Détails de la commande</h3>
 
-                  <div className="space-y-3 mb-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-white/60">Client</span>
-                        <p className="font-medium">{selectedOrder.customerName || "Non renseigné"}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/60">Email</span>
-                        <p className="font-medium">{selectedOrder.email || "Non renseigné"}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/60">Téléphone</span>
-                        <p className="font-medium">{selectedOrder.phone || "Non renseigné"}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/60">Wilaya / Ville</span>
-                        <p className="font-medium">{selectedOrder.city || "Non renseigné"}</p>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <span className="text-white/60">Adresse</span>
-                        <p className="font-medium">{selectedOrder.address || "Non renseigné"}</p>
+                   <div className="space-y-4">
+                     <h3 className="text-lg font-bold">Produits commandés</h3>
+                     {selectedOrder.items?.map((item: any, idx: number) => (
+                       <div
+                         key={idx}
+                         className="flex items-center gap-4 p-3 bg-white/5 rounded-xl"
+                       >
+                         <ProductImage
+                           src={
+                             getProductImage(item.image || undefined) ||
+                             DEFAULT_PRODUCT_IMAGE
+                           }
+                           alt={item.name}
+                           className="w-16 h-16 rounded-lg object-cover"
+                         />
+                         <div className="flex-1">
+                           <p className="font-medium">{item.name}</p>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+
+                   <div className="flex justify-center mt-6">
+                     <button
+                       type="button"
+                       onClick={() => setShowModal(false)}
+                       className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-colors"
+                     >
+                       Fermer
+                     </button>
+                   </div>
+                 </div>
+               )}
+
+                {modalType !== "order" && (
+                <form
+                  onSubmit={async (e) => {
+                   e.preventDefault();
+                   const formData = new FormData(e.currentTarget);
+                   const sizesRaw = String(formData.get("sizes") ?? "");
+                   const sizes = sizesRaw
+                     .split(",")
+                     .map((s) => s.trim())
+                     .filter(Boolean);
+                   const color = String(formData.get("color") ?? "").trim();
+                   const normalizedImage = getProductImage(
+                     selectedImage || undefined,
+                   );
+                    const productData = {
+                      name: formData.get("name"),
+                      color,
+                      price: parseFloat(formData.get("price") as string),
+                      stock: parseInt(formData.get("stock") as string, 10),
+                      category: formData.get("category"),
+                      description: formData.get("description"),
+                      image: normalizedImage,
+                      published: productPublished,
+                      ...(sizes.length > 0 ? { sizes } : {}),
+                      images: additionalImages
+                        .map((url) => getProductImage(url.trim()))
+                        .filter(Boolean)
+                        .map((url, idx) => ({ url, isMain: idx === 0 })),
+                    };
+
+                   const opts = {
+                     headers: { "Content-Type": "application/json" },
+                     credentials: "include" as RequestCredentials,
+                     body: JSON.stringify(
+                       editingItem
+                         ? { id: editingItem._id, ...productData }
+                         : productData,
+                     ),
+                   };
+
+                   if (editingItem) {
+                     await fetch(apiUrl("/api/products"), {
+                       method: "PUT",
+                       ...opts,
+                     });
+                   } else {
+                     await fetch(apiUrl("/api/products"), {
+                       method: "POST",
+                       ...opts,
+                     });
+                   }
+
+                   await fetchData();
+                   setShowModal(false);
+                 }}
+               >
+                 <div
+                   ref={productFormRef}
+                   onScroll={updateScrollButtons}
+                   className="space-y-4 max-h-96 overflow-y-auto pr-2"
+                 >
+                   <input
+                     name="name"
+                     placeholder="Nom du produit"
+                     defaultValue={editingItem?.name}
+                     required
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                   />
+                   <input
+                     name="color"
+                     placeholder="Couleur"
+                     defaultValue={editingItem?.color}
+                     required
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                   />
+                   <div className="grid grid-cols-2 gap-4">
+                     <input
+                       name="price"
+                       type="number"
+                       step="0.01"
+                       placeholder="Prix"
+                       defaultValue={editingItem?.price}
+                       required
+                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                     />
+                     <input
+                       name="stock"
+                       type="number"
+                       placeholder="Stock"
+                       defaultValue={editingItem?.stock}
+                       required
+                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                     />
+                   </div>
+                   <select
+                      name="category"
+                      defaultValue={normalizeCategory(editingItem?.category)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    >
+                      <option value={PRODUCT_CATEGORIES.SWEAT}>{PRODUCT_CATEGORIES.SWEAT}</option>
+                      <option value={PRODUCT_CATEGORIES.T_SHIRT}>{PRODUCT_CATEGORIES.T_SHIRT}</option>
+                    </select>
+                   <textarea
+                     name="description"
+                     placeholder="Description"
+                     defaultValue={editingItem?.description}
+                     rows={3}
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 resize-none"
+                   />
+                   <input
+                     name="image"
+                     placeholder="Image (URL ou chemin, ex. /products/algersoliel.webp)"
+                     value={selectedImage}
+                     onChange={(e) => {
+                       const value = e.target.value;
+                       setSelectedImage(value);
+                       setImagePreview(getProductImage(value || undefined));
+                     }}
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                   />
+                   <select
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                     value={
+                       availableImages.some(
+                         (img) => `/products/${img}` === selectedImage,
+                       )
+                         ? selectedImage
+                         : ""
+                     }
+                     onChange={(e) => {
+                       const value = e.target.value;
+                       if (value) {
+                         setSelectedImage(value);
+                         setImagePreview(value);
+                       }
+                     }}
+                   >
+                     <option value="">-- Choisir une image --</option>
+                     {availableImages.map((img) => (
+                       <option key={img} value={`/products/${img}`}>
+                         {img}
+                       </option>
+                     ))}
+                   </select>
+                   <div className="flex items-center gap-4">
+                     <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 border border-white/20">
+                       <img
+                         src={imagePreview}
+                         alt="Aperçu image"
+                         className="w-full h-full object-cover"
+                       />
+                     </div>
+                     <span className="text-white/70 text-sm">
+                       {availableImages.length} image(s) disponible(s)
+                     </span>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-white/70 text-xs font-medium">Images supplémentaires (chemins séparés par des virgules)</p>
+                       <div className="flex gap-2">
+                         <input
+                           type="text"
+                           placeholder="/products/xxx.webp, /products/yyy.webp"
+                           value={additionalImageInput}
+                           onChange={(e) => setAdditionalImageInput(e.target.value)}
+                           onKeyDown={(e) => {
+                             if (e.key === "Enter") {
+                               e.preventDefault();
+                               addAdditionalImages();
+                             }
+                           }}
+                           className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                         />
+                         <button
+                           type="button"
+                           onClick={addAdditionalImages}
+                           className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors"
+                         >
+                           Ajouter
+                         </button>
+                       </div>
+                      <div className="flex flex-wrap gap-2">
+                        {additionalImages.map((img, idx) => (
+                          <div key={idx} className="relative">
+                            <img src={getProductImage(img)} alt="" className="w-16 h-16 object-cover rounded-lg border border-white/20" />
+                            <button
+                              type="button"
+                              onClick={() => setAdditionalImages((prev) => prev.filter((_, i) => i !== idx))}
+                              className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full text-white text-[10px]"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="space-y-4 max-h-60 overflow-y-auto">
-                    {selectedOrder.items?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                        <ProductImage src={item.image || "/products/default.webp"} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
-                        <div className="flex-1">
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-white/60 text-sm">
-                            {item.category ? `Catégorie: ${item.category}` : ""}
-                            {item.color ? ` · Couleur: ${item.color}` : ""}
-                            {" · "}
-                            Taille: {item.size || "Non renseigné"} · Qté: {item.quantity}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">{formatPriceDA(item.price * item.quantity)}</p>
-                          <p className="text-white/60 text-xs">{formatPriceDA(item.price)} / unité</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex space-x-4 mt-6">
-                    <button
-                      type="button"
-                      onClick={() => setShowModal(false)}
-                      className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-medium transition-colors"
-                    >
-                      Fermer
-                    </button>
-                  </div>
-                </div>
-              )}
-            </motion.div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                     <input
+                       type="checkbox"
+                       checked={productPublished}
+                       onChange={(e) => setProductPublished(e.target.checked)}
+                       className="w-4 h-4 rounded"
+                     />
+                     <span className="text-white/80 text-sm">
+                       Visible sur le site (publié)
+                     </span>
+                   </label>
+                   <input
+                     name="sizes"
+                     placeholder={`Tailles séparées par des virgules (défaut: ${DEFAULT_SIZES.join(",")})`}
+                     defaultValue={
+                       editingItem?.sizes?.length
+                         ? editingItem.sizes.join(",")
+                         : DEFAULT_SIZES.join(",")
+                     }
+                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+                   />
+                 </div>
+                 {canScrollUp && (
+                   <div className="sticky top-0 flex justify-center py-2 bg-gradient-to-b from-black/50 to-transparent z-10">
+                     <button
+                       type="button"
+                       onClick={scrollUp}
+                       className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                     >
+                       <ChevronUp className="h-5 w-5" />
+                     </button>
+                   </div>
+                 )}
+                 {canScrollDown && (
+                   <div className="sticky bottom-0 flex justify-center py-2 bg-gradient-to-t from-black/50 to-transparent z-10">
+                     <button
+                       type="button"
+                       onClick={scrollDown}
+                       className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                     >
+                       <ChevronDown className="h-5 w-5" />
+                     </button>
+                   </div>
+                 )}
+                 <div className="flex space-x-4 mt-6">
+                   <button
+                     type="button"
+                     onClick={() => setShowModal(false)}
+                     className="flex-1 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-medium transition-colors"
+                   >
+                     Annuler
+                   </button>
+                   <button
+                     type="submit"
+                     className="flex-1 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-colors"
+                   >
+                     {editingItem ? "Modifier" : "Ajouter"}
+                   </button>
+                 </div>
+                </form>
+                )}
+             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
