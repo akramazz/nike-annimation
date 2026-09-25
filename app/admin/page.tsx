@@ -1008,24 +1008,43 @@ export default function AdminDashboard() {
 
                    <div className="space-y-4">
                      <h3 className="text-lg font-bold">Produits commandés</h3>
-                     {selectedOrder.items?.map((item: any, idx: number) => (
-                       <div
-                         key={idx}
-                         className="flex items-center gap-4 p-3 bg-white/5 rounded-xl"
-                       >
-                         <ProductImage
-                           src={
-                             getProductImage(item.image || undefined) ||
-                             DEFAULT_PRODUCT_IMAGE
-                           }
-                           alt={item.name}
-                           className="w-16 h-16 rounded-lg object-cover"
-                         />
-                         <div className="flex-1">
-                           <p className="font-medium">{item.name}</p>
-                         </div>
-                       </div>
-                     ))}
+                      {selectedOrder.items?.map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-4 p-3 bg-white/5 rounded-xl"
+                        >
+                          <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
+                            <ProductImage
+                              src={
+                                getProductImage(item.image || undefined) ||
+                                DEFAULT_PRODUCT_IMAGE
+                              }
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                            {item.customDesign && (
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <img
+                                  src={item.customDesign}
+                                  alt="Design personnalisé"
+                                  className="max-w-[50%] max-h-[50%] object-contain drop-shadow-lg"
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-white/60 text-sm">
+                              {formatPriceDA(Number(item.price || 0))} x {item.quantity}
+                            </p>
+                            {item.designPrompt && (
+                              <p className="text-xs text-white/40 mt-1 truncate">
+                                Prompt: {item.designPrompt}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                    </div>
 
                    <div className="flex justify-center mt-6">

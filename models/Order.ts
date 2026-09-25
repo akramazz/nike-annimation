@@ -9,6 +9,9 @@ export interface IOrderItem {
   size: string;
   image: string;
   category?: string;
+  productType?: "tshirt" | "sweat";
+  customDesign?: string;
+  designPrompt?: string;
 }
 
 export interface IOrder extends Document {
@@ -39,6 +42,9 @@ const OrderItemSchema = new Schema<IOrderItem>(
     size: { type: String, maxlength: 32 },
     image: { type: String, maxlength: 500 },
     category: { type: String, maxlength: 80 },
+    productType: { type: String, enum: ["tshirt", "sweat"] },
+    customDesign: { type: String, maxlength: 50000 },
+    designPrompt: { type: String, maxlength: 500 },
   },
   { _id: false }
 );

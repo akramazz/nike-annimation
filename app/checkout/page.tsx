@@ -125,6 +125,9 @@ export default function CheckoutPage() {
         size: item.size,
         image: normalizeProductImage(item.image),
         category: item.category,
+        productType: item.productType,
+        customDesign: item.customDesign,
+        designPrompt: item.designPrompt,
       })),
       total,
     };

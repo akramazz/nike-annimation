@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Download, ShoppingBag, Palette, Shirt, Type } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { apiUrl } from "@/lib/api-client";
+import { DEFAULT_PRODUCT_IMAGE } from "../../lib/image-utils";
+
+const CUSTOM_DESIGN_PRICE = 3500;
+
+const PRODUCT_TYPES = [
+  { value: "tshirt", label: "T-shirt" },
+  { value: "sweat", label: "Sweat" },
+];
 
 const AI_COLORS = [
   { value: "black", label: "Noir", hex: "#000000" },
@@ -23,11 +31,6 @@ const AI_STYLES = [
   { value: "graffiti", label: "Graffiti / Street art" },
   { value: "vintage", label: "Vintage / Rétro" },
   { value: "tribal", label: "Tribal / Amazigh" },
-];
-
-const SWEATSHIRT_MODELS = [
-  { value: "sweatblack", name: "Sweat Noir", image: "/products/sweatblack.webp" },
-  { value: "sweatwhite", name: "Sweat Blanc", image: "/products/sweatwhite.webp" },
 ];
 
 interface AIDesignToolProps {
@@ -52,7 +55,7 @@ export default function AIDesignTool({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
-  const [selectedSweatshirt, setSelectedSweatshirt] = useState("sweatblack");
+  const [selectedProductType, setSelectedProductType] = useState("sweat");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,25 +103,30 @@ export default function AIDesignTool({
     if (!selectedDesign) return;
 
     setIsAddingToCart(true);
-    const cartItemName = productName || "Design personnalisé";
+    const productTypeLabel =
+      PRODUCT_TYPES.find((p) => p.value === selectedProductType)?.label || "Design personnalisé";
+    const cartItemName = productName
+      ? `${productName} (${productTypeLabel})`
+      : `${productTypeLabel}`;
     addItem(
       {
         _id: productId || `custom-design-${Date.now()}`,
         productId: productId || `custom-design-${Date.now()}`,
-        name: `${cartItemName} - ${prompt.slice(0, 40)}`,
-        price: productPrice || 79.99,
-        image: SWEATSHIRT_MODELS.find((s) => s.value === selectedSweatshirt)?.image || "/products/sweatblack.webp",
+        name: cartItemName,
+        price: CUSTOM_DESIGN_PRICE,
+        image: DEFAULT_PRODUCT_IMAGE,
         color: color,
         size: "Unique",
-        category: "Sweat",
-        customDesign: selectedDesign,
-        designPrompt: prompt,
+        category: selectedProductType === "sweat" ? "Sweat" : "T-shirt",
+          customDesign: selectedDesign,
+          designPrompt: prompt,
+          productType: selectedProductType === "sweat" ? "sweat" : "tshirt",
       },
       1,
     );
 
     setTimeout(() => setIsAddingToCart(false), 2000);
-  }, [selectedDesign, color, selectedSweatshirt, prompt, addItem, productId, productName, productPrice]);
+  }, [selectedDesign, color, selectedProductType, prompt, addItem, productId, productName]);
 
   const handleDownload = useCallback(() => {
     if (!selectedDesign) return;
@@ -214,26 +222,21 @@ export default function AIDesignTool({
         <div>
           <label className="flex items-center gap-2 text-sm font-medium text-white/80 mb-2">
             <Shirt className="h-4 w-4" />
-            Modèle de vêtement
+            Type de vêtement
           </label>
           <div className="flex gap-4">
-            {SWEATSHIRT_MODELS.map((model) => (
+            {PRODUCT_TYPES.map((pt) => (
               <button
-                key={model.value}
+                key={pt.value}
                 type="button"
-                onClick={() => setSelectedSweatshirt(model.value)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                  selectedSweatshirt === model.value
-                    ? "ring-2 ring-white bg-white/10"
-                    : "bg-white/5 hover:bg-white/10"
+                onClick={() => setSelectedProductType(pt.value)}
+                className={`px-4 py-2 rounded-xl transition-all ${
+                  selectedProductType === pt.value
+                    ? "ring-2 ring-white bg-white/10 text-white"
+                    : "bg-white/5 hover:bg-white/10 text-white/80"
                 }`}
               >
-                <img
-                  src={model.image}
-                  alt={model.name}
-                  className="w-12 h-12 object-contain"
-                />
-                <span className="text-sm font-medium">{model.name}</span>
+                <span className="text-sm font-medium">{pt.label}</span>
               </button>
             ))}
           </div>
@@ -303,28 +306,16 @@ export default function AIDesignTool({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <h3 className="text-lg font-semibold">Aperçu sur le sweatshirt</h3>
-            <div className="relative aspect-[3/4] max-w-sm mx-auto bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8">
+            <h3 className="text-lg font-semibold">Aperçu du design</h3>
+            <div className="relative aspect-[3/4] max-w-sm mx-auto bg-neutral-700 rounded-3xl p-8 flex items-center justify-center">
               <img
-                src={SWEATSHIRT_MODELS.find((s) => s.value === selectedSweatshirt)?.image || "/products/sweatblack.webp"}
-                alt="Sweatshirt"
-                className="absolute inset-4 sm:inset-8 w-full h-full object-contain z-0"
-              />
-              <div
-                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                src={selectedDesign}
+                alt="Design personnalisé"
+                className="max-w-[80%] max-h-[80%] object-contain drop-shadow-2xl"
                 style={{
-                  transform: "scale(0.8)",
+                  filter: color === "white" ? "brightness(0) invert(1)" : "none",
                 }}
-              >
-                <img
-                  src={selectedDesign}
-                  alt="Design personnalisé"
-                  className="max-w-[60%] max-h-[60%] object-contain drop-shadow-2xl filter saturate-100 brightness-110"
-                  style={{
-                    filter: color === "white" ? "brightness(0) invert(1)" : "none",
-                  }}
-                />
-              </div>
+              />
             </div>
 
             <div className="flex gap-3 justify-center">

@@ -19,6 +19,7 @@ export interface CartItem {
   color: string;
   size: string;
   category: string;
+  productType?: "tshirt" | "sweat";
   customDesign?: string;
   designPrompt?: string;
 }
@@ -61,21 +62,25 @@ function migrateOldCart(raw: unknown): CartItem[] {
           : typeof legacyId === "string"
             ? legacyId
             : crypto.randomUUID?.() ?? `legacy-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-     migrated.push({
-      _id,
-      productId: _id,
-      name: String(candidate.name ?? ""),
-      price: Math.max(0, Number(candidate.price ?? 0)),
-      quantity: Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(Number(candidate.quantity ?? 1)))),
-      image: normalizeProductImage(
-        typeof candidate.image === "string" ? candidate.image : undefined,
-      ),
-      color: String(candidate.color ?? ""),
-      size: String(candidate.size ?? "Unique"),
-      category: String(candidate.category ?? ""),
-      customDesign: typeof candidate.customDesign === "string" ? candidate.customDesign : undefined,
-      designPrompt: typeof candidate.designPrompt === "string" ? candidate.designPrompt : undefined,
-    });
+      migrated.push({
+        _id,
+        productId: _id,
+        name: String(candidate.name ?? ""),
+        price: Math.max(0, Number(candidate.price ?? 0)),
+        quantity: Math.max(1, Math.min(MAX_LINE_QTY, Math.floor(Number(candidate.quantity ?? 1)))),
+        image: normalizeProductImage(
+          typeof candidate.image === "string" ? candidate.image : undefined,
+        ),
+        color: String(candidate.color ?? ""),
+        size: String(candidate.size ?? "Unique"),
+        category: String(candidate.category ?? ""),
+        productType:
+          candidate.productType === "tshirt" || candidate.productType === "sweat"
+            ? candidate.productType
+            : undefined,
+        customDesign: typeof candidate.customDesign === "string" ? candidate.customDesign : undefined,
+        designPrompt: typeof candidate.designPrompt === "string" ? candidate.designPrompt : undefined,
+      });
   }
   return migrated;
 }
@@ -134,6 +139,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 ...i,
                 quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
                 image: normalizeProductImage(i.image),
+                productType: item.productType ?? i.productType,
                 customDesign: item.customDesign ?? i.customDesign,
                 designPrompt: item.designPrompt ?? i.designPrompt,
               }

@@ -80,18 +80,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Order must include at least one item" }, { status: 400 });
     }
 
-    const sanitizedItems = items.map((raw: unknown) => {
+    const CUSTOM_DESIGN_PRICE = 3500;
+
+    interface SanitizedItem {
+      productId?: string;
+      name: string;
+      price: number;
+      quantity: number;
+      color: string;
+      size: string;
+      image: string;
+      category: string;
+      productType?: "tshirt" | "sweat";
+      customDesign?: string;
+      designPrompt?: string;
+    }
+
+    const sanitizedItems: SanitizedItem[] = items.map((raw: unknown) => {
       const item = raw as Record<string, unknown>;
-      return {
+      const hasCustomDesign =
+        typeof item.customDesign === "string" && item.customDesign.length > 0;
+      const price = hasCustomDesign
+        ? CUSTOM_DESIGN_PRICE
+        : parsePrice(item.price);
+      const sanitized: SanitizedItem = {
         productId: item.productId != null ? String(item.productId) : undefined,
         name: clampStr(item.name, 200),
-        price: parsePrice(item.price),
+        price: price,
         quantity: Math.max(1, parseIntSafely(item.quantity, 1)),
         color: clampStr(item.color, 80),
         size: clampStr(item.size, 32),
         image: clampStr(item.image, 500),
         category: clampStr(item.category, 80),
       };
+      if (item.productType === "tshirt" || item.productType === "sweat") {
+        sanitized.productType = item.productType;
+      }
+      if (typeof item.customDesign === "string") {
+        sanitized.customDesign = clampStr(item.customDesign, 50000);
+      }
+      if (typeof item.designPrompt === "string") {
+        sanitized.designPrompt = clampStr(item.designPrompt, 500);
+      }
+      return sanitized;
     });
 
     const computedTotal = sanitizedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
