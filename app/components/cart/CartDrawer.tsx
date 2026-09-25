@@ -87,21 +87,30 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </div>
               ) : (
                 items.map((item) => (
-                  <motion.div
-                    key={cartKey(item)}
-                    layout
-                    className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10"
-                  >
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
-                      <ProductImage
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                   <motion.div
+                     key={cartKey(item)}
+                     layout
+                     className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10"
+                   >
+                     <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
+                       <ProductImage
+                         src={item.image}
+                         alt={item.name}
+                         fill
+                         className="object-cover"
+                       />
+                       {item.customDesign && (
+                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                           <img
+                             src={item.customDesign}
+                             alt="Design personnalisé"
+                             className="max-w-[40%] max-h-[40%] object-contain drop-shadow-lg"
+                           />
+                         </div>
+                       )}
+                      </div>
 
-                    <div className="flex-1 min-w-0">
+                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-white truncate">{item.name}</h3>
                       <p className="text-white/50 text-sm">
                         {item.color} · Taille {item.size}

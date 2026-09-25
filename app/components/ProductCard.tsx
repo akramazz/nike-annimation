@@ -18,6 +18,7 @@ export interface ProductCardData {
   name: string;
   color: string;
   image: string;
+  images?: Array<{ url: string; isMain?: boolean }>;
   price: number;
   stock: number;
   description: string;

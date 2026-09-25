@@ -19,6 +19,8 @@ export interface CartItem {
   color: string;
   size: string;
   category: string;
+  customDesign?: string;
+  designPrompt?: string;
 }
 
 interface CartContextType {
@@ -59,7 +61,7 @@ function migrateOldCart(raw: unknown): CartItem[] {
           : typeof legacyId === "string"
             ? legacyId
             : crypto.randomUUID?.() ?? `legacy-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    migrated.push({
+     migrated.push({
       _id,
       productId: _id,
       name: String(candidate.name ?? ""),
@@ -71,32 +73,34 @@ function migrateOldCart(raw: unknown): CartItem[] {
       color: String(candidate.color ?? ""),
       size: String(candidate.size ?? "Unique"),
       category: String(candidate.category ?? ""),
+      customDesign: typeof candidate.customDesign === "string" ? candidate.customDesign : undefined,
+      designPrompt: typeof candidate.designPrompt === "string" ? candidate.designPrompt : undefined,
     });
   }
   return migrated;
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  useEffect(() => {
+  const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         const normalized = migrateOldCart(parsed);
-        setItems(
-          normalized.map((item) => ({
-            ...item,
-            image: normalizeProductImage(item.image),
-          })),
-        );
+        return normalized.map((item) => ({
+          ...item,
+          image: normalizeProductImage(item.image),
+        }));
       }
     } catch {
       // ignore corrupt cart
     }
-    setIsHydrated(true);
+    return [];
+  });
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setIsHydrated(true), 0);
   }, []);
 
   useEffect(() => {
@@ -130,6 +134,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 ...i,
                 quantity: Math.min(MAX_LINE_QTY, i.quantity + qty),
                 image: normalizeProductImage(i.image),
+                customDesign: item.customDesign ?? i.customDesign,
+                designPrompt: item.designPrompt ?? i.designPrompt,
               }
             : i,
         );

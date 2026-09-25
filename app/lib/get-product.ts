@@ -12,6 +12,7 @@ export interface UnifiedProduct {
   description: string;
   category: string;
   image: string;
+  images?: Array<{ url: string; isMain?: boolean }>;
   sizes: string[];
   onSale?: boolean;
   salePrice?: number;
@@ -28,6 +29,7 @@ function toUnified(p: {
   name: string;
   color?: string;
   image: string;
+  images?: Array<{ url: string; isMain?: boolean }>;
   price: number;
   stock: number;
   description: string;
@@ -44,6 +46,12 @@ function toUnified(p: {
     name: String(p.name ?? "").slice(0, 120),
     color: String(p.color ?? "").slice(0, 80) || undefined,
     image: getProductImage(p.image),
+    images: Array.isArray(p.images)
+      ? p.images.map((img) => ({
+          url: getProductImage(img.url),
+          isMain: img.isMain,
+        }))
+      : undefined,
     price: Math.max(0, Number(p.price ?? 0)),
     stock: Math.max(0, Math.floor(Number(p.stock ?? 0))),
     description: String(p.description ?? "").slice(0, 2000),
@@ -140,6 +148,12 @@ export async function getAllProducts(
       return (data.products as UnifiedProduct[]).map((p) => ({
         ...p,
         image: getProductImage(p.image),
+        images: Array.isArray(p.images)
+          ? p.images.map((img) => ({
+              url: getProductImage(img.url),
+              isMain: img.isMain,
+            }))
+          : undefined,
       }));
     }
     return [];

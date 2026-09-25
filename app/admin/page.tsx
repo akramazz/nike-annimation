@@ -103,25 +103,9 @@ export default function AdminDashboard() {
   const [imagePreview, setImagePreview] = useState<string>(DEFAULT_PRODUCT_IMAGE);
   const [productPublished, setProductPublished] = useState(true);
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
-  const [additionalImageInput, setAdditionalImageInput] = useState("");
   const productFormRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
-
-   const addAdditionalImages = () => {
-     const urls = additionalImageInput
-       .split(",")
-       .map((url) => getProductImage(url.trim()))
-       .filter(Boolean);
-     setAdditionalImages((prev) => {
-       const next = [...prev];
-       for (const url of urls) {
-         if (!next.includes(url)) next.push(url);
-       }
-       return next;
-     });
-     setAdditionalImageInput("");
-   };
 
    useEffect(() => {
      if (showModal && modalType !== "order") {
@@ -149,28 +133,31 @@ export default function AdminDashboard() {
             .map((img) => getProductImage(img.url))
             .filter(Boolean)
         : [];
-      setAdditionalImages(imgs);
-      setAdditionalImageInput(imgs.join(", "));
+      const mainImg = getProductImage((editingItem as any)?.image || undefined);
+      const allImgs = [mainImg, ...imgs.filter((img) => img !== mainImg)];
+      setAdditionalImages(allImgs);
+      setProductImageChoice(mainImg);
     } else {
       setAdditionalImages([]);
-      setAdditionalImageInput("");
     }
   }, [editingItem, modalType]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [productsRes, ordersRes, messagesRes, usersRes] = await Promise.all([
+      const [productsRes, ordersRes, messagesRes, usersRes, imagesRes] = await Promise.all([
         fetch(apiUrl("/api/products?includeUnpublished=1"), { credentials: "include" }),
         fetch(apiUrl("/api/orders"), { credentials: "include" }),
         fetch(apiUrl("/api/messages"), { credentials: "include" }),
         fetch(apiUrl("/api/admin/users"), { credentials: "include" }),
+        fetch(apiUrl("/api/products/images"), { credentials: "include" }),
       ]);
 
       const productsData = await productsRes.json();
       const ordersData = await ordersRes.json();
       const messagesData = await messagesRes.json();
       const usersData = await usersRes.json();
+      const imagesData = await imagesRes.json();
 
       if (productsRes.ok && productsData.success) {
         setProducts(productsData.products);
@@ -183,6 +170,9 @@ export default function AdminDashboard() {
       }
       if (usersRes.ok && usersData.success) {
         setUsers(usersData.users);
+      }
+      if (imagesRes.ok && imagesData.success && Array.isArray(imagesData.images)) {
+        setAvailableImages(imagesData.images);
       }
     } catch {
       /* ignore */
@@ -549,16 +539,17 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
                 <h1 className="text-3xl font-bold">Gestion des produits</h1>
-                <button
-                  onClick={() => {
-                    setModalType("product");
-                    setEditingItem(null);
-                    setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
-                    setProductPublished(true);
-                    setShowModal(true);
-                  }}
-                  className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
-                >
+                 <button
+                   onClick={() => {
+                     setModalType("product");
+                     setEditingItem(null);
+                     setProductImageChoice(DEFAULT_PRODUCT_IMAGE);
+                     setAdditionalImages([DEFAULT_PRODUCT_IMAGE]);
+                     setProductPublished(true);
+                     setShowModal(true);
+                   }}
+                   className="flex items-center space-x-2 px-6 py-3 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
+                 >
                   <Plus className="h-5 w-5" />
                   <span>Ajouter un produit</span>
                 </button>
@@ -576,9 +567,9 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              {/* Products Table */}
-              <div className="overflow-x-auto rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
-                <table className="w-full">
+               {/* Products Table */}
+               <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+                 <table className="w-full min-w-[700px]">
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="text-left p-4 font-medium text-white/60">
@@ -659,18 +650,22 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4">
                             <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => {
-                                  setEditingItem(product);
-                                  setModalType("product");
-                                  setProductImageChoice(
-                                    product.image || DEFAULT_PRODUCT_IMAGE,
-                                  );
-                                  setProductPublished(product.published !== false);
-                                  setShowModal(true);
-                                }}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                              >
+                               <button
+                                 onClick={() => {
+                                   setEditingItem(product);
+                                   setModalType("product");
+                                   const mainImg = getProductImage(product.image || DEFAULT_PRODUCT_IMAGE);
+                                   const imgs = Array.isArray(product.images)
+                                     ? product.images.map((img) => getProductImage(img.url)).filter(Boolean)
+                                     : [];
+                                   const allImgs = [mainImg, ...imgs.filter((img) => img !== mainImg)];
+                                   setAdditionalImages(allImgs.length ? allImgs : [mainImg]);
+                                   setProductImageChoice(mainImg);
+                                   setProductPublished(product.published !== false);
+                                   setShowModal(true);
+                                 }}
+                                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                               >
                                 <Edit className="h-4 w-4 text-blue-400" />
                               </button>
                               <button
@@ -1072,7 +1067,7 @@ export default function AdminDashboard() {
                       images: additionalImages
                         .map((url) => getProductImage(url.trim()))
                         .filter(Boolean)
-                        .map((url, idx) => ({ url, isMain: idx === 0 })),
+                        .map((url) => ({ url, isMain: url === normalizedImage })),
                     };
 
                    const opts = {
@@ -1190,56 +1185,93 @@ export default function AdminDashboard() {
                      ))}
                    </select>
                    <div className="flex items-center gap-4">
-                     <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 border border-white/20">
-                       <img
-                         src={imagePreview}
-                         alt="Aperçu image"
-                         className="w-full h-full object-cover"
-                       />
-                     </div>
-                     <span className="text-white/70 text-sm">
-                       {availableImages.length} image(s) disponible(s)
-                     </span>
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/10 border border-white/20">
+                      <img
+                        src={imagePreview}
+                        alt="Aperçu image"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-white/70 text-xs font-medium">Images supplémentaires (chemins séparés par des virgules)</p>
-                       <div className="flex gap-2">
-                         <input
-                           type="text"
-                           placeholder="/products/xxx.webp, /products/yyy.webp"
-                           value={additionalImageInput}
-                           onChange={(e) => setAdditionalImageInput(e.target.value)}
-                           onKeyDown={(e) => {
-                             if (e.key === "Enter") {
+                    <span className="text-white/70 text-sm">
+                      {availableImages.length} image(s) disponible(s)
+                    </span>
+                   </div>
+
+                   <div className="space-y-2">
+                     <label className="text-white/70 text-xs font-medium">Images du produit</label>
+                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                       {additionalImages.map((img, idx) => {
+                         const normalizedImg = getProductImage(img);
+                         const isMain = normalizedImg === getProductImage(selectedImage);
+                         return (
+                           <div
+                             key={idx}
+                             className={`relative group cursor-pointer border-2 rounded-xl overflow-hidden transition-all ${
+                               isMain
+                                 ? "border-white"
+                                 : "border-white/20 hover:border-white/40"
+                             }`}
+                             onClick={(e) => {
                                e.preventDefault();
-                               addAdditionalImages();
-                             }
-                           }}
-                           className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
-                         />
-                         <button
-                           type="button"
-                           onClick={addAdditionalImages}
-                           className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors"
-                         >
-                           Ajouter
-                         </button>
-                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {additionalImages.map((img, idx) => (
-                          <div key={idx} className="relative">
-                            <img src={getProductImage(img)} alt="" className="w-16 h-16 object-cover rounded-lg border border-white/20" />
-                            <button
-                              type="button"
-                              onClick={() => setAdditionalImages((prev) => prev.filter((_, i) => i !== idx))}
-                              className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full text-white text-[10px]"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                               setProductImageChoice(img);
+                             }}
+                             title={isMain ? "Image principale" : "Cliquer pour définir comme principale"}
+                           >
+                             <img
+                               src={normalizedImg}
+                               alt=""
+                               className="w-full h-16 sm:h-20 object-cover"
+                             />
+                             <button
+                               type="button"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 setAdditionalImages((prev) =>
+                                   prev.filter((_, i) => i !== idx),
+                                 );
+                               }}
+                               className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                               title="Supprimer cette image"
+                             >
+                               <X className="h-3 w-3" />
+                             </button>
+                           </div>
+                         );
+                       })}
+                     </div>
+
+                     {additionalImages.length === 0 && (
+                       <p className="text-white/40 text-sm">Aucune image ajoutée.</p>
+                     )}
+
+                     <button
+                       type="button"
+                       onClick={() => {
+                         const unused = availableImages.filter(
+                           (img) => !additionalImages.some(
+                             (existing) =>
+                               getProductImage(existing) ===
+                               getProductImage(`/products/${img}`),
+                           ),
+                         );
+                         if (unused.length === 0) {
+                           alert("Toutes les images disponibles sont déjà ajoutées.");
+                           return;
+                         }
+                         const next = unused[0];
+                         const path = `/products/${next}`;
+                         const normalized = getProductImage(path);
+                         setAdditionalImages((prev) => [...prev, normalized]);
+                         if (additionalImages.length === 0) {
+                           setProductImageChoice(normalized);
+                         }
+                       }}
+                       className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                     >
+                       <Plus className="h-4 w-4" />
+                       Ajouter une image
+                     </button>
+                   </div>
                     <label className="flex items-center gap-3 cursor-pointer">
                      <input
                        type="checkbox"

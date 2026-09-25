@@ -84,6 +84,7 @@ export default function Header() {
         { name: "Promotions", href: "/products?onSale=true" },
       ],
     },
+    { name: "Créer mon design", href: "/designer" },
     { name: "À propos", href: "/a-propos" },
     { name: "Contact", href: "/contact" },
   ];
