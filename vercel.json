@@ -6,8 +6,8 @@
   "outputDirectory": ".next",
   "regions": ["iad1"],
   "functions": {
-    "app/**/*.{js,ts,jsx,tsx}": {
-      "maxDuration": 60
+    "app/api/ai/generate/**": {
+      "maxDuration": 120
     },
     "app/api/**/*.ts": {
       "maxDuration": 60

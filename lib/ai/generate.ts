@@ -68,7 +68,9 @@ function buildProviderChain(): AIProvider[] {
     }
   }
 
-  chain.push(new PollinationsProvider());
+  if (provider !== "pollinations") {
+    chain.push(new PollinationsProvider());
+  }
 
   const hfKey = process.env.HF_API_KEY?.trim();
   if (hfKey && provider !== "huggingface" && provider !== "hf") {
@@ -102,15 +104,24 @@ export async function generateImages(
 
   for (const provider of chain) {
     try {
-      const images: string[] = [];
+      const promises: Promise<string | null>[] = [];
       for (let i = 0; i < numImages; i++) {
         const seed = i > 0 ? Math.floor(Math.random() * 2147483647) : undefined;
         const opts: ImageGenOptions = { width: 512, height: 512, seed };
-        const img = await provider.generateImage(fullPrompt, opts);
-        if (img && img.length > 0) {
-          images.push(img);
-        }
+        promises.push(
+          Promise.race([
+            provider.generateImage(fullPrompt, opts),
+            new Promise<string | null>((resolve) =>
+              setTimeout(() => resolve(null), 30000),
+            ),
+          ]).catch(() => null),
+        );
       }
+
+      const results = await Promise.all(promises);
+      const images = results.filter(
+        (img): img is string => img != null && img.length > 0,
+      );
 
       if (images.length === 0) {
         throw new Error("No images were generated");
