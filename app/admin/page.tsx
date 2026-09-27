@@ -11,6 +11,7 @@ import { formatPriceDA } from "@/lib/price-utils";
 import { normalizeCategory, PRODUCT_CATEGORIES } from "@/lib/product-categories";
 import ProductImage from "@/app/components/products/ProductImage";
 import { useAdminNav } from "@/app/context/AdminNavContext";
+import AdminImageSelector from "./components/AdminImageSelector";
 import {
   Package,
   ShoppingCart,
@@ -103,6 +104,7 @@ export default function AdminDashboard() {
   const [imagePreview, setImagePreview] = useState<string>(DEFAULT_PRODUCT_IMAGE);
   const [productPublished, setProductPublished] = useState(true);
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [imageSelectorOpen, setImageSelectorOpen] = useState(false);
   const productFormRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
@@ -1263,31 +1265,12 @@ export default function AdminDashboard() {
                        <p className="text-white/40 text-sm">Aucune image ajoutée.</p>
                      )}
 
-                     <button
-                       type="button"
-                       onClick={() => {
-                         const unused = availableImages.filter(
-                           (img) => !additionalImages.some(
-                             (existing) =>
-                               getProductImage(existing) ===
-                               getProductImage(`/products/${img}`),
-                           ),
-                         );
-                         if (unused.length === 0) {
-                           alert("Toutes les images disponibles sont déjà ajoutées.");
-                           return;
-                         }
-                         const next = unused[0];
-                         const path = `/products/${next}`;
-                         const normalized = getProductImage(path);
-                         setAdditionalImages((prev) => [...prev, normalized]);
-                         if (additionalImages.length === 0) {
-                           setProductImageChoice(normalized);
-                         }
-                       }}
-                       className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                     >
-                       <Plus className="h-4 w-4" />
+                      <button
+                        type="button"
+                        onClick={() => setImageSelectorOpen(true)}
+                        className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
                        Ajouter une image
                      </button>
                    </div>
@@ -1356,6 +1339,23 @@ export default function AdminDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AdminImageSelector
+        availableImages={availableImages}
+        selectedImages={additionalImages}
+        isOpen={imageSelectorOpen}
+        onClose={() => setImageSelectorOpen(false)}
+        onAddImage={(imagePath) => {
+          const normalized = getProductImage(imagePath);
+          setAdditionalImages((prev) => {
+            const newImages = [...prev, normalized];
+            if (prev.length === 0) {
+              setProductImageChoice(normalized);
+            }
+            return newImages;
+          });
+        }}
+      />
     </div>
   );
 }
