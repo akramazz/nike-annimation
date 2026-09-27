@@ -367,6 +367,12 @@ body {
   }
 }
 
+/* Police Frijole pour le titre Hero */
+.frijole-regular {
+  font-family: "Frijole", system-ui;
+  font-weight: 400;
+}
+
 /* Performance optimizations */
 .will-change-transform {
   will-change: transform;

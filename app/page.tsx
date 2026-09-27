@@ -72,9 +72,9 @@ function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight"
+          className="frijole-regular text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight"
         >
-          DRIPBAZZARDZ
+          DRIP BAZZAR.DZ
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}

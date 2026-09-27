@@ -93,6 +93,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
 
+        {/* Google Fonts - Frijole */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Frijole&display=swap"
+          rel="stylesheet"
+        />
+
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
