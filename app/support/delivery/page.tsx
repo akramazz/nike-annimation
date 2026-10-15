@@ -14,21 +14,21 @@ export default function DeliveryPage() {
   const deliveryInfo = [
     {
       title: "France Métropolitaine",
-      price: "Gratuit",
+      price: "",
       time: "2-3 jours ouvrés",
-      threshold: "100 DA",
+      threshold: null,
       details: ["Livraison à domicile", "Point relais", "Suivi en temps réel"]
     },
     {
       title: "Europe",
-      price: "9,99 DA",
+      price: "",
       time: "3-5 jours ouvrés",
       threshold: null,
       details: ["Livraison à domicile", "Suivi international", "Douanes incluses"]
     },
     {
       title: "International",
-      price: "19,99 DA",
+      price: "",
       time: "5-10 jours ouvrés",
       threshold: null,
       details: ["Livraison express", "Assurance colis", "Suivi global"]
@@ -129,3 +129,4 @@ export default function DeliveryPage() {
     </div>
   );
 }
+
