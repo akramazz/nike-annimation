@@ -74,7 +74,7 @@ function HeroSection() {
           transition={{ duration: 0.8 }}
           className="frijole-regular text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight"
         >
-          DRIP BAZZAR.DZ
+          A&Z drip.dz
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}

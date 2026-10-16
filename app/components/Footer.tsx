@@ -187,11 +187,10 @@ export default function Footer() {
         <div className="border-t border-white/10 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p ref={copyrightRef} className="text-white/50 text-sm text-center md:text-left">
-              © 2026 DripBazzarDZ. Tous droits réservés.
+              © 2026 AZ Drip - Tous droits réservés.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-white/50 text-sm">
-               <Link href="/support/delivery" className="hover:text-white transition-colors">Livraison gratuite dès 100 DA</Link>
               <span>•</span>
               <Link href="/support/returns" className="hover:text-white transition-colors">Retour sous 30 jours</Link>
               <span>•</span>

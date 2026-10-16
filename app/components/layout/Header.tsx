@@ -100,12 +100,10 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-<div className="relative w-20 h-20 md:w-24 md:h-24">
-                  <Image src="/logo.png" alt="DripBazzardz" fill className="object-contain" />
+            <div className="relative w-28 h-28 md:w-36 md:h-36">
+                  <Image src="/Logo premium A&Z Streetwear.png" alt="DripBazzardz" fill className="object-contain" />
               </div>
-              <span className="text-white font-bold text-xl md:text-2xl hidden sm:block">
-                DripBazzardz
-              </span>
+            
             </Link>
           </div>
 
