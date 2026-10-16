@@ -90,7 +90,7 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent overflow-hidden ${
         isScrolled
           ? "bg-black/90 backdrop-blur-xl border-b border-white/10"
           : "bg-transparent"
@@ -100,9 +100,18 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-            <div className="relative w-28 h-28 md:w-36 md:h-36">
-                  <Image src="/Logo premium A&Z Streetwear.png" alt="DripBazzardz" fill className="object-contain" />
-              </div>
+ 
+<div className="relative w-24 h-20 md:w-32 md:h-24 flex-shrink-0 overflow-hidden">
+  <Image
+    src="/Logo premium A&Z Streetwear.png"
+    alt="A&Z Drip"
+    fill
+    priority
+    className="object-contain scale-125"
+    sizes="(max-width: 768px) 96px, 128px"
+  />
+</div>
+
             
             </Link>
           </div>
@@ -160,9 +169,10 @@ export default function Header() {
 
 
           <div className="flex items-center space-x-2 md:space-x-4">
+
             <button
               type="button"
-              className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
+              className="p-2 text-white/80 hover:text-red-500 transition-colors duration-200 hidden md:block"
               aria-label="Rechercher"
               onClick={() => setIsSearchOpen((v) => !v)}
             >
@@ -176,10 +186,10 @@ export default function Header() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Rechercher un produit..."
-                  className="w-64 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-white/40"
+                  className="w-64 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600/50 transition-all duration-200"
                 />
                 {searchLoading && (
-                  <span className="absolute right-3 text-white/60 text-xs">...</span>
+                  <span className="absolute right-3 text-red-500 text-xs">...</span>
                 )}
                 {searchQuery && (
                   <div className="absolute top-full left-0 mt-2 w-full max-w-md bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
@@ -190,7 +200,7 @@ export default function Header() {
                       <Link
                         key={product._id}
                         href={`/products/${product._id}`}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-red-600/10 transition-colors"
                         onClick={() => {
                           setIsSearchOpen(false);
                           setSearchQuery("");
@@ -208,22 +218,25 @@ export default function Header() {
               </div>
             )}
 
+
             {user ? (
-              <Link
-                href="/account/profile"
-                className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
-                aria-label="Mon compte"
-              >
-                <User className="h-5 w-5" />
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="p-2 text-white/80 hover:text-white transition-colors duration-200 hidden md:block"
-                aria-label="Compte"
-              >
-                <User className="h-5 w-5" />
-              </Link>
+
+<Link
+  href="/account/profile"
+  className="p-2 text-white/80 hover:text-red-500 transition-colors duration-200 hidden md:block"
+  aria-label="Mon compte"
+>
+  <User className="h-5 w-5" />
+</Link>
+) : (
+<Link
+  href="/login"
+  className="p-2 text-white/80 hover:text-red-500 transition-colors duration-200 hidden md:block"
+  aria-label="Compte"
+>
+  <User className="h-5 w-5" />
+</Link>
+
             )}
 
             <motion.button
