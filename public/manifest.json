@@ -1,19 +1,14 @@
 {
-  "name": "DripBazzarDZ",
-  "short_name": "DripBazzarDZ",
-  "description": "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme en Algérie",
+  "name": "AZ drip Streetwear",
+  "short_name": "AZ drip Streetwear",
+  "description": "AZ drip Streetwear - Mode Urbaine et Accessoires Haut de Gamme en Algérie",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "/logo.png",
+      "src": "/Logo premium A&Z Streetwear.png",
       "sizes": "any",
       "type": "image/png"
     }

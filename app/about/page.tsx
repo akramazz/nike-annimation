@@ -78,7 +78,7 @@ export default function AboutPage() {
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90 z-10" />
 
-        <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+        <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 w-full max-w-none">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.6 }} className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 mb-8">
             <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse mr-2" />
             <span className="text-white/90 text-sm font-medium">Notre Histoire</span>
@@ -90,10 +90,10 @@ export default function AboutPage() {
           </h1>
 
           <p ref={subtitleRef} className="text-lg sm:text-xl md:text-2xl text-white/80 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Découvrez l'histoire et les valeurs qui font de DripBazzarDZ une marque unique dans l'univers de la mode urbaine et haut de gamme.
+            Découvrez l'histoire et les valeurs qui font de AZ drip Streetwear une marque unique dans l'univers de la mode urbaine et haut de gamme.
           </p>
 
-          <motion.div ref={statsRef} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.8 }} className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <motion.div ref={statsRef} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.8 }} className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-none">
             {[
               { value: "2018", label: "Année de création" },
               { value: "50+", label: "Employés" },
@@ -110,7 +110,7 @@ export default function AboutPage() {
       </section>
 
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-none">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Nos Valeurs</h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">Les principes qui guident chacune de nos actions.</p>
@@ -129,7 +129,7 @@ export default function AboutPage() {
       </section>
 
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-b from-transparent via-white/5 to-transparent">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-none">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Notre Équipe</h2>
             <p className="text-white/70 text-lg max-w-3xl mx-auto">Des professionnels passionnés qui travaillent ensemble pour vous offrir le meilleur.</p>

@@ -96,12 +96,12 @@ export default function Header() {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
             <div className="relative w-28 h-28 md:w-36 md:h-36">
-                  <Image src="/Logo premium A&Z Streetwear.png" alt="DripBazzardz" fill className="object-contain" />
+                  <Image src="/Logo premium A&Z Streetwear.png" alt="AZ drip Streetwear" fill className="object-contain" />
               </div>
             
             </Link>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -10,6 +11,7 @@ import { formatPriceDA } from "@/lib/price-utils";
 import { useCart } from "../context/CartContext";
 import { apiUrl } from "@/lib/api-client";
 import { ArrowLeft, CreditCard, Truck, Shield, Check } from "lucide-react";
+
 export default function CheckoutPage() {
   const { items, total, clearCart, isHydrated } = useCart();
   const router = useRouter();
@@ -57,8 +59,8 @@ export default function CheckoutPage() {
   // Animation GSAP au focus des inputs
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     gsap.to(e.target, {
-      borderColor: "rgba(255, 255, 255, 0.5)",
-      boxShadow: "0 0 20px rgba(255, 255, 255, 0.1)",
+      borderColor: "rgba(220, 38, 38, 0.7)",
+      boxShadow: "0 0 20px rgba(220, 38, 38, 0.15)",
       duration: 0.3,
       ease: "power2.out",
     });
@@ -80,7 +82,7 @@ export default function CheckoutPage() {
       if (btn) {
         gsap.to(btn, {
           scale: 1.02,
-          boxShadow: "0 0 40px rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)",
           duration: 0.3,
           ease: "power2.out",
         });
@@ -94,7 +96,7 @@ export default function CheckoutPage() {
       if (btn) {
         gsap.to(btn, {
           scale: 1,
-          boxShadow: "0 0 20px rgba(255, 255, 255, 0.1)",
+          boxShadow: "0 0 20px rgba(220, 38, 38, 0.2)",
           duration: 0.3,
           ease: "power2.out",
         });
@@ -141,26 +143,26 @@ export default function CheckoutPage() {
 
       const data = await response.json();
 
-       if (data.success) {
-         setIsSuccess(true);
-         clearCart();
+      if (data.success) {
+        setIsSuccess(true);
+        clearCart();
 
-         // Track Purchase event
-         if (typeof window !== 'undefined' && window.fbq) {
-           window.fbq('track', 'Purchase', {
-             value: total,
-             currency: 'EUR'
-           });
-         }
+        // Track Purchase event
+        if (typeof window !== 'undefined' && window.fbq) {
+          window.fbq('track', 'Purchase', {
+            value: total,
+            currency: 'EUR'
+          });
+        }
 
-         if (typeof window !== "undefined") {
-           gsap.to(".checkout-form", {
-             opacity: 0,
-             y: -50,
-             duration: 0.5,
-             ease: "power2.in",
-           });
-         }
+        if (typeof window !== "undefined") {
+          gsap.to(".checkout-form", {
+            opacity: 0,
+            y: -50,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+        }
       } else {
         setSubmitError(
           typeof data.error === "string" ? data.error : "La commande a échoué.",
@@ -188,7 +190,7 @@ export default function CheckoutPage() {
           ref={successRef}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="max-w-md w-full p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20 text-center"
+          className="max-w-md w-full p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-red-600/40 text-center"
         >
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
             <Check className="h-10 w-10 text-green-400" />
@@ -202,7 +204,7 @@ export default function CheckoutPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => router.push("/")}
-            className="w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
+            className="w-full py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-colors"
           >
             Retour à l'accueil
           </motion.button>
@@ -214,23 +216,23 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-red-600/30">
+        <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => router.back()}
-              className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
+              className="flex items-center space-x-2 text-white/80 hover:text-red-500 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Retour</span>
             </motion.button>
             <div className="flex items-center space-x-2">
-              <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
-                <img src="/logo.png" alt="DripBazzarDZ" className="w-9 h-9 object-cover rounded-full" />
+              <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 border-2 border-red-600/50">
+                <img src="/Logo premium A&Z Streetwear.png" alt="AZ drip Streetwear" className="w-9 h-9 object-cover rounded-full" />
               </div>
-              <span className="text-white font-bold text-xl">DripBazzarDZ</span>
+              <span className="text-white font-bold text-xl">AZ drip Streetwear</span>
             </div>
             <div className="w-20" />
           </div>
@@ -238,8 +240,10 @@ export default function CheckoutPage() {
       </header>
 
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8">Paiement</h1>
+        <div className="w-full max-w-none">
+          <h1 className="text-4xl font-bold mb-8">
+            Paiement
+          </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Formulaire */}
@@ -249,7 +253,7 @@ export default function CheckoutPage() {
               className="checkout-form space-y-6"
             >
               {/* Informations personnelles */}
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40">
                 <h2 className="text-xl font-bold mb-4">
                   Informations personnelles
                 </h2>
@@ -285,7 +289,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Adresse de livraison */}
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40">
                 <h2 className="text-xl font-bold mb-4">Adresse de livraison</h2>
                 <div className="space-y-4">
                   <input
@@ -343,7 +347,7 @@ export default function CheckoutPage() {
                 disabled={isSubmitting || items.length === 0}
                 onMouseEnter={handleButtonHover}
                 onMouseLeave={handleButtonLeave}
-                className="submit-btn w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                className="submit-btn w-full py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
               >
                 <span className="relative z-10">
                   {isSubmitting
@@ -368,7 +372,7 @@ export default function CheckoutPage() {
 
             {/* Résumé de la commande */}
             <div className="space-y-6">
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10 sticky top-24">
+              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40 sticky top-24">
                 <h2 className="text-xl font-bold mb-4">
                   Résumé de la commande
                 </h2>
@@ -380,12 +384,12 @@ export default function CheckoutPage() {
                       className="flex items-center space-x-4"
                     >
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10">
-                      <ProductImage
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-contain p-2"
-                      />
+                        <ProductImage
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-contain p-2"
+                        />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium">{item.name}</h3>

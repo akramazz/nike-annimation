@@ -4,7 +4,7 @@ import ProductsClient from "./ProductsClient";
 function LoadingFallback() {
   return (
     <div className="min-h-screen bg-black pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="w-full max-w-none px-3 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="h-12 bg-white/10 rounded-lg w-64 mx-auto mb-4 animate-pulse" />
           <div className="h-6 bg-white/10 rounded-lg w-96 mx-auto animate-pulse" />

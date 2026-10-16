@@ -4,7 +4,7 @@ const apiKey = process.env.RESEND_API_KEY;
 const resend = apiKey ? new Resend(apiKey) : null;
 
 function getFrom() {
-  return process.env.EMAIL_FROM || "DripBazzardz <no-reply@dripbazzardz.com>";
+  return process.env.EMAIL_FROM || "AZ drip Streetwear <no-reply@AZ drip Streetwear.com>";
 }
 
 function escapeHtml(value: string) {
@@ -50,7 +50,7 @@ export async function sendOrderConfirmationEmail(options: {
     <div style="background:#000;color:#fff;font-family:Inter,sans-serif;padding:24px 0;">
       <div style="max-width:640px;margin:0 auto;background:#0a0a0a;border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:28px;">
         <div style="text-align:center;margin-bottom:20px;">
-          <div style="font-size:22px;font-weight:900;letter-spacing:0.08em;">DRIPBAZZARDZ</div>
+          <div style="font-size:22px;font-weight:900;letter-spacing:0.08em;">AZ drip Streetwear</div>
           <div style="color:#a3a3a3;font-size:13px;margin-top:6px;">Confirmation de commande</div>
         </div>
 
@@ -79,7 +79,7 @@ export async function sendOrderConfirmationEmail(options: {
           ${options.status ? `<div style="margin-top:8px;color:#525252;">Statut : ${escapeHtml(options.status)}</div>` : ""}
         </div>
 
-        <div style="text-align:center;margin-top:22px;color:#a3a3a3;font-size:12px;">Merci pour votre commande chez DripBazzardz.</div>
+        <div style="text-align:center;margin-top:22px;color:#a3a3a3;font-size:12px;">Merci pour votre commande chez AZ drip Streetwear.</div>
       </div>
     </div>
   `;
@@ -131,12 +131,12 @@ export async function sendOrderStatusEmail(options: {
     <div style="background:#000;color:#fff;font-family:Inter,sans-serif;padding:24px 0;">
       <div style="max-width:640px;margin:0 auto;background:#0a0a0a;border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:28px;">
         <div style="text-align:center;margin-bottom:20px;">
-          <div style="font-size:22px;font-weight:900;letter-spacing:0.08em;">DRIPBAZZARDZ</div>
+          <div style="font-size:22px;font-weight:900;letter-spacing:0.08em;">AZ drip Streetwear</div>
           <div style="color:#a3a3a3;font-size:13px;margin-top:6px;">Mise à jour de commande</div>
         </div>
         <p style="color:#e5e5e5;font-size:15px;line-height:1.6;">Bonjour ${escapeHtml(name)},</p>
         <p style="color:#e5e5e5;font-size:15px;line-height:1.6;">${escapeHtml(copy.body)}</p>
-        <div style="text-align:center;margin-top:22px;color:#a3a3a3;font-size:12px;">DripBazzardz</div>
+        <div style="text-align:center;margin-top:22px;color:#a3a3a3;font-size:12px;">AZ drip Streetwear</div>
       </div>
     </div>
   `;

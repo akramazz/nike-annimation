@@ -237,7 +237,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-black">
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="w-full max-w-none px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <button
               onClick={() => router.back()}
@@ -248,9 +248,9 @@ export default function ProductDetailPage() {
             </button>
             <div className="flex items-center space-x-2">
               <div className="relative w-8 h-8 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
-                <Image src="/logo.png" alt="DripBazzarDZ" fill className="object-cover" />
+                <Image src="/Logo premium A&Z Streetwear.png" alt="AZ drip Streetwear" fill className="object-cover" />
               </div>
-              <span className="text-white font-bold text-lg sm:text-xl">DripBazzarDZ</span>
+              <span className="text-white font-bold text-lg sm:text-xl">AZ drip Streetwear</span>
             </div>
             <div className="w-20" />
           </div>
@@ -258,7 +258,7 @@ export default function ProductDetailPage() {
       </header>
 
       <div className="pt-20 pb-12 px-3 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-none">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16">
             <div className="lg:sticky lg:top-24 lg:self-start">
               <ProductGallery product={product} />

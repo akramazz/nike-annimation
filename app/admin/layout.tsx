@@ -47,10 +47,10 @@ function AdminSidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; s
           <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
             <Link href="/admin" className="flex items-center gap-3">
               <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/20 bg-white/10">
-                <Image src="/logo.png" alt="DripBazzarDZ" fill className="object-cover" />
+                <Image src="/Logo premium A&Z Streetwear.png" alt="AZ drip Streetwear" fill className="object-cover" />
               </div>
               <div className="flex flex-col">
-                <span className="text-white font-bold text-sm leading-tight">DripBazzarDZ</span>
+                <span className="text-white font-bold text-sm leading-tight">AZ drip Streetwear</span>
                 <span className="text-white/50 text-xs">Administration</span>
               </div>
             </Link>

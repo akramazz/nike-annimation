@@ -13,15 +13,15 @@ export default function TermsPage() {
   const sections = [
     {
       title: "Objet",
-      content: "Les présentes Conditions Générales de Vente (CGV) ont pour objet de définir les modalités et conditions de vente entre DripBazzarDZ et tout client personne physique ou morale souhaitant acquérir les produits proposés sur notre site e-commerce."
+      content: "Les présentes Conditions Générales de Vente (CGV) ont pour objet de définir les modalités et conditions de vente entre AZ drip Streetwear et tout client personne physique ou morale souhaitant acquérir les produits proposés sur notre site e-commerce."
     },
     {
       title: "Commande",
-      content: "La commande est passée lorsque vous sélectionnez vos produits, ajoutez au panier et validez le paiement. La confirmation de commande vous sera envoyée par email. DripBazzarDZ se réserve le droit de refuser toute commande en cas de litige précédent ou de paiement non honoré."
+      content: "La commande est passée lorsque vous sélectionnez vos produits, ajoutez au panier et validez le paiement. La confirmation de commande vous sera envoyée par email. AZ drip Streetwear se réserve le droit de refuser toute commande en cas de litige précédent ou de paiement non honoré."
     },
     {
       title: "Prix",
-      content: "Les prix sont indiqués en euros TTC. Ils ne comprennent pas les frais de livraison ajoutés au moment du paiement. DripBazzarDZ se réserve le droit de modifier les prix à tout moment, mais les commandes déjà confirmées ne seront pas affectées."
+      content: "Les prix sont indiqués en euros TTC. Ils ne comprennent pas les frais de livraison ajoutés au moment du paiement. AZ drip Streetwear se réserve le droit de modifier les prix à tout moment, mais les commandes déjà confirmées ne seront pas affectées."
     },
     {
       title: "Paiement",
@@ -41,7 +41,7 @@ export default function TermsPage() {
     },
     {
       title: "Responsabilité",
-      content: "DripBazzarDZ ne peut être tenue responsable des dommages résultant d'une mauvaise utilisation des produits ou du non-respect des consignes d'entretien. La responsabilité maximale est limitée au montant de la commande."
+      content: "AZ drip Streetwear ne peut être tenue responsable des dommages résultant d'une mauvaise utilisation des produits ou du non-respect des consignes d'entretien. La responsabilité maximale est limitée au montant de la commande."
     },
     {
       title: "Propriété intellectuelle",
@@ -66,7 +66,7 @@ export default function TermsPage() {
               Conditions Générales de Vente
             </h1>
             <p className="text-white/70 text-lg">
-              Les règles qui encadrent vos achats sur DripBazzarDZ.
+              Les règles qui encadrent vos achats sur AZ drip Streetwear.
             </p>
           </motion.div>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
 
           <div className="mt-12 p-6 bg-white/5 rounded-2xl border border-white/10">
             <p className="text-white/70 text-sm text-center">
-               Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à legal@dripbazzardz.com
+               Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à legal@AZ drip Streetwear.com
             </p>
           </div>
         </div>

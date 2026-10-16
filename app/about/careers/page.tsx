@@ -23,10 +23,10 @@ export default function CareersPage() {
   return (
     <div className="min-h-screen bg-black">
       <main className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4">Carrières</h1>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto">Rejoignez une équipe passionnée et contribuez à l'excellence de DripBazzarDZ.</p>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">Rejoignez une équipe passionnée et contribuez à l'excellence de AZ drip Streetwear.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">

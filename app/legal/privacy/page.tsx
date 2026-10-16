@@ -29,7 +29,7 @@ export default function PrivacyPage() {
     },
     {
       title: "Vos droits",
-      content: "Conformément au RGPD, vous avez le droit d'accéder, de rectifier, de supprimer et de vous opposer au traitement de vos données personnelles. Vous pouvez exercer ces droits en nous contactant à privacy@dripbazzardz.com."
+      content: "Conformément au RGPD, vous avez le droit d'accéder, de rectifier, de supprimer et de vous opposer au traitement de vos données personnelles. Vous pouvez exercer ces droits en nous contactant à privacy@AZ drip Streetwear.com."
     },
     {
       title: "Conservation des données",
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
 
           <div className="mt-12 p-6 bg-white/5 rounded-2xl border border-white/10">
             <p className="text-white/70 text-sm text-center">
-               Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à privacy@dripbazzardz.com
+               Dernière mise à jour : Avril 2026. Pour toute question, contactez-nous à privacy@AZ drip Streetwear.com
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -48,8 +49,8 @@ export default function ContactPage() {
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     gsap.to(e.target, {
-      borderColor: "rgba(255, 255, 255, 0.5)",
-      boxShadow: "0 0 20px rgba(255, 255, 255, 0.1)",
+      borderColor: "rgba(220, 38, 38, 0.7)",
+      boxShadow: "0 0 20px rgba(220, 38, 38, 0.15)",
       duration: 0.3,
       ease: "power2.out",
     });
@@ -73,7 +74,7 @@ export default function ContactPage() {
       if (btn) {
         gsap.to(btn, {
           scale: 1.02,
-          boxShadow: "0 0 40px rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)",
           duration: 0.3,
           ease: "power2.out",
         });
@@ -87,7 +88,7 @@ export default function ContactPage() {
       if (btn) {
         gsap.to(btn, {
           scale: 1,
-          boxShadow: "0 0 20px rgba(255, 255, 255, 0.1)",
+          boxShadow: "0 0 20px rgba(220, 38, 38, 0.2)",
           duration: 0.3,
           ease: "power2.out",
         });
@@ -142,7 +143,7 @@ export default function ContactPage() {
           ref={successRef}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="max-w-md w-full p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-white/20 text-center"
+          className="max-w-md w-full p-8 rounded-3xl backdrop-blur-xl bg-white/10 border border-red-600/40 text-center"
         >
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
             <Check className="h-10 w-10 text-green-400" />
@@ -156,7 +157,7 @@ export default function ContactPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => router.push("/")}
-            className="w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors"
+            className="w-full py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-colors"
           >
             Retour à l'accueil
           </motion.button>
@@ -168,23 +169,23 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/80 border-b border-red-600/30">
+        <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => router.back()}
-              className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
+              className="flex items-center space-x-2 text-white/80 hover:text-red-500 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Retour</span>
             </motion.button>
             <div className="flex items-center space-x-2">
-              <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 border-2 border-white/20">
-                <Image src="/logo.png" alt="DripBazzarDZ" fill className="object-cover" />
+              <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 border-2 border-red-600/50">
+                <Image src="/Logo premium A&Z Streetwear.png" alt="AZ drip Streetwear" fill className="object-cover" />
               </div>
-              <span className="text-white font-bold text-xl">DripBazzarDZ</span>
+              <span className="text-white font-bold text-xl">AZ drip Streetwear</span>
             </div>
             <div className="w-20" />
           </div>
@@ -192,8 +193,10 @@ export default function ContactPage() {
       </header>
 
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8">Contactez-nous</h1>
+        <div className="w-full max-w-none">
+          <h1 className="text-4xl font-bold mb-8">
+            Contactez-<span className="text-red-600">nous</span>
+          </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Formulaire */}
@@ -202,7 +205,7 @@ export default function ContactPage() {
               onSubmit={handleSubmit}
               className="contact-form space-y-6"
             >
-              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10">
+              <div className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40">
                 <h2 className="text-xl font-bold mb-4">
                   Envoyez-nous un message
                 </h2>
@@ -253,7 +256,7 @@ export default function ContactPage() {
                 disabled={isSubmitting}
                 onMouseEnter={handleButtonHover}
                 onMouseLeave={handleButtonLeave}
-                className="submit-btn w-full py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group flex items-center justify-center space-x-2"
+                className="submit-btn w-full py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group flex items-center justify-center space-x-2"
               >
                 <span className="relative z-10">
                   {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
@@ -269,39 +272,39 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10"
+                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40"
               >
                 <h2 className="text-xl font-bold mb-4">Nos coordonnées</h2>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">
-                    <div className="p-3 rounded-xl bg-white/10">
-                      <Mail className="h-6 w-6 text-white/80" />
+                    <div className="p-3 rounded-xl bg-red-600/15">
+                      <Mail className="h-6 w-6 text-red-500" />
                     </div>
                     <div>
                       <h3 className="font-medium">Email</h3>
-                      <a href="mailto:azzouzakram357@gmail.com" className="text-white/60 hover:text-white transition-colors">
+                      <a href="mailto:azzouzakram357@gmail.com" className="text-white/60 hover:text-red-500 transition-colors">
                         azzouzakram357@gmail.com
                       </a>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
-                    <div className="p-3 rounded-xl bg-white/10">
-                      <Phone className="h-6 w-6 text-white/80" />
+                    <div className="p-3 rounded-xl bg-red-600/15">
+                      <Phone className="h-6 w-6 text-red-500" />
                     </div>
                     <div>
                       <h3 className="font-medium">Téléphone</h3>
-                      <a href="tel:+213792259216" className="text-white/60 hover:text-white transition-colors">
+                      <a href="tel:+213792259216" className="text-white/60 hover:text-red-500 transition-colors">
                         +213 792 259 216
                       </a>
                       <br />
-                      <a href="tel:+213552815537" className="text-white/60 hover:text-white transition-colors">
+                      <a href="tel:+213552815537" className="text-white/60 hover:text-red-500 transition-colors">
                         +213 552 815 537
                       </a>
                     </div>
                   </div>
                   <div className="flex items-start space-x-4">
-                    <div className="p-3 rounded-xl bg-white/10">
-                      <MapPin className="h-6 w-6 text-white/80" />
+                    <div className="p-3 rounded-xl bg-red-600/15">
+                      <MapPin className="h-6 w-6 text-red-500" />
                     </div>
                     <div>
                       <h3 className="font-medium">Adresse</h3>
@@ -317,7 +320,7 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10"
+                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40"
               >
                 <h2 className="text-xl font-bold mb-4">Horaires d'ouverture</h2>
                 <div className="space-y-2 text-white/80">
@@ -332,7 +335,7 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10"
+                className="p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-red-600/40"
               >
                 <h2 className="text-xl font-bold mb-4">FAQ</h2>
                 <div className="space-y-4">

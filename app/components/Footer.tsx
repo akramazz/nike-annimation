@@ -142,7 +142,7 @@ export default function Footer() {
     <footer ref={footerRef} className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent to-black/50">
       <div className="absolute inset-0 bg-black/30" />
       
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="relative z-10 w-full max-w-none">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12">
           <div className="lg:col-span-2">
             <div ref={logoRef} className="flex items-center mb-6">
@@ -187,7 +187,7 @@ export default function Footer() {
         <div className="border-t border-white/10 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p ref={copyrightRef} className="text-white/50 text-sm text-center md:text-left">
-              © 2026 AZ Drip - Tous droits réservés.
+              © 2026 AZ DripStreetwear - Tous droits réservés.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-white/50 text-sm">

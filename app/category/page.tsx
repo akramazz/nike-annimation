@@ -244,7 +244,7 @@ export default function CategoryPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90 z-10" />
 
         {/* Contenu principal */}
-        <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+        <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8 w-full max-w-none">
           {/* Badge animé */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -286,7 +286,7 @@ export default function CategoryPage() {
 
       {/* Section Filtres par catégorie */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-none">
           <div
             ref={categoriesRef}
             className="flex flex-wrap justify-center gap-4"
@@ -312,7 +312,7 @@ export default function CategoryPage() {
 
       {/* Section Produits */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-none">
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedCategory}
@@ -562,7 +562,7 @@ export default function CategoryPage() {
 
       {/* Section Statistiques */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative bg-gradient-to-b from-transparent via-white/5 to-transparent">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-none">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -607,7 +607,7 @@ export default function CategoryPage() {
 
       {/* Section CTA */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="w-full max-w-none text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

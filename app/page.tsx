@@ -57,54 +57,73 @@ function StarRating({ value, count }: { value: number; count: number }) {
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black z-10" />
-      <div className="absolute inset-0">
-        <ProductImage
-          src="/products/db-styke.webp"
-          alt="Hero background"
-          fill
-          className="object-cover opacity-40"
-        />
-      </div>
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="frijole-regular text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight"
-        >
-          A&Z drip.dz
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-xl md:text-2xl text-white/70 mb-8 max-w-2xl mx-auto"
-        >
-          Streetwear premium. Des pièces sélectionnées pour votre style.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
-        >
-          <Link
-            href="/products"
-            className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-all text-lg"
-          >
-            Explorer les produits
-          </Link>
-          <Link
-            href="/products"
-            className="px-8 py-4 bg-white/10 text-white font-bold rounded-full hover:bg-white/20 transition-all text-lg border border-white/20"
-          >
-            Voir les catégories
-          </Link>
-        </motion.div>
-      </div>
-    </section>
+
+<section className="relative min-h-[100vh] flex items-center justify-center overflow-hidden bg-black">
+
+  {/* Image de fond */}
+  <div className="absolute inset-0">
+    <ProductImage
+      src="/products/background2.webp"
+      alt="A&Z Drip Streetwear"
+      fill
+      className="object-cover object-center opacity-90"
+    />
+  </div>
+
+  {/* Dégradé cinématographique */}
+  <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/35 to-black" />
+
+  {/* Lumière rouge subtile */}
+  <div className="absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.18)_0%,transparent_65%)]" />
+
+  {/* Contenu principal */}
+  <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+
+    <motion.h1
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      className="frijole-regular text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight drop-shadow-2xl"
+    >
+      AZ drip<span className="text-red-600">S</span>treetwear
+    </motion.h1>
+
+    <motion.p
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+      className="text-lg sm:text-xl md:text-2xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed"
+    >
+      Streetwear premium. Des pièces sélectionnées pour votre style.
+    </motion.p>
+
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.4 }}
+      className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+    >
+      <Link
+        href="/products"
+        className="group w-full sm:w-auto px-8 py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 hover:scale-105 transition-all duration-300 text-lg shadow-lg shadow-red-600/20"
+      >
+        Explorer les produits
+        <span className="inline-block ml-2 transition-transform duration-300 group-hover:translate-x-1">
+          →
+        </span>
+      </Link>
+
+      <Link
+        href="/products"
+        className="w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-sm text-white font-bold rounded-full hover:bg-white/15 hover:scale-105 transition-all duration-300 text-lg border border-white/20"
+      >
+        Voir les catégories
+      </Link>
+    </motion.div>
+
+  </div>
+</section>
+
   );
 }
 
@@ -116,29 +135,41 @@ function CategoriesSection() {
       id: "sweat",
       name: "SWEAT",
       description: "Vestes, sweats et pièces streetwear premium",
-      image: "/products/rouge.webp",
+      image: "/products/azsweat.webp",
       route: "/products?category=sweat",
     },
     {
       id: "tshirt",
       name: "TSHIRT",
       description: "T-shirts et accessoires tendance",
-      image: "/products/casquette.webp",
+      image: "/products/aztshirt.webp",
       route: "/products?category=tshirt",
     },
   ];
 
   return (
-    <section className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-3xl md:text-4xl font-bold text-center mb-12"
-        >
-          Nos catégories
-        </motion.h2>
+   
+<section className="py-20">
+      <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
+        
+<motion.h2
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  className="relative text-center text-4xl md:text-5xl font-black uppercase tracking-wider mb-12"
+>
+  Nos <span className="text-red-600">catégories</span>
+
+  <motion.span
+    initial={{ width: 0 }}
+    whileInView={{ width: "64px" }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.7, delay: 0.2 }}
+    className="block h-1 bg-red-600 rounded-full mx-auto mt-4"
+  />
+</motion.h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {categories.map((category, index) => (
             <motion.div
@@ -148,23 +179,37 @@ function CategoriesSection() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.2 }}
               onClick={() => router.push(category.route)}
-              className="group relative aspect-[4/3] md:aspect-video rounded-3xl overflow-hidden cursor-pointer"
+              className="group relative aspect-[4/3] md:aspect-video rounded-3xl overflow-hidden cursor-pointer border border-red-600"
             >
-              <ProductImage
-                src={category.image}
-                alt={category.name}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-end p-8">
-                <h3 className="text-3xl md:text-4xl font-bold mb-2">{category.name}</h3>
-                <p className="text-white/70 mb-4 text-sm md:text-base">{category.description}</p>
-                <span className="inline-flex items-center px-6 py-3 bg-white text-black font-bold rounded-full w-fit group-hover:bg-white/90 transition-colors">
-                  Explorer la collection
-                </span>
-              </div>
-            </motion.div>
+
+<ProductImage
+  src={category.image}
+  alt={category.name}
+  fill
+  sizes="(max-width: 768px) 100vw, 50vw"
+className="object-contain scale-110 p-2 transition-transform duration-500 group-hover:scale-125"/>
+
+<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+<div className="absolute inset-0 flex flex-col justify-end p-8">
+  <h3 className="text-3xl md:text-4xl font-bold mb-2">
+    {category.name}
+  </h3>
+
+  <p className="text-white/70 mb-4 text-sm md:text-base">
+    {category.description}
+  </p>
+
+
+<span className="inline-flex items-center gap-3 px-6 py-3 bg-red-600 text-white font-bold rounded-full w-fit group-hover:bg-red-700 transition-colors">
+  Explorer la collection
+  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
+    →
+  </span>
+</span>
+
+</div>
+</motion.div>
+
           ))}
         </div>
       </div>
@@ -172,12 +217,13 @@ function CategoriesSection() {
   );
 }
 
+
 function ProductGrid({ title, products, href }: { title: string; products: Product[]; href?: string }) {
   if (products.length === 0) return null;
 
   return (
     <section className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -236,7 +282,7 @@ function ProductGrid({ title, products, href }: { title: string; products: Produ
 function CtaSection() {
   return (
     <section className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

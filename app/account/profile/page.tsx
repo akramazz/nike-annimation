@@ -182,7 +182,7 @@ export default function AccountProfilePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold mb-8">Profil</h1>
 
         {error && <p className="text-red-400 mb-4">{error}</p>}

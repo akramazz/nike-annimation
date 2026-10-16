@@ -14,20 +14,20 @@ const appUrlRaw =
 const appUrl = appUrlRaw.replace(/\/$/, "");
 
 export const metadata: Metadata = {
-  title: "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme",
+  title: "AZ drip Streetwear",
   description:
-    "Découvrez DripBazzarDZ, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
+    "Découvrez AZ drip Streetwear, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
   keywords: [
-    "DripBazzarDZ",
+    "AZ drip Streetwear",
     "mode urbaine algérie",
     "vestes premium",
     "accessoires mode",
     "fashion dz",
     "boutique mode alger",
   ],
-  authors: [{ name: "DripBazzarDZ" }],
-  creator: "DripBazzarDZ",
-  publisher: "DripBazzarDZ",
+  authors: [{ name: "AZ drip Streetwear" }],
+  creator: "AZ drip Streetwear",
+  publisher: "AZ drip Streetwear",
   formatDetection: {
     email: false,
     address: false,
@@ -35,17 +35,17 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL(appUrl),
   openGraph: {
-    title: "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme",
+    title: "AZ drip Streetwear",
     description:
-      "Découvrez DripBazzarDZ, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
+      "Découvrez AZ drip Streetwear, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
     url: appUrl,
-    siteName: "DripBazzarDZ",
+    siteName: "AZ drip Streetwear",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "DripBazzarDZ - Mode Urbaine Premium",
+        alt: "AZ drip Streetwear - Mode Urbaine Premium",
       },
     ],
     locale: "fr_FR",
@@ -53,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "DripBazzarDZ - Mode Urbaine et Accessoires Haut de Gamme",
+    title: "AZ drip Streetwear",
     description:
-      "Découvrez DripBazzarDZ, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
+      "Découvrez AZ drip Streetwear, votre destination pour la mode urbaine premium. Vestes, accessoires et collections exclusives livrées en Algérie.",
     images: ["/twitter-image.jpg"],
   },
   robots: {
