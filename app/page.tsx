@@ -79,14 +79,16 @@ function HeroSection() {
   {/* Contenu principal */}
   <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
 
-    <motion.h1
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="frijole-regular text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tight drop-shadow-2xl"
-    >
-      AZ drip<span className="text-red-600">S</span>treetwear
-    </motion.h1>
+
+<motion.h1
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8 }}
+  className="frijole-regular text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-8 tracking-tight drop-shadow-2xl"
+>
+  AZ drip<span className="text-red-600">S</span>treetwear
+</motion.h1>
+
 
     <motion.p
       initial={{ opacity: 0, y: 20 }}
