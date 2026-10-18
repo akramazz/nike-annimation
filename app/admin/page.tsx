@@ -194,8 +194,7 @@ export default function AdminDashboard() {
          if (!cancelled && data.success) {
            setAuthRequired(Boolean(data.authRequired));
            setAuthenticated(Boolean(data.authenticated));
-           if (!data.authRequired || data.authenticated) {
-             await fetchData();
+if (data.authenticated) {             await fetchData();
            }
          }
        } catch {
@@ -387,8 +386,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (authRequired && !authenticated) {
-    return (
+if (!authenticated) {    return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <motion.form
           initial={{ opacity: 0, y: 12 }}

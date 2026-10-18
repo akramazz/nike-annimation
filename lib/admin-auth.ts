@@ -14,7 +14,7 @@ function expectedAdminToken(secret: string): string {
  */
 export function isAdminRequest(request: NextRequest): boolean {
   const secret = process.env.ADMIN_API_SECRET?.trim();
-  if (!secret) return true;
+  if (!secret) return process.env.NODE_ENV !== "production";
 
   const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   if (!token) return false;
