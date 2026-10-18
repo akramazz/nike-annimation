@@ -96,6 +96,7 @@ export default function AdminDashboard() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
+  const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginSubmitting, setLoginSubmitting] = useState(false);
@@ -244,7 +245,7 @@ export default function AdminDashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ password: loginPassword }),
+        body: JSON.stringify({ username: loginUsername, password: loginPassword }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -396,11 +397,17 @@ export default function AdminDashboard() {
           className="w-full max-w-md p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6"
         >
           <h1 className="text-2xl font-bold">Admin — connexion</h1>
-          <p className="text-white/60 text-sm">
-            Entrez la valeur de{" "}
-            <code className="text-white/80">ADMIN_API_SECRET</code> définie sur
-            le serveur.
-          </p>
+            <p className="text-white/60 text-sm">
+              Entrez votre identifiant et votre secret administrateur.
+            </p>
+          <input
+            type="text"
+            value={loginUsername}
+            onChange={(e) => setLoginUsername(e.target.value)}
+            placeholder="Identifiant administrateur"
+            required
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30"
+          />
           <input
             type="password"
             value={loginPassword}

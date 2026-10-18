@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import {
   ADMIN_SESSION_COOKIE,
   createAdminSessionToken,
 } from "@/lib/admin-auth";
+
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  try {
+    return timingSafeEqual(Buffer.from(a, "utf8"), Buffer.from(b, "utf8"));
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
   const secret = process.env.ADMIN_API_SECRET?.trim();
@@ -17,7 +27,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { password?: string };
+  let body: { username?: string; password?: string };
   try {
     body = await request.json();
   } catch {
@@ -27,9 +37,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (typeof body.password !== "string" || body.password !== secret) {
+  const username = typeof body.username === "string" ? body.username : "";
+  const password = typeof body.password === "string" ? body.password : "";
+
+  const expectedUsername = process.env.ADMIN_USERNAME?.trim() || "";
+  const usernameOk = expectedUsername ? safeEqual(username, expectedUsername) : true;
+  const passwordOk = safeEqual(password, secret);
+
+  if (!usernameOk || !passwordOk) {
     return NextResponse.json(
-      { success: false, error: "Invalid credentials" },
+      { success: false, error: "Identifiants invalides." },
       { status: 401 },
     );
   }
