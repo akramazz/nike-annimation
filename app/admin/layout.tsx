@@ -89,13 +89,20 @@ function AdminSidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; s
           <div className="border-t border-white/10 px-4 py-4">
             <button
               type="button"
-              onClick={async () => {
-                await fetch(apiUrl("/api/auth/admin/logout"), {
+            onClick={async () => {
+              try {
+                const res = await fetch(apiUrl("/api/auth/admin/logout"), {
                   method: "POST",
                   credentials: "include",
                 });
-                window.location.href = "/admin";
-              }}
+                if (!res.ok) throw new Error("Logout failed");
+                window.location.href = "/admin/login";
+              } catch (err) {
+                console.error("Admin logout error:", err);
+                // fallback: still redirect to force re-check
+                window.location.href = "/admin/login";
+              }
+            }}
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
             >
               <LogOut className="h-4 w-4" />
